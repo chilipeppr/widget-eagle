@@ -5554,3 +5554,27 @@ EagleCanvas.prototype.matrixForRot = function (rot) {
         matrix = [flipSign * Math.cos(rad), flipSign * -Math.sin(rad), Math.sin(rad), Math.cos(rad)];
     return matrix;
 }
+
+EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
+    if (layerIdx == 1) {
+        return 16;
+    } else if (layerIdx == 16) {
+        return 1;
+    }
+    var name = this.layersByNumber[layerIdx].name,
+        prefix = name.substring(0, 1);
+    if (prefix == 't') {
+        var mirrorName = 'b' + name.substring(1),
+            mirrorLayer = this.eagleLayersByName[mirrorName];
+        if (mirrorLayer) {
+            return mirrorLayer.number;
+        }
+    } else if (prefix == 'b') {
+        var mirrorName = 't' + name.substring(1),
+            mirrorLayer = this.eagleLayersByName[mirrorName];
+        if (mirrorLayer) {
+            return mirrorLayer.number;
+        }
+    }
+    return layerIdx;
+}
