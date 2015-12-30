@@ -104,15 +104,9 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
         /**
          * The ID of the widget. You must define this and make it unique.
          */
-<<<<<<< HEAD
         id: "com-chilipeppr-widget-eagle",
         name: "Widget / Eagle PCB v3",
         desc: "This widget lets you drag in an Eagle PCB \".brd\" file to mill.",
-=======
-        id: "com-chilipeppr-widget-template", // Make the id the same as the cpdefine id
-        name: "Widget / Template", // The descriptive name of your widget.
-        desc: "This example widget gives you a framework for creating your own widget. Please change this description once you fork this template and create your own widget. Make sure to run runme.js every time you are done editing your code so you can regenerate your README.md file, regenerate your auto-generated-widget.html, and automatically push your changes to Github.", // A description of what your widget does
->>>>>>> be5dff286684ca28a672ecc5ba97a24b1ca4371e
         url: "(auto fill by runme.js)",       // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
         fiddleurl: "(auto fill by runme.js)", // The edit URL. This can be auto-filled by runme.js in Cloud9 if you'd like, or just define it on your own to help people know where they can edit/fork your widget
         githuburl: "(auto fill by runme.js)", // The backing github repo
@@ -128,7 +122,27 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
          */
         publish: {
             // Define a key:value pair here as strings to document what signals you publish.
-            '/onGenerate': 'When we go to generate gcode. If you subscribe to this you need to pass back Gcode. TODO because need to clarify how to add Gcode.'
+            '/onAddGcode': 'This signal lets a 3rd party add-on inject its own Gcode into the \
+            overall final Gcode for the Eagle BRD Widget. Here is an example of how to subscribe. \
+            \
+            chilipeppr.subscribe("/com-chilipeppr-widget-eagle/addGcode", this, this.myOnAddGcode); \
+            \
+            Then, your callback would look like this with 4 parameters receiving the variables \
+            that the addGcode publish signal sends you. \
+            \
+            onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){ \
+                console.log("Got onAddGcode:", arguments); \
+                // this method calls back to the main Eagle widget to inject our Gcode \
+                addGcodeCallback(1500, myOwnGcode ); \
+            } \
+            \
+            The 1500 in the example above is to attach a priority to where our Gcode will get positioned. \
+            The base Gcode ends around line 900. The footer starts at line 2000. So putting our Gcode at \
+            the end but before the footer means using 1500 should do fine. You can analyze the existing \
+            Gcode by looking at parameter 2 gcodeParts to see if an index has already been used so you \
+            don\'t clobber it. If you want to delete Gcode from gcodeParts you could do that as well and \
+            the main widget will reflect the deletion. \
+            '
         },
         /**
          * Define the subscribe signals that this widget/element owns or defines so that
@@ -1066,7 +1080,10 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
             return g;
         },
         exportGcodeFooter:function(){
+            
             var g = '';
+            g += "(------ FOOTER -------)\n";
+
             // move to clearance
             g += "G0 Z" + this.clearanceHeight + "\n";
             
@@ -1087,28 +1104,57 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
             // we also need to remove redundant moves.
             
             this.toolCount = 0;
-            var g = '';
-            g +=  this.exportGcodeHeader();
-            g +=  this.exportGcodeMilling();
-            g +=  this.exportGcodeMarkVias();
-            g +=  this.exportGcodeMarkPads();
-            g +=  this.exportGcodeDrillVias();
-            g +=  this.exportGcodeDrillPads();
-            g +=  this.exportGcodeDimensions();
-            //g +=  this.exportGcodeDispenser();
-            g +=  this.exportGcodeFooter();
+            var i = 100;
+            this.addGcode(i, this.exportGcodeHeader()     );
+            i += 100;
+            this.addGcode(i, this.exportGcodeMilling()    );
+            i += 100;
+            this.addGcode(i, this.exportGcodeMarkVias()   );
+            i += 100;
+            this.addGcode(i, this.exportGcodeMarkPads()   );
+            i += 100;
+            this.addGcode(i, this.exportGcodeDrillVias()  );
+            i += 100;
+            this.addGcode(i, this.exportGcodeDrillPads()  );
+            i += 100;
+            this.addGcode(i, this.exportGcodeDimensions() );
+            i = 2000;
+            this.addGcode(i, this.exportGcodeFooter()      ); // let space for additional gcode entrys
 
-            //console.log("gcode:", g);
+            // ask for additional gcode
+            // the user should synchronously inject it by calling back to us
+            // with eagleWidget.addGcode();
+            chilipeppr.publish(
+                "/com-chilipeppr-widget-eagle/addGcode", 
+                this.addGcode, 
+                this.gcodeParts, 
+                this, 
+                'You need to callback the first parameter with a command like firstParameter(1000, "my gcode");. ' + 
+                '1000 would put your gcode after all the gcode generated by the base widget, but before the footer ' +
+                'which is at index of 2000. You can inspect the base widget gcode by looking at the 2nd parameter ' + 
+                'which is an array of the gcode parts and their indexes because you can insert anywhere there is an unused index.'
+            );
+
+            // once we get here all 3rd party add-ons that were listening for the publish should have
+            // injected their gcode and we can now move on
+            var g = this.getGcode();
+            
             console.log("done generating gcode. length:", g.length);
             $('.com-chilipeppr-widget-eagle-gcode').text(g);
         },
-
+        addGcode : function(count, gcode){
+            this.gcodeParts[count] = gcode;
+        },
+        getGcode : function() {
+            console.log('Get gcodeParts: ', this.gcodeParts);
+            return this.gcodeParts.join('');
+        },
         
         
         // Actual parsing of Eagle object and rendering of Three.js objects
         // and the Clipper paths.
         
-                setupAdvancedInflateByUI: function() {
+        setupAdvancedInflateByUI: function() {
             var smdEl = $('#com-chilipeppr-widget-eagle .inflate-smds-by');
             var padEl = $('#com-chilipeppr-widget-eagle .inflate-pads-by');
             var viaEl = $('#com-chilipeppr-widget-eagle .inflate-vias-by');
