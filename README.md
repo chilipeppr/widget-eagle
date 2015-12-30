@@ -75,7 +75,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             the end but before the footer means using 1500 should do fine. You can analyze the existing 
             Gcode by looking at parameter 2 gcodeParts to see if an index has already been used so you 
             don't clobber it. If you want to delete Gcode from gcodeParts you could do that as well and 
-            the main widget will reflect the deletion. <br><br>And a 3rd para.Description<br><br>And a 2nd one.
+            the main widget will reflect the deletion. 
             </td></tr>    
       </tbody>
   </table>

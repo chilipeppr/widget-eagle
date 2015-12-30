@@ -146,10 +146,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             Gcode by looking at parameter 2 gcodeParts to see if an index has already been used so you 
             don't clobber it. If you want to delete Gcode from gcodeParts you could do that as well and 
             the main widget will reflect the deletion. 
-            
-            And a 3rd para.Description
-            
-            And a 2nd one.
             `
         },
         /**
