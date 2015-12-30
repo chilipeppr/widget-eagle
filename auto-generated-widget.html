@@ -1255,7 +1255,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // with eagleWidget.addGcode();
             chilipeppr.publish(
                 "/com-chilipeppr-widget-eagle/addGcode", 
-                this.addGcode, 
+                this.addGcode.bind(this), 
                 this.gcodeParts, 
                 this, 
                 'You need to callback the first parameter with a command like firstParameter(1000, "my gcode");. ' + 
