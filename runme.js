@@ -1022,7 +1022,7 @@ var appendKeyVal = function(data, id) {
         widget.id + "" + 
         key + 
         '</td><td>' +
-        data[key].replace(/<\/pre>[\s\r\n]*/ig, "</pre>") + // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
+        data[key].replace(/<\/pre>[\s\r\n]*/ig, "</pre>").replace(/\n\n/, "<br><br>") + // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
         '</td></tr>';
     }
   } else {
