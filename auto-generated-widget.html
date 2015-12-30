@@ -247,9 +247,9 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
          */
         publish: {
             // Define a key:value pair here as strings to document what signals you publish.
-            '/onAddGcode': `This signal lets a 3rd party add-on inject its own Gcode into the \
-            overall final Gcode for the Eagle BRD Widget. Here is an example of how to subscribe. \
-            \
+            '/onAddGcode': `This signal lets a 3rd party add-on inject its own Gcode into the 
+            overall final Gcode for the Eagle BRD Widget. Here is an example of how to subscribe. 
+            
 <pre>\n\
 chilipeppr.subscribe("/com-chilipeppr-widget-eagle/addGcode", this, this.myOnAddGcode);\n \
 </pre>\
