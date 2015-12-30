@@ -14,10 +14,10 @@ not conflict with other ChiliPeppr widgets.
 | ID                    | com-chilipeppr-widget-eagle |
 | Name                  | Widget / Eagle PCB v3 |
 | Description           | This widget lets you drag in an Eagle PCB ".brd" file to mill. |
-| chilipeppr.load() URL | http://raw.githubusercontent.com/chilipeppr/widget-eagle/master/auto-generated-widget.html |
-| Edit URL              | http://ide.c9.io/chilipeppr/widget-eagle |
-| Github URL            | http://github.com/chilipeppr/widget-eagle |
-| Test URL              | https://preview.c9users.io/chilipeppr/widget-eagle/widget.html |
+| chilipeppr.load() URL | http://raw.githubusercontent.com/raykholo/widget-eagle/master/auto-generated-widget.html |
+| Edit URL              | http://ide.c9.io/raykholo/widget-eagle |
+| Github URL            | http://github.com/raykholo/widget-eagle |
+| Test URL              | https://preview.c9users.io/raykholo/widget-eagle/widget.html |
 
 ## Example Code for chilipeppr.load() Statement
 
@@ -30,7 +30,7 @@ back the instance of it.
 ```javascript
 chilipeppr.load(
   "#myDivWidgetInsertedInto",
-  "http://raw.githubusercontent.com/chilipeppr/widget-eagle/master/auto-generated-widget.html",
+  "http://raw.githubusercontent.com/raykholo/widget-eagle/master/auto-generated-widget.html",
   function() {
     // Callback after widget loaded into #myDivWidgetInsertedInto
     cprequire(
@@ -92,10 +92,10 @@ The table below shows, in order, the methods and properties inside the widget/el
 | id | string | "com-chilipeppr-widget-eagle"<br><br>The ID of the widget. You must define this and make it unique. |
 | name | string | "Widget / Eagle PCB v3" |
 | desc | string | "This widget lets you drag in an Eagle PCB \".brd\" file to mill." |
-| url | string | "http://raw.githubusercontent.com/chilipeppr/widget-eagle/master/auto-generated-widget.html" |
-| fiddleurl | string | "http://ide.c9.io/chilipeppr/widget-eagle" |
-| githuburl | string | "http://github.com/chilipeppr/widget-eagle" |
-| testurl | string | "http://widget-eagle-chilipeppr.c9users.io/widget.html" |
+| url | string | "http://raw.githubusercontent.com/raykholo/widget-eagle/master/auto-generated-widget.html" |
+| fiddleurl | string | "http://ide.c9.io/raykholo/widget-eagle" |
+| githuburl | string | "http://github.com/raykholo/widget-eagle" |
+| testurl | string | "http://widget-eagle-raykholo.c9users.io/widget.html" |
 | publish | object | Please see docs above.<br><br>Define the publish signals that this widget/element owns or defines so thatother widgets know how to subscribe to them and what they do. |
 | subscribe | object | Please see docs above.<br><br>Define the subscribe signals that this widget/element owns or defines so thatother widgets know how to subscribe to them and what they do. |
 | foreignPublish | object | Please see docs above.<br><br>Document the foreign publish signals, i.e. signals owned by other widgetsor elements, that this widget/element publishes to. |
