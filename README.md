@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 # com-chilipeppr-widget-eagle
 This widget lets you drag in an Eagle PCB ".brd" file to mill.
+=======
+# com-chilipeppr-widget-template
+This example widget gives you a framework for creating your own widget. Please change this description once you fork this template and create your own widget. Make sure to run runme.js every time you are done editing your code so you can regenerate your README.md file, regenerate your auto-generated-widget.html, and automatically push your changes to Github.
+>>>>>>> be5dff286684ca28a672ecc5ba97a24b1ca4371e
 
 ![alt text](screenshot.png "Screenshot")
 
@@ -11,6 +16,7 @@ not conflict with other ChiliPeppr widgets.
 
 | Item                  | Value           |
 | -------------         | ------------- | 
+<<<<<<< HEAD
 | ID                    | com-chilipeppr-widget-eagle |
 | Name                  | Widget / Eagle PCB v3 |
 | Description           | This widget lets you drag in an Eagle PCB ".brd" file to mill. |
@@ -18,6 +24,15 @@ not conflict with other ChiliPeppr widgets.
 | Edit URL              | http://ide.c9.io/chilipeppr/widget-eagle |
 | Github URL            | http://github.com/chilipeppr/widget-eagle |
 | Test URL              | https://preview.c9users.io/chilipeppr/widget-eagle/widget.html |
+=======
+| ID                    | com-chilipeppr-widget-template |
+| Name                  | Widget / Template |
+| Description           | This example widget gives you a framework for creating your own widget. Please change this description once you fork this template and create your own widget. Make sure to run runme.js every time you are done editing your code so you can regenerate your README.md file, regenerate your auto-generated-widget.html, and automatically push your changes to Github. |
+| chilipeppr.load() URL | http://raw.githubusercontent.com/chilipeppr/widget-template/master/auto-generated-widget.html |
+| Edit URL              | http://ide.c9.io/chilipeppr/widget-template |
+| Github URL            | http://github.com/chilipeppr/widget-template |
+| Test URL              | https://preview.c9users.io/chilipeppr/widget-template/widget.html |
+>>>>>>> be5dff286684ca28a672ecc5ba97a24b1ca4371e
 
 ## Example Code for chilipeppr.load() Statement
 
@@ -30,7 +45,11 @@ back the instance of it.
 ```javascript
 chilipeppr.load(
   "#myDivWidgetInsertedInto",
+<<<<<<< HEAD
   "http://raw.githubusercontent.com/chilipeppr/widget-eagle/master/auto-generated-widget.html",
+=======
+  "http://raw.githubusercontent.com/chilipeppr/widget-template/master/auto-generated-widget.html",
+>>>>>>> be5dff286684ca28a672ecc5ba97a24b1ca4371e
   function() {
     // Callback after widget loaded into #myDivWidgetInsertedInto
     cprequire(
@@ -89,6 +108,7 @@ The table below shows, in order, the methods and properties inside the widget/el
 
 | Item                  | Type          | Description |
 | -------------         | ------------- | ----------- |
+<<<<<<< HEAD
 | id | string | "com-chilipeppr-widget-eagle"<br><br>The ID of the widget. You must define this and make it unique. |
 | name | string | "Widget / Eagle PCB v3" |
 | desc | string | "This widget lets you drag in an Eagle PCB \".brd\" file to mill." |
@@ -96,6 +116,15 @@ The table below shows, in order, the methods and properties inside the widget/el
 | fiddleurl | string | "http://ide.c9.io/chilipeppr/widget-eagle" |
 | githuburl | string | "http://github.com/chilipeppr/widget-eagle" |
 | testurl | string | "http://widget-eagle-chilipeppr.c9users.io/widget.html" |
+=======
+| id | string | "com-chilipeppr-widget-template"<br><br>The ID of the widget. You must define this and make it unique. |
+| name | string | "Widget / Template" |
+| desc | string | "This example widget gives you a framework for creating your own widget. Please change this description once you fork this template and create your own widget. Make sure to run runme.js every time you are done editing your code so you can regenerate your README.md file, regenerate your auto-generated-widget.html, and automatically push your changes to Github." |
+| url | string | "http://raw.githubusercontent.com/chilipeppr/widget-template/master/auto-generated-widget.html" |
+| fiddleurl | string | "http://ide.c9.io/chilipeppr/widget-template" |
+| githuburl | string | "http://github.com/chilipeppr/widget-template" |
+| testurl | string | "http://widget-template-chilipeppr.c9users.io/widget.html" |
+>>>>>>> be5dff286684ca28a672ecc5ba97a24b1ca4371e
 | publish | object | Please see docs above.<br><br>Define the publish signals that this widget/element owns or defines so thatother widgets know how to subscribe to them and what they do. |
 | subscribe | object | Please see docs above.<br><br>Define the subscribe signals that this widget/element owns or defines so thatother widgets know how to subscribe to them and what they do. |
 | foreignPublish | object | Please see docs above.<br><br>Document the foreign publish signals, i.e. signals owned by other widgetsor elements, that this widget/element publishes to. |
