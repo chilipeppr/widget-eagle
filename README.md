@@ -85,9 +85,7 @@ To better understand how ChiliPeppr's publish() method works see amplify.js's do
           </tr>
       </thead>
       <tbody>
-          
       <tr><td colspan="2">(No signals defined in this widget/element)</td></tr>    
-      
       </tbody>
   </table>
 

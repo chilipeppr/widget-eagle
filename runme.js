@@ -415,7 +415,7 @@ To better understand how ChiliPeppr's subscribe() method works see amplify.js's 
       </thead>
       <tbody>
       $row-publish-start    
-      <tr><td colspan="2">(No signals defined in this widget/element)</td></tr>
+      <tr valign="top"><td colspan="2">(No signals defined in this widget/element)</td></tr>
       $row-publish-end    
       </tbody>
   </table>
@@ -433,11 +433,9 @@ To better understand how ChiliPeppr's publish() method works see amplify.js's do
           </tr>
       </thead>
       <tbody>
-          
       $row-subscribe-start    
-      <tr><td colspan="2">(No signals defined in this widget/element)</td></tr>
+      <tr valign="top"><td colspan="2">(No signals defined in this widget/element)</td></tr>
       $row-subscribe-end    
-      
       </tbody>
   </table>
 
