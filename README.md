@@ -60,7 +60,7 @@ To better understand how ChiliPeppr's subscribe() method works see amplify.js's 
           </tr>
       </thead>
       <tbody>
-      <tr><td>/com-chilipeppr-widget-eagle/onAddGcode</td><td>This signal lets a 3rd party add-on inject its own Gcode into the             overall final Gcode for the Eagle BRD Widget. Here is an example of how to subscribe.             <pre>
+      <tr valign="top"><td>/com-chilipeppr-widget-eagle/onAddGcode</td><td>This signal lets a 3rd party add-on inject its own Gcode into the             overall final Gcode for the Eagle BRD Widget. Here is an example of how to subscribe.             <pre>
 chilipeppr.subscribe("/com-chilipeppr-widget-eagle/addGcode", this, this.myOnAddGcode);
  </pre>                        Then, your callback would look like this with 4 parameters receiving the variables             that the addGcode publish signal sends you.             <pre>
 onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){ 
@@ -122,7 +122,7 @@ To better understand how ChiliPeppr's publish() method works see amplify.js's do
       </thead>
       <tbody>
       
-      <tr><td>/com-chilipeppr-widget-eagle/com-chilipeppr-elem-dragdrop/ondropped</td><td>We subscribe to this signal at a higher priority to intercept the signal, double check if it is an Eagle Brd file and if so, we do not let it propagate by returning false. That way the 3D Viewer, Gcode widget, or other widgets will not get Eagle Brd file drag/drop events because they will not know how to interpret them.</td></tr>    
+      <tr valign="top"><td>/com-chilipeppr-widget-eagle/com-chilipeppr-elem-dragdrop/ondropped</td><td>We subscribe to this signal at a higher priority to intercept the signal, double check if it is an Eagle Brd file and if so, we do not let it propagate by returning false. That way the 3D Viewer, Gcode widget, or other widgets will not get Eagle Brd file drag/drop events because they will not know how to interpret them.</td></tr>    
       
       </tbody>
   </table>

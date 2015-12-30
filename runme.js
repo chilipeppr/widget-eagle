@@ -1159,7 +1159,7 @@ var generateWidgetDocs = function() {
   var s = "";
   for (var key in widget) {
     var obj = widget[key];
-    s += '<tr valign="top"><td>' + key +
+    s += '<tr><td>' + key +
       '</td><td>' + typeof obj +
       '</td><td>';
     s += widgetDocs[key].descHtml;
@@ -1202,7 +1202,7 @@ var appendKeyVal = function(data, id) {
         
     //var keys = Object.keys(data);
     for (var key in data) {
-      str += '<tr><td>/' + widget.id + "" + key + '</td><td>' + data[key] + '</td></tr>';
+      str += '<tr valign="top"><td>/' + widget.id + "" + key + '</td><td>' + data[key] + '</td></tr>';
     }
   } else {
     str = '<tr><td colspan="2">(No signals defined in this widget/element)</td></tr>';
