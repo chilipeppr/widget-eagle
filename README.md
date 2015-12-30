@@ -72,8 +72,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
     // this method calls back to the main Eagle widget to inject our Gcode 
     addGcodeCallback(1500, myOwnGcode ); 
 } 
-</pre>
-            The 1500 in the example above is to attach a priority to where our Gcode will get positioned. 
+</pre>The 1500 in the example above is to attach a priority to where our Gcode will get positioned. 
             The base Gcode ends around line 900. The footer starts at line 2000. So putting our Gcode at 
             the end but before the footer means using 1500 should do fine. You can analyze the existing 
             Gcode by looking at parameter 2 gcodeParts to see if an index has already been used so you 

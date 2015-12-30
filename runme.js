@@ -593,7 +593,7 @@ will you build on top of it?
     s += '<tr valign="top"><td>' + key +
       '</td><td>' + typeof obj +
       '</td><td>';
-    s += widgetDocs[key].descHtml.replace(/<\/pre>[\s\r\n]*/i, "</pre>"); // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
+    s += widgetDocs[key].descHtml.replace(/<\/pre>[\s\r\n]*/ig, "</pre>"); // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
     s += '</td></tr>';
   }
   md = md.replace(/\$row-methods-start[\s\S]+?\$row-methods-end/g, s);
@@ -1022,7 +1022,7 @@ var appendKeyVal = function(data, id) {
         widget.id + "" + 
         key + 
         '</td><td>' +
-        data[key].replace(/<\/pre>[\s\r\n]*/i, "</pre>") + // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
+        data[key].replace(/<\/pre>[\s\r\n]*/ig, "</pre>") + // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
         '</td></tr>';
     }
   } else {
