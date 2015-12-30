@@ -594,7 +594,7 @@ will you build on top of it?
   var s = "";
   for (var key in widget) {
     var obj = widget[key];
-    s += '<tr><td>' + key +
+    s += '<tr valign="top"><td>' + key +
       '</td><td>' + typeof obj +
       '</td><td>';
     s += widgetDocs[key].descHtml;
