@@ -61,7 +61,7 @@ To better understand how ChiliPeppr's subscribe() method works see amplify.js's 
       </thead>
       <tbody>
       <tr valign="top"><td>/com-chilipeppr-widget-eagle/onAddGcode</td><td>This signal lets a 3rd party add-on inject its own Gcode into the 
-            overall final Gcode for the Eagle BRD Widget. Here is an example of how to subscribe. <br><br><pre>
+            overall final Gcode for the Eagle BRD Widget. Here is an example of how to subscribe.<br><br><pre>
 chilipeppr.subscribe("/com-chilipeppr-widget-eagle/addGcode", this, this.myOnAddGcode);
 </pre>Then, your callback would look like this with 4 parameters receiving the variables 
             that the addGcode publish signal sends you. 

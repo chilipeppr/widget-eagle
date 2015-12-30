@@ -1018,11 +1018,19 @@ var appendKeyVal = function(data, id) {
         
     //var keys = Object.keys(data);
     for (var key in data) {
+      
+      // clean up the description text
+      var txt = data[key];
+      // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
+      txt = txt.replace(/<\/pre>[\s\r\n]*/ig, "</pre>");
+      // convert double newlines to <br><br> tags
+      txt = txt.replace(/\s*\n\s*\n/, "<br><br>");
+      
       str += '<tr valign="top"><td>/' + 
         widget.id + "" + 
         key + 
         '</td><td>' +
-        data[key].replace(/<\/pre>[\s\r\n]*/ig, "</pre>").replace(/\n\n/, "<br><br>") + // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
+        txt + 
         '</td></tr>';
     }
   } else {
