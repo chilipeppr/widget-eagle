@@ -211,9 +211,11 @@ var evalWidgetJs = function() {
     
     if (typeof obj === 'function') {
 
+      // grab first line of source code
       var srcFirstLine = obj.toString().substring(0, obj.toString().indexOf("\n"));
       // drop {
-      srcFirstLine = srcFirstLine.replace(/\{/, "");
+      //srcFirstLine = srcFirstLine.replace(/\{/, "");
+      srcFirstLine = srcFirstLine.replace(/function\s*\(\s*\)\s*\{/, "");
       objDoc.descHtml = srcFirstLine; // + "<br><br>";
       objDoc.descMd = srcFirstLine; // + "\n\n";
       
@@ -1026,7 +1028,7 @@ var appendKeyVal = function(data, id) {
     for (var key in data) {
       
       // clean up the description text
-      var txt = data[key];
+      var txt = data[key] + '';
       // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
       txt = txt.replace(/<\/pre>[\s\r\n]*/ig, "</pre>");
       // convert double newlines to <br><br> tags
