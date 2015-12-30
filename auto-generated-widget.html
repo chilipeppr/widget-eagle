@@ -247,7 +247,7 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
          */
         publish: {
             // Define a key:value pair here as strings to document what signals you publish.
-            '/onAddGcode': 'This signal lets a 3rd party add-on inject its own Gcode into the \
+            '/onAddGcode': `This signal lets a 3rd party add-on inject its own Gcode into the \
             overall final Gcode for the Eagle BRD Widget. Here is an example of how to subscribe. \
             \
 <pre>\n\
@@ -270,7 +270,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){ \n\
             Gcode by looking at parameter 2 gcodeParts to see if an index has already been used so you \
             don\'t clobber it. If you want to delete Gcode from gcodeParts you could do that as well and \
             the main widget will reflect the deletion. \
-            '
+            `
         },
         /**
          * Define the subscribe signals that this widget/element owns or defines so that
