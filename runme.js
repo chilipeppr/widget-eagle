@@ -214,8 +214,8 @@ var evalWidgetJs = function() {
       // grab first line of source code
       var srcFirstLine = obj.toString().substring(0, obj.toString().indexOf("\n"));
       // drop {
-      //srcFirstLine = srcFirstLine.replace(/\{/, "");
-      srcFirstLine = srcFirstLine.replace(/function\s*\(\s*\)\s*\{/, "");
+      srcFirstLine = srcFirstLine.replace(/\{/, "");
+      //srcFirstLine = srcFirstLine.replace(/function\s*\(\s*\)\s*\{/, "");
       objDoc.descHtml = srcFirstLine; // + "<br><br>";
       objDoc.descMd = srcFirstLine; // + "\n\n";
       
