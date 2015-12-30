@@ -124,22 +124,21 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
             // Define a key:value pair here as strings to document what signals you publish.
             '/onAddGcode': 'This signal lets a 3rd party add-on inject its own Gcode into the \
             overall final Gcode for the Eagle BRD Widget. Here is an example of how to subscribe. \
-            <pre>\
             \
-            chilipeppr.subscribe("/com-chilipeppr-widget-eagle/addGcode", this, this.myOnAddGcode); \
+<pre>\n\
+chilipeppr.subscribe("/com-chilipeppr-widget-eagle/addGcode", this, this.myOnAddGcode);\n \
+</pre>\
             \
-            </pre>\
             Then, your callback would look like this with 4 parameters receiving the variables \
             that the addGcode publish signal sends you. \
-            <pre>\
             \
-            onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){ \
-                console.log("Got onAddGcode:", arguments); \
-                // this method calls back to the main Eagle widget to inject our Gcode \
-                addGcodeCallback(1500, myOwnGcode ); \
-            } \
-            \
-            </pre>\
+<pre>\n\
+onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){ \n\
+    console.log("Got onAddGcode:", arguments); \n\
+    // this method calls back to the main Eagle widget to inject our Gcode \n\
+    addGcodeCallback(1500, myOwnGcode ); \n\
+} \n\
+</pre>\
             The 1500 in the example above is to attach a priority to where our Gcode will get positioned. \
             The base Gcode ends around line 900. The footer starts at line 2000. So putting our Gcode at \
             the end but before the footer means using 1500 should do fine. You can analyze the existing \
