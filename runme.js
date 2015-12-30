@@ -414,11 +414,9 @@ To better understand how ChiliPeppr's subscribe() method works see amplify.js's 
           </tr>
       </thead>
       <tbody>
-          
       $row-publish-start    
       <tr><td colspan="2">(No signals defined in this widget/element)</td></tr>
       $row-publish-end    
-      
       </tbody>
   </table>
 
@@ -498,11 +496,9 @@ The table below shows, in order, the methods and properties inside the widget/el
           </tr>
       </thead>
       <tbody>
-          
       $row-methods-start
       <tr><td colspan="2">(No methods or properties defined in this widget/element)</td></tr>
       $row-methods-end
-      
       </tbody>
   </table>
 
