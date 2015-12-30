@@ -34,7 +34,11 @@ chilipeppr.load(
   function() {
     // Callback after widget loaded into #myDivWidgetInsertedInto
     cprequire(
+<<<<<<< HEAD
       "inline:com-chilipeppr-widget-eagle", // the id you gave your widget
+=======
+      ["inline:com-chilipeppr-widget-template"], // the id you gave your widget
+>>>>>>> 7cb172111b6f04f025cf1271712e733a883353bf
       function(mywidget) {
         // Callback that is passed reference to your newly loaded widget
         console.log("My widget just got loaded.", mywidget);
