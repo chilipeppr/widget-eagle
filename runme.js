@@ -589,11 +589,17 @@ will you build on top of it?
     // do the properties and methods
   var s = "";
   for (var key in widget) {
+    var txt = widgetDocs[key] + '';
+    // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
+    txt = txt.replace(/<\/pre>[\s\r\n]*/ig, "</pre>");
+    // convert double newlines to <br><br> tags
+    txt = txt.replace(/\n\s*\n\s*/g, "<br><br>");
+
     var obj = widget[key];
     s += '<tr valign="top"><td>' + key +
       '</td><td>' + typeof obj +
       '</td><td>';
-    s += widgetDocs[key].descHtml.replace(/<\/pre>[\s\r\n]*/ig, "</pre>"); // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
+    s += txt;
     s += '</td></tr>';
   }
   md = md.replace(/\$row-methods-start[\s\S]+?\$row-methods-end/g, s);
