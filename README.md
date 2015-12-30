@@ -65,13 +65,25 @@ To better understand how ChiliPeppr's subscribe() method works see amplify.js's 
             
 <pre>
 chilipeppr.subscribe("/com-chilipeppr-widget-eagle/addGcode", this, this.myOnAddGcode);
- </pre>                        Then, your callback would look like this with 4 parameters receiving the variables             that the addGcode publish signal sends you.             <pre>
+</pre>
+            
+            Then, your callback would look like this with 4 parameters receiving the variables 
+            that the addGcode publish signal sends you. 
+            
+<pre>
 onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){ 
     console.log("Got onAddGcode:", arguments); 
     // this method calls back to the main Eagle widget to inject our Gcode 
     addGcodeCallback(1500, myOwnGcode ); 
 } 
-</pre>            The 1500 in the example above is to attach a priority to where our Gcode will get positioned.             The base Gcode ends around line 900. The footer starts at line 2000. So putting our Gcode at             the end but before the footer means using 1500 should do fine. You can analyze the existing             Gcode by looking at parameter 2 gcodeParts to see if an index has already been used so you             don't clobber it. If you want to delete Gcode from gcodeParts you could do that as well and             the main widget will reflect the deletion.             </td></tr>    
+</pre>
+            The 1500 in the example above is to attach a priority to where our Gcode will get positioned. 
+            The base Gcode ends around line 900. The footer starts at line 2000. So putting our Gcode at 
+            the end but before the footer means using 1500 should do fine. You can analyze the existing 
+            Gcode by looking at parameter 2 gcodeParts to see if an index has already been used so you 
+            don't clobber it. If you want to delete Gcode from gcodeParts you could do that as well and 
+            the main widget will reflect the deletion. 
+            </td></tr>    
       </tbody>
   </table>
 
