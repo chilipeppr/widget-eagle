@@ -1,9 +1,9 @@
-# com-chilipeppr-widget-template
-This example widget gives you a framework for creating your own widget. Please change this description once you fork this template and create your own widget.
+# com-chilipeppr-widget-eagle
+This widget lets you drag in an Eagle PCB ".brd" file to mill.
 
 ![alt text](screenshot.png "Screenshot")
 
-## ChiliPeppr Widget / Template
+## ChiliPeppr Widget / Eagle PCB v3
 
 All ChiliPeppr widgets/elements are defined using cpdefine() which is a method
 that mimics require.js. Each defined object must have a unique ID so it does
@@ -11,13 +11,13 @@ not conflict with other ChiliPeppr widgets.
 
 | Item                  | Value           |
 | -------------         | ------------- | 
-| ID                    | com-chilipeppr-widget-template |
-| Name                  | Widget / Template |
-| Description           | This example widget gives you a framework for creating your own widget. Please change this description once you fork this template and create your own widget. |
-| chilipeppr.load() URL | http://raw.githubusercontent.com/chilipeppr/com-chilipeppr-widget-template/master/auto-generated-widget.html |
-| Edit URL              | http://ide.c9.io/chilipeppr/com-chilipeppr-widget-template |
-| Github URL            | http://github.com/chilipeppr/com-chilipeppr-widget-template |
-| Test URL              | https://preview.c9users.io/chilipeppr/com-chilipeppr-widget-template/widget.html |
+| ID                    | com-chilipeppr-widget-eagle |
+| Name                  | Widget / Eagle PCB v3 |
+| Description           | This widget lets you drag in an Eagle PCB ".brd" file to mill. |
+| chilipeppr.load() URL | http://raw.githubusercontent.com/chilipeppr/com-chilipeppr-widget-eagle/master/auto-generated-widget.html |
+| Edit URL              | http://ide.c9.io/chilipeppr/com-chilipeppr-widget-eagle |
+| Github URL            | http://github.com/chilipeppr/com-chilipeppr-widget-eagle |
+| Test URL              | https://preview.c9users.io/chilipeppr/com-chilipeppr-widget-eagle/widget.html |
 
 ## Example Code for chilipeppr.load() Statement
 
@@ -30,11 +30,11 @@ back the instance of it.
 ```javascript
 chilipeppr.load(
   "#myDivWidgetInsertedInto",
-  "http://raw.githubusercontent.com/chilipeppr/com-chilipeppr-widget-template/master/auto-generated-widget.html",
+  "http://raw.githubusercontent.com/chilipeppr/com-chilipeppr-widget-eagle/master/auto-generated-widget.html",
   function() {
     // Callback after widget loaded into #myDivWidgetInsertedInto
     cprequire(
-      "inline:com-chilipeppr-widget-template", // the id you gave your widget
+      "inline:com-chilipeppr-widget-eagle", // the id you gave your widget
       function(mywidget) {
         // Callback that is passed reference to your newly loaded widget
         console.log("My widget just got loaded.", mywidget);
@@ -54,7 +54,7 @@ To better understand how ChiliPeppr's subscribe() method works see amplify.js's 
 
 | Signal | Description |
 | ------ | ----------- |
-| /com-chilipeppr-widget-template/onExampleGenerate | Example: Publish this signal when we go to generate gcode. |
+| /com-chilipeppr-widget-eagle/onGenerate | When we go to generate gcode. If you subscribe to this you need to pass back Gcode. TODO because need to clarify how to add Gcode. |
 
 ## Subscribe
 
@@ -81,7 +81,7 @@ To better understand how ChiliPeppr's publish() method works see amplify.js's do
 
 | Signal | Description |
 | ------ | ----------- |
-| (No signals defined in this widget/element) |
+| /com-chilipeppr-widget-eagle/com-chilipeppr-elem-dragdrop/ondropped | We subscribe to this signal at a higher priority to intercept the signal, double check if it is an Eagle Brd file and if so, we do not let it propagate by returning false. That way the 3D Viewer, Gcode widget, or other widgets will not get Eagle Brd file drag/drop events because they will not know how to interpret them. |
 
 ## Methods / Properties
 
@@ -89,26 +89,165 @@ The table below shows, in order, the methods and properties inside the widget/el
 
 | Item                  | Type          | Description |
 | -------------         | ------------- | ----------- |
-| id | string | "com-chilipeppr-widget-template"<br><br>The ID of the widget. You must define this and make it unique. |
-| name | string | "Widget / Template" |
-| desc | string | "This example widget gives you a framework for creating your own widget. Please change this description once you fork this template and create your own widget." |
-| url | string | "http://raw.githubusercontent.com/chilipeppr/com-chilipeppr-widget-template/master/auto-generated-widget.html" |
-| fiddleurl | string | "http://ide.c9.io/chilipeppr/com-chilipeppr-widget-template" |
-| githuburl | string | "http://github.com/chilipeppr/com-chilipeppr-widget-template" |
-| testurl | string | "http://com-chilipeppr-widget-template-chilipeppr.c9users.io/widget.html" |
+| id | string | "com-chilipeppr-widget-eagle"<br><br>The ID of the widget. You must define this and make it unique. |
+| name | string | "Widget / Eagle PCB v3" |
+| desc | string | "This widget lets you drag in an Eagle PCB \".brd\" file to mill." |
+| url | string | "http://raw.githubusercontent.com/chilipeppr/com-chilipeppr-widget-eagle/master/auto-generated-widget.html" |
+| fiddleurl | string | "http://ide.c9.io/chilipeppr/com-chilipeppr-widget-eagle" |
+| githuburl | string | "http://github.com/chilipeppr/com-chilipeppr-widget-eagle" |
+| testurl | string | "http://com-chilipeppr-widget-eagle-chilipeppr.c9users.io/widget.html" |
 | publish | object | Please see docs above.<br><br>Define the publish signals that this widget/element owns or defines so thatother widgets know how to subscribe to them and what they do. |
 | subscribe | object | Please see docs above.<br><br>Define the subscribe signals that this widget/element owns or defines so thatother widgets know how to subscribe to them and what they do. |
 | foreignPublish | object | Please see docs above.<br><br>Document the foreign publish signals, i.e. signals owned by other widgetsor elements, that this widget/element publishes to. |
 | foreignSubscribe | object | Please see docs above.<br><br>Document the foreign subscribe signals, i.e. signals owned by other widgetsor elements, that this widget/element subscribes to. |
-| init | function | function () <br><br>All widgets should have an init method. It should be run by theinstantiating code like a workspace or a different widget. |
-| btnSetup | function | function () <br><br>Call this method from init to setup all the buttons when this widgetis first loaded. This basically attaches click events to your buttons. It also turns on all the bootstrap popovers by scanningthe entire DOM of the widget. |
-| onHelloBtnClick | function | function (evt) <br><br>onHelloBtnClick is an example of a button click event callback |
-| options | object | User options are available in this property for reference by yourmethods. If any change is made on these options, please callsaveOptionsLocalStorage() |
-| setupUiFromLocalStorage | function | function () <br><br>Call this method on init to setup the UI by reading the user'sstored settings from localStorage and then adjust the UI to reflectwhat the user wants. |
-| saveOptionsLocalStorage | function | function () <br><br>When a user changes a value that is stored as an option setting, youshould call this method immediately so that on next load the valueis correctly set. |
-| showBody | function | function (evt) <br><br>Show the body of the panel.<br><br><b>evt</b> ({jquery_event})  - If you pass the event parameter in, we know it was clicked by the user and thus we store it for the next load so we can reset the user's preference. If you don't pass this value in we don't store the preference because it was likely code that sent in the param. |
-| hideBody | function | function (evt) <br><br>Hide the body of the panel.<br><br><b>evt</b> ({jquery_event})  - If you pass the event parameter in, we know it was clicked by the user and thus we store it for the next load so we can reset the user's preference. If you don't pass this value in we don't store the preference because it was likely code that sent in the param. |
-| forkSetup | function | function () <br><br>This method loads the pubsubviewer widget which attaches to our upper right corner triangle menu and generates 3 menu items likePubsub Viewer, View Standalone, and Fork Widget. It also enablesthe modal dialog that shows the documentation for this widget.<br><br>By using chilipeppr.load() we can ensure that the pubsubviewer widgetis only loaded and inlined once into the final ChiliPeppr workspace.We are given back a reference to the instantiated singleton so itsnot instantiated more than once. Then we call it's attachTo methodwhich creates the full pulldown menu for us and attaches the clickevents. |
+| init | function | function (doMyOwnDragDrop) <br><br>All widgets should have an init method. It should be run by theinstantiating code like a workspace or a different widget. |
+| setupLayerToggleDropdown | function | function ()  |
+| populateLayerToggleDropdown | function | function () |
+| onChangeLayerToggleDropdown | function | function ()  |
+| setupFeedsDepths | function | function ()  |
+| calcPasses | function | function (el)  |
+| activateWidget | function | function () <br><br>This method is called from the main workspace telling us the userjust activated us as a widget. This is not the same as load. Loadhappens once. Activate happens many times if user closes then opensus. |
+| unactivateWidget | function | function ()  |
+| init3d | function | function () <br><br>Try to get a reference to the 3D viewer. |
+| onInit3dSuccess | function | function ()  |
+| obj3d | object |  |
+| obj3dmeta | object |  |
+| userCallbackForGet3dObj | object |  |
+| get3dObj | function | function (callback)  |
+| get3dObjCallback | function | function (data, meta)  |
+| is3dViewerReady | boolean |  |
+| clear3dViewer | function | function ()  |
+| clearEagleBrd | function | function ()  |
+| clearEagleBrdStep2 | function | function ()  |
+| setupGcodeTab | function | function ()  |
+| sendGcodeToWorkspace | function | function ()  |
+| setupDragDrop | function | function ()  |
+| eagle | object |  |
+| open | function | function (data, info)  |
+| draw3d | function | function (callback) <br><br>We need the 3D viewer to be ready to go for us to generate our 3D view,so do a little bit of a wait sequence here where we try 3 times tograb the 3D viewer object and then we can render our board.Alternately, we could render our board and then inject into the 3Dviewer later. Not sure why I didn't do it that way initially. |
+| colorSignal | number |  |
+| colorSmd | number |  |
+| colorSignalBottom | number |  |
+| colorSmdBottom | number |  |
+| colorVia | number |  |
+| colorPad | number |  |
+| colorMill | number |  |
+| colorHole | number |  |
+| colorsDrop | object |  |
+| colorDimension | number |  |
+| opacitySignal | number |  |
+| opacityDimension | number |  |
+| opacityVia | number |  |
+| opacityPad | number |  |
+| endmillSize | number |  |
+| actualEndmill | number |  |
+| inflateMillPathBy | object |  |
+| paths | object |  |
+| pathsUnion | object |  |
+| pathsUnionHoles | object |  |
+| threeDimensions | object |  |
+| activeLayer | string | "Top" |
+| clipperDimensions | object |  |
+| onDraw3dReady | function | function () <br><br>This is a key method that will actually start the traversal of theentire Eagle BRD and generate Three.js objects for each pad/smd/via/wire, etc.Then it will generate Clipper Paths which are just 2d xy values in theformat that the Clipper library wants so we can do unions and diffswhich is important to generate the isolation paths as well as deal withpolygons that may be on the board representing signal planes like a GND plane. |
+| onDraw3dReadyAfter | function | function ()  |
+| clearanceHeight | number |  |
+| depthOfSignalMilling | number |  |
+| feedRatePlunge | number |  |
+| feedRateSignals | number |  |
+| feedRateDimensions | number |  |
+| drillFeedrate | number |  |
+| drillMaxDiameter | number |  |
+| drillDepth | number |  |
+| depthOfDimensions | number |  |
+| millDiameter | number |  |
+| stepDownDimensions | number |  |
+| stepDownPasses | number |  |
+| generateGcodeHole | function | function (diameter, x, y) |
+| exportGcodeHeader | function | function () |
+| exportGcodeMilling | function | function () |
+| exportGcodeMarkVias | function | function () |
+| exportGcodeMarkPads | function | function () |
+| exportGcodeDrillVias | function | function () |
+| exportGcodeDrillPads | function | function () |
+| exportGcodeDimensions | function | function () |
+| exportGcodeFooter | function | function () |
+| exportGcode | function | function ()  |
+| setupAdvancedInflateByUI | function | function ()  |
+| onRefresh | function | function (event, callback)  |
+| threePathEndMill | object |  |
+| onRefresh2nd | function | function (event, callback)  |
+| getInflatePathWithConstraint | function | function (paths, inflateBy, constraints)  |
+| raycaster | object |  |
+| projector | object |  |
+| arrowHelper | object |  |
+| intersectObjects | object |  |
+| renderArea | object |  |
+| infoArea | object |  |
+| infoSignalArea | object |  |
+| lastIntersect | object |  |
+| hidePopupsElem | object |  |
+| setupMouseOver | function | function ()  |
+| reactivateMouseMove | function | function ()  |
+| deactivateMouseMove | function | function ()  |
+| hidePopups | function | function ()  |
+| lastIntersectOtherMaterials | object |  |
+| onMouseOver | function | function (event)  |
+| getXorOfClipperPaths | function | function (subj_paths, clip_paths)  |
+| getIntersectionOfClipperPaths | function | function (subj_paths, clip_paths)  |
+| getDiffOfClipperPaths | function | function (subj_paths, clip_paths)  |
+| getAllPathsAsOuterOrientation | function | function (subj_paths)  |
+| getUnionOfClipperPaths | function | function (subj_paths)  |
+| drawUnionOfClipperPaths | function | function (subj_paths)  |
+| drawClipperPaths | function | function (paths, color, opacity, z, zstep, isClosed, isAddDirHelper)  |
+| createClipperPathsAsMesh | function | function (paths, color, opacity, holePath)  |
+| getInflatePath | function | function (paths, delta, joinType)  |
+| createThermalCutoutsFromSmd | function | function (smd, poly, myInflateBy)  |
+| sortObjByKey | function | function (obj) |
+| clipperDimension | object |  |
+| getDimensionWires | function | function ()  |
+| draw3dDimension | function | function (endmillSize)  |
+| addStrokeCapsToLine | function | function (x1, y1, x2, y2, width, capType)  |
+| clipperBySignalKey | object |  |
+| clipperBySignalKeyItem | object |  |
+| clipperSignalWires | object |  |
+| clipperSignalPolys | object |  |
+| draw3dVias | function | function (layersName)  |
+| draw3dSignalWires | function | function (layer)  |
+| draw3dSignalPolygons | function | function (layer)  |
+| clipperElements | object |  |
+| clipperPads | object |  |
+| clipperSmds | object |  |
+| clipperVias | object |  |
+| drillPads | object |  |
+| drillVias | object |  |
+| draw3dElements | function | function (layer)  |
+| rotObjectMatrix | object |  |
+| rotateAroundObjectAxis | function | function (object, axis, radians)  |
+| rotWorldMatrix | object |  |
+| rotateAroundWorldAxis | function | function (object, axis, radians)  |
+| drawCircle | function | function (x, y, radius, color) |
+| drawSphere | function | function (x, y, radius, color) |
+| drawSquare | function | function (x1, y1, x2, y2)  |
+| mySceneGroup | object |  |
+| sceneReAddMySceneGroup | function | function ()  |
+| sceneRemoveMySceneGroup | function | function ()  |
+| sceneAdd | function | function (obj)  |
+| sceneRemove | function | function (obj)  |
+| draw | function | function (e)  |
+| onDropped | function | function (data, info)  |
+| onDragOver | function | function ()  |
+| onDragLeave | function | function ()  |
+| isVidLoaded | boolean |  |
+| lazyLoadTutorial | function | function ()  |
+| options | object |  |
+| setupUiFromLocalStorage | function | function ()  |
+| saveOptionsLocalStorage | function | function ()  |
+| showBody | function | function (evt)  |
+| hideBody | function | function (evt)  |
+| btnSetup | function | function ()  |
+| statusEl | object |  |
+| status | function | function (txt)  |
+| forkSetup | function | function ()  |
 
 
 ## About ChiliPeppr
