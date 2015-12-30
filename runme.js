@@ -1024,7 +1024,7 @@ var appendKeyVal = function(data, id) {
       // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
       txt = txt.replace(/<\/pre>[\s\r\n]*/ig, "</pre>");
       // convert double newlines to <br><br> tags
-      txt = txt.replace(/\n\s*\n\s*/, "<br><br>");
+      txt = txt.replace(/\n\s*\n\s*/g, "<br><br>");
       
       str += '<tr valign="top"><td>/' + 
         widget.id + "" + 
