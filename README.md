@@ -1,5 +1,5 @@
 # com-chilipeppr-widget-eagle
-This widget lets you drag in an Eagle PCB ".brd" file to mill.
+This widget lets you drag in an Eagle PCB ".brd" file to mill. test
 
 ![alt text](screenshot.png "Screenshot")
 
