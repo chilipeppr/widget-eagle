@@ -76,14 +76,26 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             Gcode by looking at parameter 2 gcodeParts to see if an index has already been used so you 
             don't clobber it. If you want to delete Gcode from gcodeParts you could do that as well and 
             the main widget will reflect the deletion. 
-            </td></tr><tr valign="top"><td>/com-chilipeppr-widget-eagle/beforeRender</td><td>This widget fires a signal before the rendering of the Eagle BRD. 
-                In the payload is a reference to "this" so you can possibly grab info or do other 
-                manipulations of the board before we render. This is especially useful for add-on 
+            </td></tr><tr valign="top"><td>/com-chilipeppr-widget-eagle/beforeLayerGenerate</td><td>This widget fires a signal before generating the Three.js objects
+                and Clipper paths for a board layer. The Three.js objects are 3D objects representing the
+                pads, vias, smds, wires, polygons, and dimensions. Those Three.js objects are used to
+                populate the 3D viewer and to calculate 2D Clipper paths from. <br><br>Clipper paths are the 2D XY
+                values of all the layer's objects and are generated so that unions and diffs can be
+                calculated on those paths in the render step. Clipper paths can be easily inflated and
+                deflated by the Clipper.js library which is why they are so important to this widget.<br><br>When you get this signal a reference to "this", i.e. the Eagle Widget, is included in
+                the payload so you may use it to manipulate this widget as you see fit.</td></tr><tr valign="top"><td>/com-chilipeppr-widget-eagle/afterLayerGenerate</td><td>Please see the /beforeLayerGenerate description to understand this
+                signal better. The /afterLayerGenerate signal is fired after this widget is done
+                generating the board layer. The payload is the same as the before signal.</td></tr><tr valign="top"><td>/com-chilipeppr-widget-eagle/beforeToolPathRender</td><td>This widget fires a signal before the rendering of the tool path 
+                for the milling of the Eagle BRD. As the user tests out different inflate values, you 
+                will get this signal for each re-render of the tool path the user asks for, i.e. when 
+                they click the "render" button.<br><br>In the payload is a reference to "this" so you can possibly grab info or do other 
+                manipulations of the board before we render the tool path. This is especially useful for add-on 
                 widgets to the Eagle BRD widget such as the Solder Paste Dispenser Add-On or the
                 Pick and Place Add-On.
-                </td></tr><tr valign="top"><td>/com-chilipeppr-widget-eagle/afterRender</td><td>This widget fires a signal after the rendering of the Eagle BRD. 
-                Similar to the /beforeRender signal, in the payload is a reference to "this" so you can possibly grab info or do other 
-                manipulations of the board before we render. This is especially useful for add-on 
+                </td></tr><tr valign="top"><td>/com-chilipeppr-widget-eagle/afterToolPathRender</td><td>This widget fires a signal after the rendering of the tool path 
+                for the Eagle BRD. The tool path is the blue line in the 3D viewer.
+                Similar to the /beforeToolPathRender signal, in the payload is a reference to "this" so you can possibly grab info or do other 
+                manipulations of the board after we render. This is especially useful for add-on 
                 widgets to the Eagle BRD widget such as the Solder Paste Dispenser Add-On or the
                 Pick and Place Add-On.
                 </td></tr>    

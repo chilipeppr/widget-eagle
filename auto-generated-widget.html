@@ -225,11 +225,18 @@ cprequire_test(["inline:com-chilipeppr-widget-eagle"], function (ew) {
     });
     
     // test before and after render
-    chilipeppr.subscribe("/" + ew.id + '/beforeRender', this, function(eagleWidget) {
-        console.log("got the /beforeRender signal. eagleWidget:", eagleWidget);
+    chilipeppr.subscribe("/" + ew.id + '/beforeToolPathRender', this, function(eagleWidget) {
+        console.log("publish test. got the /beforeToolPathRender signal. eagleWidget:", eagleWidget);
     });
-    chilipeppr.subscribe("/" + ew.id + '/afterRender', this, function(eagleWidget) {
-        console.log("got the /afterRender signal. eagleWidget:", eagleWidget);
+    chilipeppr.subscribe("/" + ew.id + '/afterToolPathRender', this, function(eagleWidget) {
+        console.log("publish test. got the /afterToolPathRender signal. eagleWidget:", eagleWidget);
+    });
+    // test before and after render
+    chilipeppr.subscribe("/" + ew.id + '/beforeParse', this, function(eagleWidget) {
+        console.log("publish test. got the /beforeParse signal. eagleWidget:", eagleWidget);
+    });
+    chilipeppr.subscribe("/" + ew.id + '/afterParse', this, function(eagleWidget) {
+        console.log("publish test. got the /afterParse signal. eagleWidget:", eagleWidget);
     });
 
 
@@ -284,15 +291,35 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             don't clobber it. If you want to delete Gcode from gcodeParts you could do that as well and 
             the main widget will reflect the deletion. 
             `,
-            '/beforeRender' : `This widget fires a signal before the rendering of the Eagle BRD. 
+            '/beforeLayerGenerate' : `This widget fires a signal before generating the Three.js objects
+                and Clipper paths for a board layer. The Three.js objects are 3D objects representing the
+                pads, vias, smds, wires, polygons, and dimensions. Those Three.js objects are used to
+                populate the 3D viewer and to calculate 2D Clipper paths from. 
+                
+                Clipper paths are the 2D XY
+                values of all the layer's objects and are generated so that unions and diffs can be
+                calculated on those paths in the render step. Clipper paths can be easily inflated and
+                deflated by the Clipper.js library which is why they are so important to this widget.
+                
+                When you get this signal a reference to "this", i.e. the Eagle Widget, is included in
+                the payload so you may use it to manipulate this widget as you see fit.`,
+            '/afterLayerGenerate' : `Please see the /beforeLayerGenerate description to understand this
+                signal better. The /afterLayerGenerate signal is fired after this widget is done
+                generating the board layer. The payload is the same as the before signal.`,
+            '/beforeToolPathRender' : `This widget fires a signal before the rendering of the tool path 
+                for the milling of the Eagle BRD. As the user tests out different inflate values, you 
+                will get this signal for each re-render of the tool path the user asks for, i.e. when 
+                they click the "render" button.
+                
                 In the payload is a reference to "this" so you can possibly grab info or do other 
-                manipulations of the board before we render. This is especially useful for add-on 
+                manipulations of the board before we render the tool path. This is especially useful for add-on 
                 widgets to the Eagle BRD widget such as the Solder Paste Dispenser Add-On or the
                 Pick and Place Add-On.
                 `,
-            '/afterRender' : `This widget fires a signal after the rendering of the Eagle BRD. 
-                Similar to the /beforeRender signal, in the payload is a reference to "this" so you can possibly grab info or do other 
-                manipulations of the board before we render. This is especially useful for add-on 
+            '/afterToolPathRender' : `This widget fires a signal after the rendering of the tool path 
+                for the Eagle BRD. The tool path is the blue line in the 3D viewer.
+                Similar to the /beforeToolPathRender signal, in the payload is a reference to "this" so you can possibly grab info or do other 
+                manipulations of the board after we render. This is especially useful for add-on 
                 widgets to the Eagle BRD widget such as the Solder Paste Dispenser Add-On or the
                 Pick and Place Add-On.
                 `
@@ -915,7 +942,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
          * GND plane.
          */
         onDraw3dReady: function () {
+            
     		console.group("draw3d");
+
+            // inform any listeners that we're starting parsing, i.e. we're done with
+            // all of our draw3dxxx functions which means all our three.js objects
+            // and clipper objects are generated.
+            chilipeppr.publish("/" + this.id + '/beforeParse', this);
+
             this.populateLayerToggleDropdown();
             console.log("iterating Eagle Brd and drawing into 3d viewer");
             console.log("eagle obj we will draw:", this.eagle);
@@ -941,6 +975,12 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             console.log("this.obj3d:", this.obj3d);
             
             chilipeppr.publish('/com-chilipeppr-widget-3dviewer/viewextents' );
+            
+            // inform any listeners that we're done parsing, i.e. we're done with
+            // all of our draw3dxxx functions which means all our three.js objects
+            // and clipper objects are generated.
+            chilipeppr.publish("/" + this.id + '/afterParse', this);
+
             setTimeout(this.onRefresh.bind(this, null, this.onDraw3dReadyAfter), 2000);
 
             
@@ -1362,7 +1402,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             
             // fire off the pubsub signal indicating we're rendering
-            chilipeppr.publish('/' + this.id + '/beforeRender', this);
+            chilipeppr.publish('/' + this.id + '/beforeToolPathRender', this);
             
             this.inflateMillPathBy = parseFloat($('#com-chilipeppr-widget-eagle .inflate-by').val());
             var isMagicWand = $('#com-chilipeppr-widget-eagle .magic-wand-active').is(':checked');
@@ -2320,7 +2360,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             //console.log("paths:", paths);
             
             // fire off the pubsub signal indicating we're done rendering
-            chilipeppr.publish('/' + this.id + '/afterRender', this);
+            chilipeppr.publish('/' + this.id + '/afterToolPathRender', this);
 
             console.log("done rendering Eagle BRD");
         },
