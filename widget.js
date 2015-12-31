@@ -109,7 +109,7 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
          * The ID of the widget. You must define this and make it unique.
          */
         id: "com-chilipeppr-widget-eagle",
-        name: "Widget / Eagle PCB v3",
+        name: "Widget / Eagle BRD v4",
         desc: "This widget lets you drag in an Eagle PCB \".brd\" file to mill.",
         url: "(auto fill by runme.js)",       // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
         fiddleurl: "(auto fill by runme.js)", // The edit URL. This can be auto-filled by runme.js in Cloud9 if you'd like, or just define it on your own to help people know where they can edit/fork your widget
