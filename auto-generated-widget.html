@@ -232,11 +232,11 @@ cprequire_test(["inline:com-chilipeppr-widget-eagle"], function (ew) {
         console.log("publish test. got the /afterToolPathRender signal. eagleWidget:", eagleWidget);
     });
     // test before and after render
-    chilipeppr.subscribe("/" + ew.id + '/beforeParse', this, function(eagleWidget) {
-        console.log("publish test. got the /beforeParse signal. eagleWidget:", eagleWidget);
+    chilipeppr.subscribe("/" + ew.id + '/beforeLayerGenerate', this, function(eagleWidget) {
+        console.log("publish test. got the /beforeLayerGenerate signal. layer:", eagleWidget.activeLayer, "eagleWidget:", eagleWidget);
     });
-    chilipeppr.subscribe("/" + ew.id + '/afterParse', this, function(eagleWidget) {
-        console.log("publish test. got the /afterParse signal. eagleWidget:", eagleWidget);
+    chilipeppr.subscribe("/" + ew.id + '/afterLayerGenerate', this, function(eagleWidget) {
+        console.log("publish test. got the /afterLayerGenerate signal. layer:", eagleWidget.activeLayer, "eagleWidget:", eagleWidget);
     });
 
 
@@ -270,7 +270,11 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
             overall final Gcode for the Eagle BRD Widget. Here is an example of how to subscribe. 
 
 <pre>
-chilipeppr.subscribe("/com-chilipeppr-widget-eagle/addGcode", this, this.myOnAddGcode);
+chilipeppr.subscribe(
+    "/com-chilipeppr-widget-eagle/addGcode", 
+    this, 
+    this.myOnAddGcode
+);
 </pre>
 
             Then, your callback would look like this with 4 parameters receiving the variables 
@@ -948,7 +952,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // inform any listeners that we're starting parsing, i.e. we're done with
             // all of our draw3dxxx functions which means all our three.js objects
             // and clipper objects are generated.
-            chilipeppr.publish("/" + this.id + '/beforeParse', this);
+            chilipeppr.publish("/" + this.id + '/beforeLayerGenerate', this);
 
             this.populateLayerToggleDropdown();
             console.log("iterating Eagle Brd and drawing into 3d viewer");
@@ -979,7 +983,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // inform any listeners that we're done parsing, i.e. we're done with
             // all of our draw3dxxx functions which means all our three.js objects
             // and clipper objects are generated.
-            chilipeppr.publish("/" + this.id + '/afterParse', this);
+            chilipeppr.publish("/" + this.id + '/afterLayerGenerate', this);
 
             setTimeout(this.onRefresh.bind(this, null, this.onDraw3dReadyAfter), 2000);
 
