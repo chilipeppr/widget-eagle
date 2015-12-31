@@ -76,7 +76,17 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             Gcode by looking at parameter 2 gcodeParts to see if an index has already been used so you 
             don't clobber it. If you want to delete Gcode from gcodeParts you could do that as well and 
             the main widget will reflect the deletion. 
-            </td></tr>    
+            </td></tr><tr valign="top"><td>/com-chilipeppr-widget-eagle/beforeRender</td><td>This widget fires a signal before the rendering of the Eagle BRD. 
+                In the payload is a reference to "this" so you can possibly grab info or do other 
+                manipulations of the board before we render. This is especially useful for add-on 
+                widgets to the Eagle BRD widget such as the Solder Paste Dispenser Add-On or the
+                Pick and Place Add-On.
+                </td></tr><tr valign="top"><td>/com-chilipeppr-widget-eagle/afterRender</td><td>This widget fires a signal after the rendering of the Eagle BRD. 
+                Similar to the /beforeRender signal, in the payload is a reference to "this" so you can possibly grab info or do other 
+                manipulations of the board before we render. This is especially useful for add-on 
+                widgets to the Eagle BRD widget such as the Solder Paste Dispenser Add-On or the
+                Pick and Place Add-On.
+                </td></tr>    
       </tbody>
   </table>
 
