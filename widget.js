@@ -51,7 +51,7 @@ cprequire_test(["inline:com-chilipeppr-widget-eagle"], function (ew) {
 
     $('#com-chilipeppr-widget-eagle').css('position', 'relative');
     $('#com-chilipeppr-widget-eagle').css('background', 'none');
-    $('#com-chilipeppr-widget-eagle').css('width', '300px');
+    $('#com-chilipeppr-widget-eagle').css('width', '320px');
     $('body').prepend('<div id="3dviewer"></div>');
 
     //chilipeppr.load("#3dviewer", "http://fiddle.jshell.net/chilipeppr/y3HRF/195/show/light/", function () {
