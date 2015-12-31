@@ -54,7 +54,11 @@ cprequire_test(["inline:com-chilipeppr-widget-eagle"], function (ew) {
     $('#com-chilipeppr-widget-eagle').css('width', '300px');
     $('body').prepend('<div id="3dviewer"></div>');
 
-    chilipeppr.load("#3dviewer", "http://fiddle.jshell.net/chilipeppr/y3HRF/195/show/light/", function () {
+    //chilipeppr.load("#3dviewer", "http://fiddle.jshell.net/chilipeppr/y3HRF/195/show/light/", function () {
+    chilipeppr.load(
+      "#3dviewer",
+      "http://raw.githubusercontent.com/chilipeppr/widget-3dviewer/master/auto-generated-widget.html",
+      function() {
         cprequire(['inline:com-chilipeppr-widget-3dviewer'], function (threed) {
             threed.init({
                 doMyOwnDragDrop: false
