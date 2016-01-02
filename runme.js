@@ -1130,6 +1130,8 @@ var generateInlinedFile = function() {
   // now write out the auto-gen file
   fs.writeFileSync("auto-generated-widget.html", fileHtml);
   console.log("Updated auto-generated-widget.html");
+  
+  fs.writeFileSync("index.html", fileHtml);
 
 }
 
