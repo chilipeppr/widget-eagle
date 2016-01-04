@@ -154,12 +154,14 @@ requirejs.config({
         ThreeTextGeometry: '//i2dcui.appspot.com/js/three/TextGeometry',
         ThreeFontUtils: '//i2dcui.appspotr.com/js/three/FontUtils',
         ThreeHelvetiker: '//i2dcui.appspot.com/js/three/threehelvetiker',
+        ThreeSTLLoader: '//i2dcui.appspot.com/geturl?url=http://threejs.org/examples/js/loaders/STLLoader.js',
         Clipper: '//i2dcui.appspot.com/js/clipper/clipper_unminified'
    },
    shim: {
        ThreeTextGeometry: ['Three'],
        ThreeFontUtils: ['Three', 'ThreeTextGeometry'],
        ThreeHelvetiker: ['Three', 'ThreeTextGeometry', 'ThreeFontUtils'],
+       ThreeSTLLoader: ['Three', 'ThreeTextGeometry', 'ThreeFontUtils', 'ThreeHelvetiker'],  //Have tried with and without this
    }
 });
 
