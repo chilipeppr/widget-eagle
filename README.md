@@ -66,7 +66,7 @@ chilipeppr.subscribe(
     "/com-chilipeppr-widget-eagle/addGcode", 
     this, 
     this.myOnAddGcode
-);
+    );
 </pre>Then, your callback would look like this with 4 parameters receiving the variables 
             that the addGcode publish signal sends you. <br><br><pre>
 onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){ 

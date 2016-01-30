@@ -27,7 +27,7 @@ requirejs.config({
        // Don't put .js at end of URL (except when passing thru CP geturl proxy)
         Three: '//i2dcui.appspot.com/geturl?url=http://threejs.org/build/three.min.js',
         ThreeTextGeometry: '//i2dcui.appspot.com/js/three/TextGeometry',
-        ThreeFontUtils: '//i2dcui.appspotr.com/js/three/FontUtils',
+        ThreeFontUtils: '//i2dcui.appspot.com/js/three/FontUtils',
         ThreeHelvetiker: '//i2dcui.appspot.com/js/three/threehelvetiker',
         Clipper: '//i2dcui.appspot.com/js/clipper/clipper_unminified'
    },
@@ -149,7 +149,7 @@ chilipeppr.subscribe(
     "/com-chilipeppr-widget-eagle/addGcode", 
     this, 
     this.myOnAddGcode
-);
+    );
 </pre>
 
             Then, your callback would look like this with 4 parameters receiving the variables 
@@ -5450,7 +5450,7 @@ EagleCanvas.prototype.parse = function () {
             'pads': packagePads,
             'smds': packageSmds,
             'wires': packageWires,
-                'texts': packageTexts,
+            'texts': packageTexts,
             'bbox': bbox,
             'name' : packageName
         };
