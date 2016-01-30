@@ -4806,7 +4806,6 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
 
                 }, this);
 
-
                 /*
                 var smashed = elem.smashed,
                     textCollection = smashed ? elem.attributes : pkg.texts; //smashed : use element attributes instead of package texts
