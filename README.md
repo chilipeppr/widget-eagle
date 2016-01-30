@@ -104,6 +104,13 @@ The table below shows, in order, the methods and properties inside the widget/el
 | setupLayerToggleDropdown | function | function ()  |
 | populateLayerToggleDropdown | function | function () |
 | onChangeLayerToggleDropdown | function | function ()  |
+| flipTheBoard | boolean |  |
+| boardFlipAxis | object |  |
+| ThreeAxisX | object |  |
+| ThreeAxisY | object |  |
+| ThreeAxisZ | object |  |
+| deg180toRad | object |  |
+| setupFrequentThreeFeatures | function | function ()  |
 | setupFeedsDepths | function | function ()  |
 | calcPasses | function | function (el)  |
 | activateWidget | function | function () <br><br>This method is called from the main workspace telling us the userjust activated us as a widget. This is not the same as load. Loadhappens once. Activate happens many times if user closes then opensus. |
