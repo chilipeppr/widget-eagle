@@ -37,19 +37,21 @@ http.createServer(function(req, res) {
     //var html = getMainPage();
     var htmlDocs = generateWidgetDocs();
     
-    var html = "";
+    var notes = "";
+    notes += "<p>Click refresh to regenerate README.md, auto-generated-widget.html, and push updates to Github.</p>";
     generateWidgetReadme();
-    html += "<p>Generated a new README.md file...</p>";
+    notes += "<p>Generated a new README.md file...</p>";
     generateInlinedFile();
-    html += "<p>Generated a new auto-generated-widget.html file...</p>";
+    notes += "<p>Generated a new auto-generated-widget.html file...</p>";
     //pushToGithub();
     //pushToGithubSync();
     pushToGithubAsync();
-    html += "<p>Pushed updates to Github...</p>";
+    notes += "<p>Pushed updates to Github...</p>";
 
-    html = html + htmlDocs;
+    //html = html + htmlDocs;
+    var finalHtml = htmlDocs.replace(/<!-- pre-notes -->/, notes);
     
-    res.end(html);
+    res.end(finalHtml);
 
   } 
   else if (uri == "/pushtogithub") {
@@ -211,9 +213,11 @@ var evalWidgetJs = function() {
     
     if (typeof obj === 'function') {
 
+      // grab first line of source code
       var srcFirstLine = obj.toString().substring(0, obj.toString().indexOf("\n"));
       // drop {
       srcFirstLine = srcFirstLine.replace(/\{/, "");
+      //srcFirstLine = srcFirstLine.replace(/function\s*\(\s*\)\s*\{/, "");
       objDoc.descHtml = srcFirstLine; // + "<br><br>";
       objDoc.descMd = srcFirstLine; // + "\n\n";
       
@@ -406,44 +410,96 @@ This widget/element publishes the following signals. These signals are owned by 
 chilipeppr.subscribe(signal, callback) method. 
 To better understand how ChiliPeppr's subscribe() method works see amplify.js's documentation at http://amplifyjs.com/api/pubsub/
 
-| Signal | Description |
-| ------ | ----------- |
-$widget-publish
+  <table id="com-chilipeppr-elem-pubsubviewer-pub" class="table table-bordered table-striped">
+      <thead>
+          <tr>
+              <th style="">Signal</th>
+              <th style="">Description</th>
+          </tr>
+      </thead>
+      <tbody>
+      $row-publish-start    
+      <tr valign="top"><td colspan="2">(No signals defined in this widget/element)</td></tr>
+      $row-publish-end    
+      </tbody>
+  </table>
 
 ## Subscribe
 
 This widget/element subscribes to the following signals. These signals are owned by this widget/element. Other objects inside the ChiliPeppr environment can publish to these signals via the chilipeppr.publish(signal, data) method. 
 To better understand how ChiliPeppr's publish() method works see amplify.js's documentation at http://amplifyjs.com/api/pubsub/
 
-| Signal | Description |
-| ------ | ----------- |
-$widget-subscribe
+  <table id="com-chilipeppr-elem-pubsubviewer-sub" class="table table-bordered table-striped">
+      <thead>
+          <tr>
+              <th style="">Signal</th>
+              <th style="">Description</th>
+          </tr>
+      </thead>
+      <tbody>
+      $row-subscribe-start    
+      <tr valign="top"><td colspan="2">(No signals defined in this widget/element)</td></tr>
+      $row-subscribe-end    
+      </tbody>
+  </table>
 
 ## Foreign Publish
 
 This widget/element publishes to the following signals that are owned by other objects. 
 To better understand how ChiliPeppr's subscribe() method works see amplify.js's documentation at http://amplifyjs.com/api/pubsub/
 
-| Signal | Description |
-| ------ | ----------- |
-$widget-foreignpublish
+  <table id="com-chilipeppr-elem-pubsubviewer-foreignpub" class="table table-bordered table-striped">
+      <thead>
+          <tr>
+              <th style="">Signal</th>
+              <th style="">Description</th>
+          </tr>
+      </thead>
+      <tbody>
+      $row-foreign-publish-start    
+      <tr><td colspan="2">(No signals defined in this widget/element)</td></tr>
+      $row-foreign-publish-end    
+      </tbody>
+  </table>
 
 ## Foreign Subscribe
 
 This widget/element publishes to the following signals that are owned by other objects.
 To better understand how ChiliPeppr's publish() method works see amplify.js's documentation at http://amplifyjs.com/api/pubsub/
 
-| Signal | Description |
-| ------ | ----------- |
-$widget-foreignsubscribe
+  <table id="com-chilipeppr-elem-pubsubviewer-foreignsub" class="table table-bordered table-striped">
+      <thead>
+          <tr>
+              <th style="">Signal</th>
+              <th style="">Description</th>
+          </tr>
+      </thead>
+      <tbody>
+      $row-foreign-subscribe-start    
+      <tr><td colspan="2">(No signals defined in this widget/element)</td></tr>
+      $row-foreign-subscribe-end    
+      </tbody>
+  </table>
 
 ## Methods / Properties
 
 The table below shows, in order, the methods and properties inside the widget/element.
 
-| Item                  | Type          | Description |
-| -------------         | ------------- | ----------- |
-$widget-methprops
+  <table id="com-chilipeppr-elem-methodsprops" class="table table-bordered table-striped">
+      <thead>
+          <tr>
+              <th style="">Method / Property</th>
+              <th>Type</th>
+              <th style="">Description</th>
+          </tr>
+      </thead>
+      <tbody>
+      $row-methods-start
+      <tr><td colspan="2">(No methods or properties defined in this widget/element)</td></tr>
+      $row-methods-end
+      </tbody>
+  </table>
+
 
 ## About ChiliPeppr
 
@@ -473,8 +529,6 @@ ChiliPeppr's Serial Port JSON Server is the basis for the
 [Arduino's new web IDE](https://create.arduino.cc/). If the Arduino team is excited about building on top
 of ChiliPeppr, what
 will you build on top of it?
-
-
 
 `
 
@@ -508,6 +562,7 @@ will you build on top of it?
   }
   md = md.replace(/\$widget-img/g, img);
 
+  /*
   // now generate methods/properties
   //$widget-methprops
   var s = "";
@@ -533,7 +588,36 @@ will you build on top of it?
   md = md.replace(/\$widget-foreignpublish/, s);
   s = appendKeyValForMarkdown(widget.foreignSubscribe);
   md = md.replace(/\$widget-foreignsubscribe/, s);
+  */
+  
+    // do the properties and methods
+  var s = "";
+  for (var key in widget) {
+    var txt = widgetDocs[key].descHtml + '';
+    // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
+    txt = txt.replace(/<\/pre>[\s\r\n]*/ig, "</pre>");
+    // convert double newlines to <br><br> tags
+    txt = txt.replace(/\n\s*\n\s*/g, "<br><br>");
 
+    var obj = widget[key];
+    s += '<tr valign="top"><td>' + key +
+      '</td><td>' + typeof obj +
+      '</td><td>';
+    s += txt;
+    s += '</td></tr>';
+  }
+  md = md.replace(/\$row-methods-start[\s\S]+?\$row-methods-end/g, s);
+
+  // now do pubsub signals
+  var s;
+  s = appendKeyVal(widget.publish);
+  md = md.replace(/\$row-publish-start[\s\S]+?\$row-publish-end/, s);
+  s = appendKeyVal(widget.subscribe);
+  md = md.replace(/\$row-subscribe-start[\s\S]+?\$row-subscribe-end/g, s);
+  s = appendKeyVal(widget.foreignPublish);
+  md = md.replace(/\$row-foreign-publish-start[\s\S]+?\$row-foreign-publish-end/, s);
+  s = appendKeyVal(widget.foreignSubscribe);
+  md = md.replace(/\$row-foreign-subscribe-start[\s\S]+?\$row-foreign-subscribe-end/g, s);
 
   // now write out the auto-gen file
   fs.writeFileSync("README.md", md);
@@ -658,6 +742,8 @@ var generateWidgetDocs = function() {
     </head>
     <body style="padding:20px;">
     
+      <!-- pre-notes -->
+      
       <button class="btn btn-xs btn-default btn-pushtogithub">Push to Github</button>
       <button class="btn btn-xs btn-default btn-pullfromgithub">Pull from Github</button>
       <button class="btn btn-xs btn-default btn-mergetemplate">Merge the ChiliPeppr Template to this Repo</button>
@@ -727,7 +813,7 @@ var generateWidgetDocs = function() {
   this widget inside a workspace or from another widget. The key is that
   you need to load your widget inlined into a div so the DOM can parse
   your HTML, CSS, and Javascript. Then you use cprequire() to find
-  your widget's Javascript and get back the instiated instance of it.</p>
+  your widget's Javascript and get back the instantiated instance of it.</p>
   
   <pre><code class="language-js" 
   data-lang="js">$cp-load-stmt</code></pre>
@@ -944,7 +1030,20 @@ var appendKeyVal = function(data, id) {
         
     //var keys = Object.keys(data);
     for (var key in data) {
-      str += '<tr><td>/' + widget.id + "" + key + '</td><td>' + data[key] + '</td></tr>';
+      
+      // clean up the description text
+      var txt = data[key] + '';
+      // get rid of spaces and returns after closing pre tags cuz it messes up github markdown
+      txt = txt.replace(/<\/pre>[\s\r\n]*/ig, "</pre>");
+      // convert double newlines to <br><br> tags
+      txt = txt.replace(/\n\s*\n\s*/g, "<br><br>");
+      
+      str += '<tr valign="top"><td>/' + 
+        widget.id + "" + 
+        key + 
+        '</td><td>' +
+        txt + 
+        '</td></tr>';
     }
   } else {
     str = '<tr><td colspan="2">(No signals defined in this widget/element)</td></tr>';
@@ -1019,18 +1118,10 @@ var pushToGithubSync = function() {
   // git commit -m "Made some changes to ChiliPeppr widget using Cloud9"
   // git push
   var stdout = "";
-  /*
-  stdout += "> git add index.html\n";
-  stdout += '> git commit -m "Made some changes to ChiliPeppr widget using Cloud9"\n';
-  stdout += "> git push origin master:gh-pages\n";
-  */
-  
   stdout += "> git add *\n";
   stdout += '> git commit -m "Made some changes to ChiliPeppr widget using Cloud9"\n';
   stdout += "> git push\n";
-  
-  //stdout += proc.execSync('git add index.html; git commit -m "Made some changes to ChiliPeppr widget using Cloud9"; git push origin master:gh-pages;', { encoding: 'utf8' });
-   stdout += proc.execSync('git add *; git commit -m "Made some changes to ChiliPeppr widget using Cloud9"; git push;', { encoding: 'utf8' });
+  stdout += proc.execSync('git add *; git commit -m "Made some changes to ChiliPeppr widget using Cloud9"; git push;', { encoding: 'utf8' });
   console.log("Pushed to github sync. Stdout:", stdout);
   
   return stdout;
@@ -1078,7 +1169,12 @@ var mergeFromCpTemplateRepo = function() {
   stdout += pushToGithubSync();
   stdout += "> git checkout master\n";
   stdout += "> git pull https://github.com/chilipeppr/widget-template.git\n";
-  stdout += proc.execSync('git checkout master; git pull https://github.com/chilipeppr/widget-template.git', { encoding: 'utf8' });
+  try {
+    stdout += proc.execSync('git checkout master; git pull https://github.com/chilipeppr/widget-template.git', { encoding: 'utf8' });
+  } catch (ex) {
+    console.log("error on merge:", ex);
+    stdout += "Tiny little error on merge.\n";
+  }
   console.log("Pulled from github sync. Stdout:", stdout);
   
   return stdout;
@@ -1107,7 +1203,7 @@ var generateInlinedFile = function() {
 
   // auto fill title if they're asking for it
   if (widget) {
-    var re = /<title><!--\(auto-fill by runme\.js--><\/title>/i;
+    var re = /<title>[\s\r\n]*<!--\(auto-fill by runme\.js-->[\s\r\n]*<\/title>/i;
     if (fileHtml.match(re)) {
     fileHtml = fileHtml.replace(re, "<title>" + widget.name + "</title>");
     console.log("Swapped in title for final HTML page.");
@@ -1138,8 +1234,6 @@ var generateInlinedFile = function() {
   // now write out the auto-gen file
   fs.writeFileSync("auto-generated-widget.html", fileHtml);
   console.log("Updated auto-generated-widget.html");
-  
-  fs.writeFileSync("index.html", fileHtml);
 
 }
 
