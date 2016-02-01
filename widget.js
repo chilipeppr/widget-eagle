@@ -27,7 +27,7 @@ requirejs.config({
        // Don't put .js at end of URL (except when passing thru CP geturl proxy)
         Three: '//i2dcui.appspot.com/geturl?url=http://threejs.org/build/three.min.js',
         ThreeTextGeometry: '//i2dcui.appspot.com/js/three/TextGeometry',
-        ThreeFontUtils: '//i2dcui.appspotr.com/js/three/FontUtils',
+        ThreeFontUtils: '//i2dcui.appspot.com/js/three/FontUtils',
         ThreeHelvetiker: '//i2dcui.appspot.com/js/three/threehelvetiker',
         Clipper: '//i2dcui.appspot.com/js/clipper/clipper_unminified'
    },
@@ -3612,7 +3612,8 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
                     var radius = via.drill; //(via.drill * 2) / 2;
                     var segments = 32;
                     if (viashape == "octagon") segments = 8;
-                        
+                    
+                    //maybe add var in front of viaGeo    
                     viaGeo = new THREE.CircleGeometry(radius, segments);                    
                     // Remove center vertex
                     viaGeo.vertices.shift();
@@ -5008,7 +5009,8 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
                 // check that there's a board tag
                 if (data.match(/<board>/i)) {
                     console.log("we have an eagle board file!");
-
+                    this.colorSignal = 9249571;
+                    this.colorSmd = 9249571;
                     localStorage.setItem('com-chilipeppr-widget-eagle-lastDropped', data);
                     localStorage.setItem('com-chilipeppr-widget-eagle-lastDropped-info', JSON.stringify(info));
                     this.fileInfo = info;
