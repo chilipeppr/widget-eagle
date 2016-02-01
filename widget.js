@@ -3692,7 +3692,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var radius = via.drill; //(via.drill * 2) / 2;
                     var segments = 32;
                     if (viashape == "octagon") segments = 8;
-                        
+                    
+                    //maybe add var in front of viaGeo    
                     viaGeo = new THREE.CircleGeometry(radius, segments);                    
                     // Remove center vertex
                     viaGeo.vertices.shift();
@@ -5088,7 +5089,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // check that there's a board tag
                 if (data.match(/<board>/i)) {
                     console.log("we have an eagle board file!");
-
+                    this.colorSignal = 9249571;
+                    this.colorSmd = 9249571;
                     localStorage.setItem('com-chilipeppr-widget-eagle-lastDropped', data);
                     localStorage.setItem('com-chilipeppr-widget-eagle-lastDropped-info', JSON.stringify(info));
                     this.fileInfo = info;
