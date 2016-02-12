@@ -345,12 +345,31 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
             
             this.setupLayerToggleDropdown();
             
+            this.setupBoardMirrorCheckboxes();
+            
 
             console.log(this.name + " done loading.");
         },
+        setupBoardMirrorCheckboxes: function() {
+            $('#com-chilipeppr-widget-eagle .mirrorLayerY').change(this.onChangeMirrorLayerYCheckbox.bind(this));
+            $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked", false);
+            
+        },
+        onChangeMirrorLayerYCheckbox: function() {
+            this.flipTheBoard = $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked");
+            
+            //console.log ("Flip Bottom Layer About Y Axis: " + $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked") );
+            console.log ("Flip Bottom Layer About Y Axis: " + this.flipTheBoard );
+            
+            this.clearEagleBrd();
+            this.draw3d();
+            
+        },
+        
+        
         setupLayerToggleDropdown: function() {
         	$('#com-chilipeppr-widget-eagle .selectLayer').change(this.onChangeLayerToggleDropdown.bind(this));
-          console.log("r0:  ");
+          //console.log("r0:  ");
         },
         populateLayerToggleDropdown: function(){
         	var selectLayerDropdown = $('#com-chilipeppr-widget-eagle .selectLayer');
@@ -426,6 +445,9 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
                     that.colorSignal = 11403055;
                     that.colorSmd = 11403055;
                 }
+                
+                $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked", false);
+                this.flipTheBoard = false;
 
                 this.clearEagleBrd();
                 this.draw3d();
@@ -449,7 +471,7 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
           });
           */
         },
-        flipTheBoard: true, //ray temporary hardcode, later bind to user input
+        flipTheBoard: false, //ray temporary hardcode, later bind to user input
         //placeholder, also need to hold which direction to flip board in.  coming soon.
         boardFlipAxis: null,
         
@@ -5951,10 +5973,16 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
                         </select>
                     </div>
                     
-                    <div>
+                    <!--<div>
                         Mirror This Layer: 
                         
-                    </div>
+                    </div>-->
+                    
+                    <div class="checkbox">
+                            <label>
+                                <input type="checkbox" class="mirrorLayerY" checked />Mirror this layer (Bottom only, highly experimental) 
+                            </label>
+                        </div>
 
                     <div class="form-group">
                         Inflate Milling Path By
