@@ -279,12 +279,31 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             
             this.setupLayerToggleDropdown();
             
+            this.setupBoardMirrorCheckboxes();
+            
 
             console.log(this.name + " done loading.");
         },
+        setupBoardMirrorCheckboxes: function() {
+            $('#com-chilipeppr-widget-eagle .mirrorLayerY').change(this.onChangeMirrorLayerYCheckbox.bind(this));
+            $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked", false);
+            
+        },
+        onChangeMirrorLayerYCheckbox: function() {
+            this.flipTheBoard = $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked");
+            
+            //console.log ("Flip Bottom Layer About Y Axis: " + $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked") );
+            console.log ("Flip Bottom Layer About Y Axis: " + this.flipTheBoard );
+            
+            this.clearEagleBrd();
+            this.draw3d();
+            
+        },
+        
+        
         setupLayerToggleDropdown: function() {
         	$('#com-chilipeppr-widget-eagle .selectLayer').change(this.onChangeLayerToggleDropdown.bind(this));
-          console.log("r0:  ");
+          //console.log("r0:  ");
         },
         populateLayerToggleDropdown: function(){
         	var selectLayerDropdown = $('#com-chilipeppr-widget-eagle .selectLayer');
@@ -360,6 +379,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     that.colorSignal = 11403055;
                     that.colorSmd = 11403055;
                 }
+                
+                $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked", false);
+                this.flipTheBoard = false;
 
                 this.clearEagleBrd();
                 this.draw3d();
@@ -383,7 +405,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
           });
           */
         },
-        flipTheBoard: true, //ray temporary hardcode, later bind to user input
+        flipTheBoard: false, //ray temporary hardcode, later bind to user input
         //placeholder, also need to hold which direction to flip board in.  coming soon.
         boardFlipAxis: null,
         
@@ -3692,7 +3714,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var radius = via.drill; //(via.drill * 2) / 2;
                     var segments = 32;
                     if (viashape == "octagon") segments = 8;
-                        
+                    
+                    //maybe add var in front of viaGeo    
                     viaGeo = new THREE.CircleGeometry(radius, segments);                    
                     // Remove center vertex
                     viaGeo.vertices.shift();
@@ -5088,7 +5111,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // check that there's a board tag
                 if (data.match(/<board>/i)) {
                     console.log("we have an eagle board file!");
-
+                    this.colorSignal = 9249571;
+                    this.colorSmd = 9249571;
                     localStorage.setItem('com-chilipeppr-widget-eagle-lastDropped', data);
                     localStorage.setItem('com-chilipeppr-widget-eagle-lastDropped-info', JSON.stringify(info));
                     this.fileInfo = info;
