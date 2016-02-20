@@ -149,7 +149,7 @@ chilipeppr.subscribe(
     "/com-chilipeppr-widget-eagle/addGcode", 
     this, 
     this.myOnAddGcode
-);
+    );
 </pre>
 
             Then, your callback would look like this with 4 parameters receiving the variables 
@@ -5613,7 +5613,7 @@ EagleCanvas.prototype.parse = function () {
             'pads': packagePads,
             'smds': packageSmds,
             'wires': packageWires,
-                'texts': packageTexts,
+            'texts': packageTexts,
             'bbox': bbox,
             'name' : packageName
         };
