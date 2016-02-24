@@ -4132,7 +4132,7 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
                     });
                     //lineMat.side = THREE.DoubleSided;
                     var holes = [];
-                    var triangles = THREE.ShapeUtils.triangulateShape(lineGeo.vertices, holes);
+                    var triangles = THREE.ShapeUtils.triangulateShape(lineGeo.vertices, holes); //changed Shape.Utils to ShapeUtils
 
                     for (var i = 0; i < triangles.length; i++) {
 
