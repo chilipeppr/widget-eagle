@@ -4212,7 +4212,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     });
                     //lineMat.side = THREE.DoubleSided;
                     var holes = [];
-                    var triangles = THREE.Shape.Utils.triangulateShape(lineGeo.vertices, holes);
+                    var triangles = THREE.ShapeUtils.triangulateShape(lineGeo.vertices, holes); //changed Shape.Utils to ShapeUtils per new Three revision
 
                     for (var i = 0; i < triangles.length; i++) {
 
