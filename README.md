@@ -14,10 +14,10 @@ not conflict with other ChiliPeppr widgets.
 | ID                    | com-chilipeppr-widget-eagle |
 | Name                  | Widget / Eagle BRD v4 |
 | Description           | This widget lets you drag in an Eagle PCB ".brd" file to mill. |
-| chilipeppr.load() URL | http://raw.githubusercontent.com/chilipeppr/widget-eagle/master/auto-generated-widget.html |
-| Edit URL              | http://ide.c9.io/chilipeppr/widget-eagle |
-| Github URL            | http://github.com/chilipeppr/widget-eagle |
-| Test URL              | https://preview.c9users.io/chilipeppr/widget-eagle/widget.html |
+| chilipeppr.load() URL | http://raw.githubusercontent.com/Tegeon/widget-eagle/master/auto-generated-widget.html |
+| Edit URL              | http://ide.c9.io/tegeon/widget-eagle |
+| Github URL            | http://github.com/Tegeon/widget-eagle |
+| Test URL              | https://preview.c9users.io/tegeon/widget-eagle/widget.html |
 
 ## Example Code for chilipeppr.load() Statement
 
@@ -33,7 +33,7 @@ $("body").append('<' + 'div id="myDivWidgetEagle"><' + '/div>');
 
 chilipeppr.load(
   "#myDivWidgetEagle",
-  "http://raw.githubusercontent.com/chilipeppr/widget-eagle/master/auto-generated-widget.html",
+  "http://raw.githubusercontent.com/Tegeon/widget-eagle/master/auto-generated-widget.html",
   function() {
     // Callback after widget loaded into #myDivWidgetEagle
     // Now use require.js to get reference to instantiated widget
@@ -174,7 +174,7 @@ The table below shows, in order, the methods and properties inside the widget/el
           </tr>
       </thead>
       <tbody>
-      <tr valign="top"><td>id</td><td>string</td><td>"com-chilipeppr-widget-eagle"<br><br>The ID of the widget. You must define this and make it unique.</td></tr><tr valign="top"><td>name</td><td>string</td><td>"Widget / Eagle BRD v4"</td></tr><tr valign="top"><td>desc</td><td>string</td><td>"This widget lets you drag in an Eagle PCB \".brd\" file to mill."</td></tr><tr valign="top"><td>url</td><td>string</td><td>"http://raw.githubusercontent.com/chilipeppr/widget-eagle/master/auto-generated-widget.html"</td></tr><tr valign="top"><td>fiddleurl</td><td>string</td><td>"http://ide.c9.io/chilipeppr/widget-eagle"</td></tr><tr valign="top"><td>githuburl</td><td>string</td><td>"http://github.com/chilipeppr/widget-eagle"</td></tr><tr valign="top"><td>testurl</td><td>string</td><td>"http://widget-eagle-chilipeppr.c9users.io/widget.html"</td></tr><tr valign="top"><td>publish</td><td>object</td><td>Please see docs above.<br><br>Define the publish signals that this widget/element owns or defines so that
+      <tr valign="top"><td>id</td><td>string</td><td>"com-chilipeppr-widget-eagle"<br><br>The ID of the widget. You must define this and make it unique.</td></tr><tr valign="top"><td>name</td><td>string</td><td>"Widget / Eagle BRD v4"</td></tr><tr valign="top"><td>desc</td><td>string</td><td>"This widget lets you drag in an Eagle PCB \".brd\" file to mill."</td></tr><tr valign="top"><td>url</td><td>string</td><td>"http://raw.githubusercontent.com/Tegeon/widget-eagle/master/auto-generated-widget.html"</td></tr><tr valign="top"><td>fiddleurl</td><td>string</td><td>"http://ide.c9.io/tegeon/widget-eagle"</td></tr><tr valign="top"><td>githuburl</td><td>string</td><td>"http://github.com/Tegeon/widget-eagle"</td></tr><tr valign="top"><td>testurl</td><td>string</td><td>"http://widget-eagle-tegeon.c9users.io/widget.html"</td></tr><tr valign="top"><td>publish</td><td>object</td><td>Please see docs above.<br><br>Define the publish signals that this widget/element owns or defines so that
 other widgets know how to subscribe to them and what they do.</td></tr><tr valign="top"><td>subscribe</td><td>object</td><td>Please see docs above.<br><br>Define the subscribe signals that this widget/element owns or defines so that
 other widgets know how to subscribe to them and what they do.</td></tr><tr valign="top"><td>foreignPublish</td><td>object</td><td>Please see docs above.<br><br>Document the foreign publish signals, i.e. signals owned by other widgets
 or elements, that this widget/element publishes to.</td></tr><tr valign="top"><td>foreignSubscribe</td><td>object</td><td>Please see docs above.<br><br>Document the foreign subscribe signals, i.e. signals owned by other widgets
