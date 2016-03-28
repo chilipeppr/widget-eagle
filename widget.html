@@ -205,7 +205,17 @@
                     <button type="button" class="btn btn-xs btn-default btn-eagle-sendgcodetows" 
                     style="margin: 4px 0;" disabled><span class="glyphicon glyphicon-send"></span> Send Gcode to Workspace</button>
 
-                    <h2 style="margin-top:10px;">Traces</h2> Depth of Milling Traces
+                    <h2 style="margin-top:10px;">Traces</h2> 
+                    
+                    Spindle Speed
+                    <div class="input-group">
+                        <input class="form-control spindle-rpm" type="number" placeholder="" value="12000" />
+                        <div class="input-group-addon">rpm</div>
+                    </div>
+                    <p class="descriptive-text">Spindle speed (rpm) value will be used for a whole job. If you need various speeds for different parts of the job e.g. milling traces, drilling, milling board outline, please edit the gcode file manually and replace S12000 with Sxxxx, where xxxx = your new spindle speed value.
+                    </p>
+                    
+                    Depth of Milling Traces
                     <div class="input-group">
                         <input class="form-control trace-depth" type="number" placeholder="Depth" value="-0.1" />
                         <div class="input-group-addon">mm</div>
