@@ -1003,7 +1003,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             g += "G21 (mm mode)\n";
             g += "G90 (abs mode)\n";
             g += "M3 S" + this.spindleRPM + " (spindle on)\n";
-            g += "TO M6 (set tool)\n"
+            g += "T0 M6 (set tool)\n"
             return g;
         },
         exportGcodeMilling:function(){

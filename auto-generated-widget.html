@@ -1128,7 +1128,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             g += "G21 (mm mode)\n";
             g += "G90 (abs mode)\n";
             g += "M3 S" + this.spindleRPM + " (spindle on)\n";
-            g += "TO M6 (set tool)\n"
+            g += "T0 M6 (set tool)\n"
             return g;
         },
         exportGcodeMilling:function(){
@@ -6094,12 +6094,16 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
                             1 oz = 0.035mm, 2 oz = 0.07mm, 3 oz = 0.105mm thick. If you use ChiliPeppr's Auto-Level, you could safely mill with depths of 1 oz = 0.07mm, 2 oz = 0.1mm (most popular), 3 oz = 0.15mm. That means a V-bit with a 45&deg; angle
                             at 0.1mm depth will have a diameter of roughly 0.1mm. So, you could use 0.05mm above, however, in practice it would be best to inflate further than that to be safe.</p>
                     </div>
+                    
                     Advanced Inflating
+                    <p class="descriptive-text">Instead of using the default inflate value, you can override
+                    inflate values for specific elements on the board.</p>
+                    
                     <div class="panel eagle-advanced" style="margin-bottom:10px;">
 
                         <div class="checkbox">
                             <label>
-                                <input type="checkbox" class="use-inflate-smds-by" checked /> Inflate SMDs By
+                                <input type="checkbox" class="use-inflate-smds-by" xchecked /> Inflate SMDs By
                             </label>
                         </div>
                         <div class="input-group">
@@ -6185,14 +6189,6 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
 
                     <h2 style="margin-top:10px;">Traces</h2> 
                     
-                    Spindle Speed
-                    <div class="input-group">
-                        <input class="form-control spindle-rpm" type="number" placeholder="" value="12000" />
-                        <div class="input-group-addon">rpm</div>
-                    </div>
-                    <p class="descriptive-text">Spindle speed (rpm) value will be used for a whole job. If you need various speeds for different parts of the job e.g. milling traces, drilling, milling board outline, please edit the gcode file manually and replace S12000 with Sxxxx, where xxxx = your new spindle speed value.
-                    </p>
-                    
                     Depth of Milling Traces
                     <div class="input-group">
                         <input class="form-control trace-depth" type="number" placeholder="Depth" value="-0.1" />
@@ -6220,6 +6216,14 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
                         <div class="input-group-addon">mm/min</div>
                     </div>
                     <p class="descriptive-text">The feedrate to use when the Z is descending into your copper. Default is 30mm/min.
+                    </p>
+                    
+                    Spindle Speed
+                    <div class="input-group">
+                        <input class="form-control spindle-rpm" type="number" placeholder="" value="12000" />
+                        <div class="input-group-addon">rpm</div>
+                    </div>
+                    <p class="descriptive-text">Spindle speed (rpm) value will be used for a whole job. If you need various speeds for different parts of the job e.g. milling traces, drilling, milling board outline, please edit the gcode file manually and replace S12000 with Sxxxx, where xxxx = your new spindle speed value.
                     </p>
 
                     <h2>Clearance Height</h2> Clearance for Z Axis Moves
