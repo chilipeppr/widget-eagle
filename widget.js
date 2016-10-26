@@ -26,7 +26,7 @@ requirejs.config({
    paths: {
        // Don't put .js at end of URL (except when passing thru CP geturl proxy)
         // Three: '//i2dcui.appspot.com/geturl?url=http://threejs.org/build/three.min.js',
-        Three: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three',
+        Three: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r77/three',
         ThreeTextGeometry: '//i2dcui.appspot.com/js/three/TextGeometry',
         ThreeFontUtils: '//i2dcui.appspot.com/js/three/FontUtils',
         ThreeHelvetiker: '//i2dcui.appspot.com/js/three/threehelvetiker',
