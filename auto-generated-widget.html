@@ -588,6 +588,18 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 console.log("evt:", evt);
                 that.clearanceHeight = evt.currentTarget.valueAsNumber;
             });
+            el.find('.drill-useboarddepth').change(function(evt) {
+                console.log("evt:", evt);
+                var elem = $('#com-chilipeppr-widget-eagle .drill-depth');
+                if(elem.prop('disabled')){
+                    elem.prop('disabled', false);
+                    elem.val(that.drillDepth);
+                }else{
+                    elem.prop('disabled', true);
+                    elem.val(that.depthOfDimensions);
+                    that.drillDepth = elem.val();
+                }
+            });
             el.find('.drill-feedrate').change(function(evt) {
                 console.log("evt:", evt);
                 if(evt.currentTarget.valueAsNumber) // arrow buttons send 2 events
@@ -2090,7 +2102,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // here. Or, better yet let's get a more generic way of letting 3rd
             // party add-ons add stuff
             
-                        // Step 4. We now have a gorgeous clipperBySignalKey with polys that are
+            // Step 4. We now have a gorgeous clipperBySignalKey with polys that are
             // correct with all stuff removed. We have wires, pads, smds, vias.
             // We now need to union each signal to one final master union path.
             // Then we'll render those paths.
@@ -2146,7 +2158,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             
             // Step 5.
             // Now we should have a full signal path for each signal where we
-            // have wires,smds,pads, and vias as well as the polygons where the
+            // have wires, smds, pads, and vias as well as the polygons where the
             // polygon is cutout cleanly to represent what you would see in Eagle
             
             // Let's do an additional step and remove redundant lines so that we don't end
@@ -2847,7 +2859,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         // have found this to be one of the nicest parts of the Eagle BRD Import
         // to visualize the Eagle BRD better than what Eagle lets us do
         
-                raycaster: null,
+        raycaster: null,
         projector: null, // = new THREE.Projector();
         arrowHelper: null,
         intersectObjects: [], // contains three.js objects that we want to detect on mouse movement in the 3d viewer
@@ -5431,15 +5443,15 @@ var p = function (o) {
 
 EagleCanvas.LayerId = {
     'BOTTOM_COPPER': 1,
-        'BOTTOM_SILKSCREEN': 2,
-        'BOTTOM_DOCUMENTATION': 3,
-        'DIM_BOARD': 4,
-        'TOP_COPPER': 5,
-        'TOP_SILKSCREEN': 6,
-        'TOP_DOCUMENTATION': 7,
-        'VIAS': 8,
-        'OUTLINE': 9,
-        'PADS': 10
+    'BOTTOM_SILKSCREEN': 2,
+    'BOTTOM_DOCUMENTATION': 3,
+    'DIM_BOARD': 4,
+    'TOP_COPPER': 5,
+    'TOP_SILKSCREEN': 6,
+    'TOP_DOCUMENTATION': 7,
+    'VIAS': 8,
+    'OUTLINE': 9,
+    'PADS': 10
 }
 
 EagleCanvas.LARGE_NUMBER = 99999;
