@@ -6862,17 +6862,17 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
         <div class="panel-body">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
-                <li xclass="active"><a href="#eagle-main" role="tab" data-toggle="tab">Render</a>
+                <li class="active"><a href="#eagle-main" role="tab" data-toggle="tab">Render</a>
                 </li>
                 <li xclass="active"><a href="#eagle-gcode" role="tab" data-toggle="tab">Gcode</a></li>
-                <li class="active"><a href="#eagle-soldermask" role="tab" data-toggle="tab">Solder Mask</a>
+                <li xclass="active"><a href="#eagle-soldermask" role="tab" data-toggle="tab">Solder Mask</a>
                 </li>
                 <li ><a href="#eagle-tutorial" role="tab" data-toggle="tab">Tutorial</a>
                 </li>
             </ul>
             <!-- Tab panes -->
             <div class="tab-content">
-                <div class="tab-pane xactive" id="eagle-main">
+                <div class="tab-pane active" id="eagle-main">
                     <div class="eagle-draghere">Drag your Eagle BRD file here...</div>
                     <!-- <p>Best Endmill Size to Use <code><span class="best-size highlight"><i>Undetermined</i></span></code></p> -->
                     <div class="panel-eagle-sendgcodetows">
@@ -7139,7 +7139,7 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
                     <textarea class="com-chilipeppr-widget-eagle-gcode"></textarea>
                 </div>
                 
-                <div class="tab-pane active" id="eagle-soldermask">
+                <div class="tab-pane xactive" id="eagle-soldermask">
                     <p>Use these tools to  
                     to reveal or cut out pads/smds for soldering.</p>
                     
