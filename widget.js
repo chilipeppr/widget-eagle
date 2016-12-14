@@ -5980,7 +5980,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     if (!that.isVidLoaded) {
                         console.log("lazy loading vid cuz not loaded");
                         that.isVidLoaded = true;
-                        $('#eagle-tutorial').html('<iframe style="width:100%;" class="" src="//www.youtube.com/embed/T2h7hagVfnA" frameborder="0" allowfullscreen></iframe>');
+                        $('#eagle-tutorial').html('<iframe style="width:100%;" class="" src="//www.youtube.com/embed/DX0xGgSARj4" frameborder="0" allowfullscreen></iframe>');
                     }
                 }
                 //e.relatedTarget // previous tab
