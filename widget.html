@@ -62,21 +62,23 @@
                     </div>
                 </div>
             </div> <span class="panel-title" data-toggle="popover">Eagle BRD</span> <span 
-            style="font-size:9px;" class="fb-build">v4</span>
+            style="font-size:9px;" class="fb-build">v5</span>
 
         </div>
         <div class="panel-body">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
-                <li class="active"><a href="#eagle-main" role="tab" data-toggle="tab">Render</a>
+                <li xclass="active"><a href="#eagle-main" role="tab" data-toggle="tab">Render</a>
                 </li>
                 <li xclass="active"><a href="#eagle-gcode" role="tab" data-toggle="tab">Gcode</a></li>
-                <!-- <li><a href="#eagle-tutorial" role="tab" data-toggle="tab">Tutorial</a>
-            </li> -->
+                <li class="active"><a href="#eagle-soldermask" role="tab" data-toggle="tab">Solder Mask</a>
+                </li>
+                <li ><a href="#eagle-tutorial" role="tab" data-toggle="tab">Tutorial</a>
+                </li>
             </ul>
             <!-- Tab panes -->
             <div class="tab-content">
-                <div class="tab-pane active" id="eagle-main">
+                <div class="tab-pane xactive" id="eagle-main">
                     <div class="eagle-draghere">Drag your Eagle BRD file here...</div>
                     <!-- <p>Best Endmill Size to Use <code><span class="best-size highlight"><i>Undetermined</i></span></code></p> -->
                     <div class="panel-eagle-sendgcodetows">
@@ -168,7 +170,7 @@
                     </div>
 
                     <div class="form-group">
-                        Show Actual Endmill Path
+                        Show Actual End Mill Path
                         <div class="checkbox">
                             <label>
                                 <input type="checkbox" class="show-actual" xchecked /> Show (Takes long to process)
@@ -342,10 +344,208 @@
                     Generated Gcode
                     <textarea class="com-chilipeppr-widget-eagle-gcode"></textarea>
                 </div>
-                <div class="tab-pane" id="eagle-tutorial">
+                
+                <div class="tab-pane active" id="eagle-soldermask">
+                    <p>Use these tools to  
+                    to reveal or cut out pads/smds for soldering.</p>
+                    
+                    <h2>Mask Reveal</h2>
+                    
+                    <p style="font-size:10px;">This approach assumes you have painted, rolled, glued, or stuck on a solder mask and you want to laser 
+                    etch or mill away the solder pads and smd pads. This can work with paint or rolled 
+                    on solder mask. Some people use Dynamask, which is a gel film you laminate on with a hot roller. Some
+                    people use vinyl and then cut out the pads, then paint. Laser etching the mask can work because copper is highly reflective 
+                    and thus lasers won't effect it, while burning away the paint. Milling is possible, but 
+                    you need to be massively accurate on your Z depth to not mill away the copper and only mill 
+                    the mask ink. Auto-levelling is highly suggested before mask if milling.</p>
+                    
+                    <div style="padding-bottom:10px;">
+                        <button class="btn xbtn-xs btn-default com-chilipeppr-widget-eagle-soldermask-render">Render</button>
+                    </div>
+                    
+                    Show Actual Laser / End Mill Path
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-show" class="com-chilipeppr-widget-eagle-soldermask-showAsLine" xchecked /> 
+                            As Path Line
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-show" class="com-chilipeppr-widget-eagle-soldermask-showAsMesh" checked /> 
+                            As Solid Line (Slow)</input>
+                        </label>
+                    </div>
+                    
+                    Laser / Mill Full Pad or Outline
+                    <div class="radio" style="padding-top:10px;">
+                        <label>
+                            <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-fullOrOutline" class="com-chilipeppr-widget-eagle-soldermask-full" checked /> 
+                            Full Pad</input>
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-fullOrOutline" class="com-chilipeppr-widget-eagle-soldermask-outline" xchecked /> 
+                            Outline Only
+                        </label>
+                    </div>
+                    <div class="com-chilipeppr-widget-eagle-soldermask-outlineRegion hidden">
+                    <div class="radio" style="margin-left:20px;">
+                        <label>
+                            <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-outlineStyle" class="com-chilipeppr-widget-eagle-soldermask-outlineOutside eagle-soldermask-regen-onrender-click" checked /> 
+                            Outside Pad Outline</input>
+                        </label>
+                    </div>
+                    <div class="radio" style="margin-left:20px;">
+                        <label>
+                            <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-outlineStyle" class="com-chilipeppr-widget-eagle-soldermask-outlineOn eagle-soldermask-regen-onrender-click" xchecked /> 
+                            On Pad Outline</input>
+                        </label>
+                    </div>
+                    <div class="radio" style="margin-left:20px;">
+                        <label>
+                            <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-outlineStyle" class="com-chilipeppr-widget-eagle-soldermask-outlineInside eagle-soldermask-regen-onrender-click" xchecked /> 
+                            Inside Pad Outline</input>
+                        </label>
+                    </div>
+                    </div>
+                    
+                    Diameter of laser point or end mill
+                    <div class="alert alert-danger hidden eagle-soldermask-alert" style="margin-bottom:5px;">Some of your pads/smds could not get a path rendered because your laser point or end mill diameter is too wide.</div>
+                    <div class="input-group">
+                        <input class="form-control eagle-soldermask-regen-onrender com-chilipeppr-widget-soldermask-laser-width" type="number" placeholder="Width of laser point" value="0.2" step="0.1"  />
+                        <div class="input-group-addon">mm</div>
+                    </div>
+                    
+                    <div class="com-chilipeppr-widget-soldermask-laser-overlapRegion">
+                    Overlap of paths
+                    <div class="input-group">
+                        <input class="form-control eagle-soldermask-regen-onrender com-chilipeppr-widget-soldermask-laser-overlap" type="number" min="0" max="100" placeholder="Overlap %'age" value="20" step="1" />
+                        <div class="input-group-addon">%</div>
+                    </div>
+                    </div>
+                    
+                    <div class="form-group" style="padding-top:10px;">
+                        <p style="margin-bottom:0">Mode</p>
+                        <div>
+                            <label class="radio-inline">
+                                <input class="eagle-soldermask-modetype eagle-soldermask-regen-onchange" type="radio" name="com-chilipeppr-widget-eagle-soldermask-mode" value="laser" checked=""> Laser
+                            </label>
+                            <div class="form-group eagle-soldermask-mode-laser" style="padding-left:20px;margin-bottom:0">
+                                <p style="margin-bottom:0;font-size:11px;">Turn Laser On With</p>
+                                <label class="radio-inline">
+                                    <input class="eagle-soldermask-modetype eagle-soldermask-regen-onchange" type="radio" name="com-chilipeppr-widget-eagle-soldermask-laseron" value="M3" xchecked="">
+                                    M3 (Spindle)
+                                </label><br>
+                                <label class="radio-inline">
+                                    <input class="eagle-soldermask-modetype eagle-soldermask-regen-onchange" type="radio" name="com-chilipeppr-widget-eagle-soldermask-laseron" value="M7" checked> 
+                                    M8 (Coolant)
+                                </label><br>
+                                <label class="radio-inline">
+                                    <input class="eagle-soldermask-modetype eagle-soldermask-regen-onchange" type="radio" name="com-chilipeppr-widget-eagle-soldermask-laseron" value="outN"> 
+                                    OutN (TinyG G2)
+                                </label><br>
+                                <label class="radio-inline">
+                                    <input class="eagle-soldermask-modetype eagle-soldermask-regen-onchange" type="radio" name="com-chilipeppr-widget-eagle-soldermask-laseron" value="cayenn"> 
+                                    Cayenn Command
+                                </label>
+                                
+                                <div class="eagle-soldermask-modeoutN hidden">
+                                    <p style="margin-top:3px;margin-bottom:0;font-size:11px;">Which TinyG G2 Output Port?</p>
+                                    <select  class="form-control">
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                    <option>6</option>
+                                    <option>7</option>
+                                    <option>8</option>
+                                    <option>9</option>
+                                    </select>
+                                    <p style="margin-top:3px;margin-bottom:0;font-size:11px;">
+                                        TinyG G2 core supports generic GPIO. Laser on puts the port HIGH. Laser off is LOW.
+                                    </p>
+                                </div>
+                                
+                                <div class="eagle-soldermask-modecayenn hidden">
+                                    <p style="margin-top:3px;margin-bottom:0;font-size:11px;">Pre-Run Command (Start of Gcode)</p>
+                                    <input type="text" class="form-control eagle-soldermask-regen-onblur eagle-soldermask-input-cayenn-pre" value="{CayennDevice:&quot;Laser6W&quot;,Cmd:&quot;LaserBoot&quot;,PauseAfter:2}" placeholder="Enter Cayenn pre-run cmd">
+                                    <p style="margin-top:3px;margin-bottom:0;font-size:11px;">Laser On Command</p>
+                                    <input type="text" class="form-control eagle-soldermask-regen-onblur eagle-soldermask-input-cayenn-on" value="{Cmd:&quot;PwmOn&quot;,Hz:1000,Duty:1023}" placeholder="Enter Cayenn on cmd">
+                                    <p style="margin-top:3px;margin-bottom:0;font-size:11px;">Laser Off Command</p>
+                                    <input type="text" class="form-control eagle-soldermask-regen-onblur eagle-soldermask-input-cayenn-off" value="{Cmd:&quot;PwmOff&quot;}" placeholder="Enter Cayenn off cmd">
+                                    <p style="margin-top:3px;margin-bottom:0;font-size:11px;">Post-Run Command (End of Gcode)</p>
+                                    <input type="text" class="form-control eagle-soldermask-regen-onblur eagle-soldermask-input-cayenn-post" value="{Cmd:&quot;LaserShutdown&quot;}" placeholder="Enter Cayenn post-run cmd">
+                                    <p style="margin-top:3px;margin-bottom:0;font-size:11px;">
+                                        View the Cayenn widget to see what commands are available for your
+                                        laser Cayenn device.
+                                    </p>
+                                </div>
+
+                                <div class="eagle-soldermask-modem3 hidden">
+                                    <p style="margin-top:3px;margin-bottom:0;font-size:11px;">S Value (M3 PWM Spindle Speed)</p>
+                                    <div class="input-group">
+                                        <input type="number" min="0" step="1" class="form-control eagle-soldermask-regen-onblur eagle-soldermask-input-svalue" value="1" placeholder="Enter S value">
+                                        <div class="input-group-addon">mm</div>
+                                    </div>
+                                    <p style="margin-top:3px;margin-bottom:0;font-size:11px;">
+                                        On TinyG enter $p1 to see PWM settings. Set $p1cpl=0, $p1cph=1, $p1csl=0, 
+                                        $p1csh=1, $p1pof=0 then use 
+                                        1 in the box above for 100% power, 0.1 for 10% power, etc.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <label class="radio-inline">
+                            <input class="eagle-soldermask-modetype eagle-soldermask-regen-onchange" type="radio" name="com-chilipeppr-widget-eagle-soldermask-mode" value="mill"> Mill
+                        </label>
+                        <div class="form-group eagle-soldermask-mode-millRegion hidden" style="padding-left:20px;margin-bottom:0">
+                            <p style="margin-bottom:0;font-size:11px;">Clearance Height</p>
+                            <div class="input-group">
+                                <input type="number" step="1" class="form-control eagle-soldermask-regen-onblur eagle-soldermask-input-clearance" value="2" placeholder="Enter clearance height">
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p style="margin-bottom:0;font-size:11px;">Depth of Cut</p>
+                            <div class="input-group">
+                                <input type="number" step="1" class="form-control eagle-soldermask-regen-onblur eagle-soldermask-input-depthcut" value="0" placeholder="Enter depth of cut">
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p style="margin-bottom:0;font-size:11px;">Feedrate of Plunge</p>
+                            <div class="input-group">
+                                <input type="number" step="10" class="form-control eagle-soldermask-regen-onblur eagle-soldermask-input-feedrateplunge" value="30" placeholder="Enter feedrate">
+                                <div class="input-group-addon">mm/min</div>
+                            </div>
+                            <p style="margin-bottom:0;font-size:11px;">Spindle Speed</p>
+                            <div class="input-group">
+                                <input type="number" step="100" class="form-control eagle-soldermask-regen-onblur eagle-soldermask-input-spindle" value="8000" placeholder="Enter spindle speed">
+                                <div class="input-group-addon">rpm</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p style="margin-bottom:0;font-size:11px;">Feedrate of Laser / Mill</p>
+                    <div class="input-group">
+                        <input type="number" step="10" class="form-control eagle-soldermask-regen-onblur eagle-soldermask-input-feedrate" value="30" placeholder="Enter feedrate">
+                        <div class="input-group-addon">mm/min</div>
+                    </div>
+                    <!--<p style="margin-bottom:0;font-size:11px;">Clearance Height</p>-->
+                    <!--<div class="input-group">-->
+                    <!--    <input type="number" step="1" class="form-control eagle-soldermask-input-clearance" value="10" placeholder="Enter clearance height">-->
+                    <!--    <div class="input-group-addon">mm</div>-->
+                    <!--</div>-->
+                    
+                    <p style="margin-top:10px;margin-bottom:2px;">Gcode <span class="eagle-soldermask-regenerate" style="font-size:11px;color:red;">Needs re-generated</span>
+                    <span class="eagle-soldermask-gcode-size-span hidden"><span class="eagle-soldermask-gcode-size" style="font-size:11px;color:blue;">88Kb</span></span></p>
+                    <button style="margin-bottom:4px;" type="button" class="btn btn-default btn-eagle-soldermask-sendgcodetows">Send Gcode to Workspace</button>
+                    <textarea class="form-control eagle-soldermask-gcode" rows="3" spellcheck="false"></textarea>
 
                 </div>
-
+                
+                <div class="tab-pane" id="eagle-tutorial">
+                    <iframe width="100%" xheight="315" src="https://www.youtube.com/embed/DX0xGgSARj4" frameborder="0" allowfullscreen></iframe>
+                </div>
 
             </div>
         </div>
