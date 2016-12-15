@@ -76,6 +76,7 @@
                 <li ><a href="#eagle-tutorial" role="tab" data-toggle="tab">Tutorial</a>
                 </li>
             </ul>
+            
             <!-- Tab panes -->
             <div class="tab-content">
                 <div class="tab-pane active" id="eagle-main">
@@ -349,7 +350,7 @@
                     <p>Use these tools to  
                     to reveal or cut out pads/smds for soldering.</p>
                     
-                    <h2>Mask Reveal</h2>
+                    <!--<h2>Mask Reveal</h2>-->
                     
                     <p style="font-size:10px;">This approach assumes you have painted, rolled, glued, or stuck on a solder mask and you want to laser 
                     etch or mill away the solder pads and smd pads. This can work with paint or rolled 
@@ -359,21 +360,28 @@
                     you need to be massively accurate on your Z depth to not mill away the copper and only mill 
                     the mask ink. Auto-levelling is highly suggested before mask if milling.</p>
                     
-                    <div style="padding-bottom:10px;">
-                        <button class="btn xbtn-xs btn-default com-chilipeppr-widget-eagle-soldermask-render">Render</button>
-                    </div>
+                    <!--<div style="padding-bottom:10px;">-->
+                    <!--    <button class="btn xbtn-xs btn-default com-chilipeppr-widget-eagle-soldermask-render">Render</button>-->
+                    <!--</div>-->
                     
                     Show Actual Laser / End Mill Path
                     <div class="radio">
                         <label>
                             <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-show" class="com-chilipeppr-widget-eagle-soldermask-showAsLine" xchecked /> 
                             As Path Line
+                            <p style="margin-top:0px;margin-bottom:0px;font-size:11px;">
+                            Shows center line of path without width of laser / end mill.
+                            </p>
                         </label>
                     </div>
                     <div class="radio">
                         <label>
                             <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-show" class="com-chilipeppr-widget-eagle-soldermask-showAsMesh" checked /> 
-                            As Solid Line (Slow)</input>
+                            As Solid Line (Slow)
+                            <p style="margin-top:0px;margin-bottom:0px;font-size:11px;">
+                            Shows path with width of laser / end mill.
+                            </p>
+                            </input>
                         </label>
                     </div>
                     
@@ -381,37 +389,92 @@
                     <div class="radio" style="padding-top:10px;">
                         <label>
                             <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-fullOrOutline" class="com-chilipeppr-widget-eagle-soldermask-full" checked /> 
-                            Full Pad</input>
+                            Full Pad
+                            <p style="margin-top:0px;margin-bottom:0px;font-size:11px;">
+                            Best if laser ablating mask over pads.
+                            </p>
                         </label>
                     </div>
                     <div class="radio">
                         <label>
                             <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-fullOrOutline" class="com-chilipeppr-widget-eagle-soldermask-outline" xchecked /> 
                             Outline Only
+                            <p style="margin-top:0px;margin-bottom:0px;font-size:11px;">
+                            Best if laser cutting a vinyl mask, peeling off vinyl, leaving pads covered.
+                            </p>
                         </label>
                     </div>
                     <div class="com-chilipeppr-widget-eagle-soldermask-outlineRegion hidden">
                     <div class="radio" style="margin-left:20px;">
                         <label>
                             <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-outlineStyle" class="com-chilipeppr-widget-eagle-soldermask-outlineOutside eagle-soldermask-regen-onrender-click" checked /> 
-                            Outside Pad Outline</input>
+                            Outside Pad Outline
                         </label>
                     </div>
                     <div class="radio" style="margin-left:20px;">
                         <label>
                             <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-outlineStyle" class="com-chilipeppr-widget-eagle-soldermask-outlineOn eagle-soldermask-regen-onrender-click" xchecked /> 
-                            On Pad Outline</input>
+                            On Pad Outline
                         </label>
                     </div>
                     <div class="radio" style="margin-left:20px;">
                         <label>
                             <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-outlineStyle" class="com-chilipeppr-widget-eagle-soldermask-outlineInside eagle-soldermask-regen-onrender-click" xchecked /> 
-                            Inside Pad Outline</input>
+                            Inside Pad Outline
                         </label>
                     </div>
                     </div>
                     
+                    <div class="hidden">
+                    Invert
+                    <p style="margin-top:3px;margin-bottom:4px;font-size:11px;">
+                        This lets you invert your laser/mill path so you are effecting
+                        every part of the board other than the pads or SMDs. This is useful if you are 
+                        exposing your solder mask with a UV laser, and then washing away the undeveloped
+                        mask on the pads/smds.
+                    </p>
+                    <div class="checkbox" style="margin-top:0;margin-bottom:0;">
+                        <label>
+                            <input type="checkbox" name="com-chilipeppr-widget-eagle-soldermask-invert" class="com-chilipeppr-widget-eagle-soldermask-invert eagle-soldermask-regen-onrender-click" xchecked /> 
+                            Invert Path
+                        </label>
+                    </div>
+                    <div class="com-chilipeppr-widget-eagle-soldermask-invert-insetRegion hidden">
+                    <div class="radio" style="margin-left:20px; margin-top:4px;">
+                        <label>
+                            <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-invertStyle" class="com-chilipeppr-widget-eagle-soldermask-invertOutside eagle-soldermask-regen-onrender-click" checked /> 
+                            Start Outside Pad Outline
+                        </label>
+                    </div>
+                    <div class="radio" style="margin-left:20px;">
+                        <label>
+                            <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-invertStyle" class="com-chilipeppr-widget-eagle-soldermask-invertOn eagle-soldermask-regen-onrender-click" xchecked /> 
+                            Start On Pad Outline
+                        </label>
+                    </div>
+                    <div class="radio" style="margin-left:20px;">
+                        <label>
+                            <input type="radio" name="com-chilipeppr-widget-eagle-soldermask-invertStyle" class="com-chilipeppr-widget-eagle-soldermask-invertInside eagle-soldermask-regen-onrender-click" xchecked /> 
+                            Start Inside Pad Outline
+                        </label>
+                    </div>
+                    <div class="checkbox" style="margin-left:20px;margin-top:0; margin-bottom:0;">
+                        <label>
+                            <input type="checkbox" name="com-chilipeppr-widget-eagle-soldermask-invert-dbltrace" class="com-chilipeppr-widget-eagle-soldermask-invert-dbltrace eagle-soldermask-regen-onrender-click" xchecked /> 
+                            Double Trace Pad Outline
+                            <p style="margin-top:0px;margin-bottom:0px;font-size:11px;">
+                            Adds extra laser exposure to edge of pads.
+                            </p>
+                            </input>
+                            
+                        </label>
+                    </div>
+                    </div>
+                    </div>
+                   
+                    <p style="padding-top:10px;margin-bottom:0;">
                     Diameter of laser point or end mill
+                    </p>
                     <div class="alert alert-danger hidden eagle-soldermask-alert" style="margin-bottom:5px;">Some of your pads/smds could not get a path rendered because your laser point or end mill diameter is too wide.</div>
                     <div class="input-group">
                         <input class="form-control eagle-soldermask-regen-onrender com-chilipeppr-widget-soldermask-laser-width" type="number" placeholder="Width of laser point" value="0.2" step="0.1"  />
@@ -525,7 +588,9 @@
                         </div>
                     </div>
                     
-                    <p style="margin-bottom:0;font-size:11px;">Feedrate of Laser / Mill</p>
+                    <p style="margin-bottom:0;font-size:11px;">
+                        Feedrate of Laser / Mill
+                    </p>
                     <div class="input-group">
                         <input type="number" step="10" class="form-control eagle-soldermask-regen-onblur eagle-soldermask-input-feedrate" value="30" placeholder="Enter feedrate">
                         <div class="input-group-addon">mm/min</div>
@@ -550,9 +615,16 @@
                 </div>
 
             </div>
+    
+            <!-- Notify panel -->
+            <div class="alert alert-info com-chilipeppr-widget-eagle-infoTemp hidden" style="position:absolute;left:0;right:0;bottom:-74px;">
+                Rendering...
+            </div>
+            
+
         </div>
         <div class="panel-footer hidden">
-            <textarea id="com-chilipeppr-widget-lasersolder-status" class="widget-status form-control" rows="3"></textarea>
+            <!--<textarea id="com-chilipeppr-widget-lasersolder-status" class="widget-status form-control" rows="3"></textarea>-->
         </div>
         <div class="com-chilipeppr-widget-eagle-info panel hidden">
             <table class="table table-bordered table-striped table-condensed">

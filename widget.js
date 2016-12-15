@@ -369,6 +369,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 }
             });
             
+            // based on mode, show/hide different sub-items
             $('.eagle-soldermask-modetype').click(function() {
                 console.log("got click on mode type radio");
                 var mode = $('#' + that.id + ' input[name=com-chilipeppr-widget-eagle-soldermask-mode]:checked').val();
@@ -396,6 +397,15 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 }
             });
             
+            // invert show/hide
+            $('.com-chilipeppr-widget-eagle-soldermask-invert').click(function() {
+                var isInvert = $('#' + that.id + ' input[name=com-chilipeppr-widget-eagle-soldermask-invert]:checked').val();
+                if (isInvert) {
+                    $('.com-chilipeppr-widget-eagle-soldermask-invert-insetRegion').removeClass("hidden");
+                } else {
+                    $('.com-chilipeppr-widget-eagle-soldermask-invert-insetRegion').addClass("hidden");
+                }
+            });
 
             // when tab is shown, render solder mask
             $('#' + this.id + ' a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -435,6 +445,13 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         solderMaskRender: function() {
             console.log("solderMaskRender");
             
+            $('.com-chilipeppr-widget-eagle-infoTemp')
+                .html("Rendering path...")
+                .removeClass("hidden");
+                
+            setTimeout(this.solderMaskRenderCallback.bind(this), 10);    
+        },
+        solderMaskRenderCallback: function() {
             // we will use clipperPads and clipperSmds
             
             // create our overall THREE group
@@ -472,6 +489,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 outlineIn = $('.com-chilipeppr-widget-eagle-soldermask-outlineInside').is(":checked");
             }
             
+            var isInvert = false;
+            isInvert = $('.com-chilipeppr-widget-eagle-soldermask-invert').is(":checked");
+            
             // hide the alert. we'll show it below if we find a path we can't render for
             $('.eagle-soldermask-alert').addClass("hidden");
             
@@ -479,6 +499,28 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var padsAndSmds = [];
             padsAndSmds = padsAndSmds.concat(this.clipperPads.slice(0)); // clone
             padsAndSmds = padsAndSmds.concat(this.clipperSmds.slice(0)); // clone
+            
+            // if invert, branch to alternate render method just to keep stuff clean
+            // we probably should move the normal render to a method like this as well
+            // to keep the approaches parallel
+            if (isInvert) {
+                var opts = {
+                    width: w,
+                    overlapPct: overlapPct,
+                    isShowAsMesh: isShowAsMesh,
+                    isOutlineOnly: isOutlineOnly,
+                    outlineOut: outlineOut,
+                    outlineOn: outlineOn,
+                    outlineIn: outlineIn,
+                    gcodePath: this.solderMaskGcodePath,
+                    threeGrp: this.solderMaskGrp,
+                    padsAndSmds: padsAndSmds,
+                    clipperDimension: this.clipperDimension,
+                    // dimensions: this.clipperDimensions,
+                }
+                this.solderMaskRenderInvert(opts);
+                return;
+            }
             
             padsAndSmds.forEach(function(pad) {
                 console.log("pad:", pad);
@@ -604,6 +646,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // ok, now add our group
             this.sceneAdd(this.solderMaskGrp);
             
+            $('.com-chilipeppr-widget-eagle-infoTemp')
+                .addClass("hidden");
+                
             // might as well generate gcode
             this.solderMaskGenerateGcode();
             
@@ -613,6 +658,127 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             //     that.sceneReAddMySceneGroup();
             // });
         
+        },
+        /**
+         * This method renders an inverse path for lasering/milling. This can be used
+         * to expose a solder mask with UV laser light outside of the pads. Then the
+         * pads can be washed off to expose the copper.
+         * 
+         * opts = {
+                width: w,
+                isShowAsMesh: isShowAsMesh,
+                isOutlineOnly: isOutlineOnly,
+                outlineOut: outlineOut,
+                outlineOn: outlineOn,
+                outlineIn: outlineIn,
+                gcodePath: this.solderMaskGcodePath,
+                // threeGrp: this.solderMaskGrp,
+                padsAndSmds: padsAndSmds,
+                clipperDimension: this.clipperDimension,
+            }
+         */
+        solderMaskRenderInvert: function(opts) {
+            
+            console.log("solderMaskRenderInvert. opts:", opts);
+            
+            $('.com-chilipeppr-widget-eagle-infoTemp')
+                .html("Rendering invert path...")
+                .removeClass("hidden");
+                
+            setTimeout(this.solderMaskRenderInvertCallback.bind(this, opts), 30);    
+        },
+        solderMaskRenderInvertCallback: function(opts) {
+            
+            console.log("solderMaskRenderInvert. opts:", opts);
+            
+            // create polygon squares across the board. then remove out the pads/smds
+            
+            // clipper arrays are inside array
+            var clipperDimension = [opts.clipperDimension];
+            
+            // deflate dimensions by width
+            var w = (opts.width / 2) * -1;
+            w = 0; // for now 
+            clipperDimension = this.getInflatePath(clipperDimension, w);
+            // clipperDimension = this.getInflatePath(clipperDimension, opts.width * -1);
+            
+            var isDblTrace = $('.com-chilipeppr-widget-eagle-soldermask-invert-dbltrace').is(":checked");
+            var isTraceOutside = $('.com-chilipeppr-widget-eagle-soldermask-invertOutside').is(":checked");
+            var isTraceOn = $('.com-chilipeppr-widget-eagle-soldermask-invertOn').is(":checked");
+            var isTraceInside = $('.com-chilipeppr-widget-eagle-soldermask-invertInside').is(":checked");
+            
+            // var threeDim = this.drawClipperPaths(clipperDimension, 0xff0000, 0.9, 1);
+            // this.sceneRemove(threeDim);
+            // this.solderMaskGrp.add(threeDim);
+            // console.log("threeDim:", threeDim);
+            
+            // now remove the pads so they are holes from the dimensions
+            var clipperDiff = this.getDiffOfClipperPaths(clipperDimension, opts.padsAndSmds);
+            console.log("clipperDiff:", clipperDiff);
+            // var threePads = this.drawClipperPaths(clipperDiff, 0xff0000, 0.9, 1);
+            // this.solderMaskGrp.add(threePads);
+            // console.log("threePads:", threePads);
+            
+            // now deflate by half width of laser / end mill
+            // this is the default for the trace starting on outside of pads
+            var firstWidthToDeflateBy = (opts.width / 2) * -1;
+            if (isTraceOn) firstWidthToDeflateBy = 0.001;
+            if (isTraceInside) firstWidthToDeflateBy = opts.width;
+            
+            var clipperFirstPath = this.getInflatePath(clipperDiff, firstWidthToDeflateBy);
+            this.drawPathAsLineOrMesh(clipperFirstPath, opts.width, opts.isShowAsMesh, this.solderMaskGrp);
+                            
+            // push this line onto gcode array
+            this.solderMaskGcodePath.push(clipperFirstPath);
+            
+            // var threeFirstPath = this.drawClipperPaths(clipperFirstPath, 0xff0000, 0.9, 1);
+            // this.sceneRemove(threeFirstPath);
+            // this.solderMaskGrp.add(threeFirstPath);
+            
+            // now, keep deflating by width of of laser / end mill until no paths are left
+            // but take into account the overlap
+            var isStillAPath = true;
+            var lastReducePath = clipperFirstPath;
+            while (isStillAPath) {
+            
+                var deflateBy = opts.width * (1 - opts.overlapPct / 100) * -1;
+                var clipperReducePath = this.getInflatePath(lastReducePath, deflateBy);
+                
+                if (clipperReducePath.length > 0) {
+                    // we have paths after the reduce. draw it.
+                    this.drawPathAsLineOrMesh(clipperReducePath, opts.width, opts.isShowAsMesh, this.solderMaskGrp);
+                            
+                    // push this line onto gcode array
+                    this.solderMaskGcodePath.push(clipperReducePath);
+                    
+                    // var threeReducePath = this.drawClipperPaths(clipperReducePath, 0xff0000, 0.9, 1);
+                    // this.sceneRemove(threeReducePath);
+                    // this.solderMaskGrp.add(threeReducePath);
+                    
+                    lastReducePath = clipperReducePath;
+                } else {
+                    isStillAPath = false;
+                }
+            }
+            
+            // if double trace on pads, then do it
+            if (isDblTrace) {
+                // do additional path deflated at start value
+                this.drawPathAsLineOrMesh(clipperFirstPath, opts.width, opts.isShowAsMesh, this.solderMaskGrp);
+                            
+                // push this line onto gcode array
+                this.solderMaskGcodePath.push(clipperFirstPath);
+            }
+            
+
+            // ok, now add our group
+            this.sceneAdd(this.solderMaskGrp);
+            
+            $('.com-chilipeppr-widget-eagle-infoTemp')
+                .addClass("hidden");
+                
+            // might as well generate gcode
+            this.solderMaskGenerateGcode();
         },
         solderMaskGenerateGcodeTimeoutPtr: null,
         solderMaskIsGcodeInRegeneratingState: false,
@@ -638,6 +804,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // to set the UI elements again. they'll get set back and this flag after
                 // the gcode is generated
                 this.solderMaskIsGcodeInRegeneratingState = true;
+                
+                $('.com-chilipeppr-widget-eagle-infoTemp')
+                    .html("Generating Gcode...")
+                    .removeClass("hidden");
 
             } else {
                 // do nothing
@@ -682,7 +852,13 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 outlineOut = $('.com-chilipeppr-widget-eagle-soldermask-outlineOutside').is(":checked");
                 outlineOn = $('.com-chilipeppr-widget-eagle-soldermask-outlineOn').is(":checked");
                 outlineIn = $('.com-chilipeppr-widget-eagle-soldermask-outlineInside').is(":checked");
-            }   
+            }
+            var isInvert = $('.com-chilipeppr-widget-eagle-soldermask-invert').is(":checked");
+            var isDblTrace = $('.com-chilipeppr-widget-eagle-soldermask-invert-dbltrace').is(":checked");
+            var isTraceOutside = $('.com-chilipeppr-widget-eagle-soldermask-invertOutside').is(":checked");
+            var isTraceOn = $('.com-chilipeppr-widget-eagle-soldermask-invertOn').is(":checked");
+            var isTraceInside = $('.com-chilipeppr-widget-eagle-soldermask-invertInside').is(":checked");
+            
             
             // test cayenn cmds
             if (options.laseron == "cayenn") {
@@ -721,6 +897,11 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 if (outlineOut) g += "(Cutting outside pad/smd)\n";
                 if (outlineOn) g += "(Cutting on pad/smd path)\n";
                 if (outlineIn) g += "(Cutting inside pad/smd path)\n";
+            } else if (isInvert) {
+                g += "(Inverted paths)\n";
+                if (isTraceOutside) g += "(Path start outside pads)\n";
+                if (isTraceOn) g += "(Path start on pad outline)\n";
+                if (isTraceInside) g += "(Path start inside pads)\n";
             } else {
                 g += "(Cutting full pads/smds)\n";
             }
@@ -798,62 +979,79 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 } else {
                     // we have coordinates to move
                     // make sure only one path
-                    if (path.length > 1) console.error("we have more than one path, should not happen. path:", path);
-                    
-                    var p = path[0];
-                    
-                    // see if is move to first position
-                    if (isAtNewPad) {
-                        // it is, so make G0 fast move
-                        g += "G0 ";
-                        isAtNewPad = false;
-                    } else {
-                        // it is not at new smd, it's inside an smd so just do g1
-                        g += "G1 ";
+                    if (path.length > 1) {
+                        
+                        // we are probably milling the invert path
+                        if (isInvert) {
+                            // we are ok then, but need to do all paths
+                        } else {
+                            // we are milling normal path, and i don't think we should
+                            // get multiple paths so show error in case i missed something
+                            console.error("we have more than one path, should not happen. path:", path);
+                        }
                     }
                     
-                    g += "X" + p[0].X.toFixed(3) + " Y" + p[0].Y.toFixed(3) + "\n"; // + " (1st pos)\n";
+                    // in normal milling we should have just one path, but since
+                    // we added the invert option we get multiple paths now
+                    for (var pathIndex = 0; pathIndex < path.length; pathIndex++) {
+                        var p = path[pathIndex];
                     
-                    // turn on laser
-                    // see if laser or milling
-                    if (options.mode == "laser") {
+                        // var p = path[0];
+                    
+                        // see if is move to first position
+                        if (isAtNewPad) {
+                            // it is, so make G0 fast move
+                            g += "G0 ";
+                            isAtNewPad = false;
+                        } else {
+                            // it is not at new smd, it's inside an smd so just do g1
+                            g += "G1 ";
+                        }
                         
-                        // if the laser is not on, we need to turn it on
-                        if (!isLaserOn) {
-                            if (options.laseron == "M3") {
-                                g += "M3 S" + options.lasersvalue + " (laser on)\n";
-                            } else if (options.laseron == "M7") {
-                                g += "M8 (coolant on / laser on)\n";
-                            } else {
-                                // cayenn
-                                g += "(" + options.cayennon + ")\n";
+                        g += "X" + p[0].X.toFixed(3) + " Y" + p[0].Y.toFixed(3) + "\n"; // + " (1st pos)\n";
+                        
+                        // turn on laser
+                        // see if laser or milling
+                        if (options.mode == "laser") {
+                            
+                            // if the laser is not on, we need to turn it on
+                            if (!isLaserOn) {
+                                if (options.laseron == "M3") {
+                                    g += "M3 S" + options.lasersvalue + " (laser on)\n";
+                                } else if (options.laseron == "M7") {
+                                    g += "M8 (coolant on / laser on)\n";
+                                } else {
+                                    // cayenn
+                                    g += "(" + options.cayennon + ")\n";
+                                }
+                                
+                                isLaserOn = true;
+                            }
+                        } else {
+                            // this is milling. if we are not at depth cut
+                            // we need to get there
+                            g += "G1 Z" + options.milldepthcut + " F" + options.millfeedrateplunge + "\n";
+                            isAtClearanceHeight = false;
+                            
+                        }
+                        
+                        // now that spindle or laser is on, start moves after 1st position
+                        for (var i2 = 1; i2 < p.length; i2++) {
+                            var pt = p[i2];
+                            
+                            // see if feedrate specificed
+                            if (!isFeedrateSpecifiedAlready) {
+                                g += "F" + options.feedrate + " (Feedrate for cut)\n";
+                                isFeedrateSpecifiedAlready = true;
                             }
                             
-                            isLaserOn = true;
+                            g += "G1 X" + pt.X.toFixed(3) + " Y" + pt.Y.toFixed(3) + "\n";
                         }
-                    } else {
-                        // this is milling. if we are not at depth cut
-                        // we need to get there
-                        g += "G1 Z" + options.milldepthcut + " F" + options.millfeedrateplunge + "\n";
-                        isAtClearanceHeight = false;
-                        
-                    }
-                    
-                    // now that spindle or laser is on, start moves after 1st position
-                    for (var i2 = 1; i2 < p.length; i2++) {
-                        var pt = p[i2];
-                        
-                        // see if feedrate specificed
-                        if (!isFeedrateSpecifiedAlready) {
-                            g += "F" + options.feedrate + " (Feedrate for cut)\n";
-                            isFeedrateSpecifiedAlready = true;
-                        }
-                        
+                        // we have to move back to first pt to complete the drawing
+                        var pt = p[0];
                         g += "G1 X" + pt.X.toFixed(3) + " Y" + pt.Y.toFixed(3) + "\n";
+
                     }
-                    // we have to move back to first pt to complete the drawing
-                    var pt = p[0];
-                    g += "G1 X" + pt.X.toFixed(3) + " Y" + pt.Y.toFixed(3) + "\n";
                     
                 }
             }          
@@ -890,6 +1088,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             $('#' + this.id + " .eagle-soldermask-gcode-size-span").removeClass('hidden');
             $('#' + this.id + " .eagle-soldermask-gcode-size").text(parseInt(g.length / 1024) + "KB");
 
+            $('.com-chilipeppr-widget-eagle-infoTemp')
+                .addClass("hidden");
+                
             this.solderMaskIsGcodeInRegeneratingState = false;
 
         },
@@ -923,7 +1124,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
          * This is used to draw end mill paths that are the width of the line.
          */
         drawPathAsLineOrMesh: function(clipperPath, width, isShowAsMesh, threeGroup) {
-            var pathGrp = this.drawClipperPaths(clipperPath, 0xff0000, 0.8, 0.025); //, 0.1);
+            var pathGrp = this.drawClipperPaths(clipperPath, 0xff0000, 0.5, 0.025); //, 0.1);
             // drawClipperPaths shoves into the scene. we'll remove so we can add it to our overall group
             this.sceneRemove(pathGrp);
             if (!isShowAsMesh) 
@@ -4129,6 +4330,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             return retGrp;
                 
         },
+        /**
+         * Enormously useful function to inflate or deflate clipper paths. Pass
+         * in the array of array like all normal clipper dimensions are. Then pass
+         * in a pos/neg number for how much to inflate or deflate by. So to inflate by
+         * 0.5mm then pass in 0.5. To deflate 0.8mm pass in -0.8. For joinType the
+         * default is ClipperLib.JoinType.jtRound. See ClipperLib docs for joinType or
+         * leave empty.
+         */
         getInflatePath: function (paths, delta, joinType) {
             var scale = 10000;
             ClipperLib.JS.ScaleUpPaths(paths, scale);
