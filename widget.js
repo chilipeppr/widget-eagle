@@ -488,6 +488,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 outlineOn = $('.com-chilipeppr-widget-eagle-soldermask-outlineOn').is(":checked");
                 outlineIn = $('.com-chilipeppr-widget-eagle-soldermask-outlineInside').is(":checked");
             }
+            var isIncludeDimensions = $('.com-chilipeppr-widget-eagle-soldermask-outlineDimensions').is(":checked");
             
             var isInvert = false;
             isInvert = $('.com-chilipeppr-widget-eagle-soldermask-invert').is(":checked");
@@ -643,6 +644,18 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
             }, this);
 
+            // see if they want to include dimensions as well
+            if (isIncludeDimensions) {
+                
+                this.solderMaskGcodePath.push("move to dimensions start");
+                
+                // add this path
+                this.drawPathAsLineOrMesh([this.clipperDimension], w, isShowAsMesh, this.solderMaskGrp);
+                            
+                // push this line onto gcode array
+                this.solderMaskGcodePath.push([this.clipperDimension]);
+            }
+            
             // ok, now add our group
             this.sceneAdd(this.solderMaskGrp);
             
@@ -853,6 +866,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 outlineOn = $('.com-chilipeppr-widget-eagle-soldermask-outlineOn').is(":checked");
                 outlineIn = $('.com-chilipeppr-widget-eagle-soldermask-outlineInside').is(":checked");
             }
+            var isIncludeDimensions = $('.com-chilipeppr-widget-eagle-soldermask-outlineDimensions').is(":checked");
+            
             var isInvert = $('.com-chilipeppr-widget-eagle-soldermask-invert').is(":checked");
             var isDblTrace = $('.com-chilipeppr-widget-eagle-soldermask-invert-dbltrace').is(":checked");
             var isTraceOutside = $('.com-chilipeppr-widget-eagle-soldermask-invertOutside').is(":checked");
@@ -950,7 +965,11 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     
                     console.log("in move to");
                     padCtr++;
-                    g += "(Pad/smd " + padCtr + ")\n";
+                    if (path.match(/dimension/)) {
+                        g += "(Dimension path)\n";
+                    } else {
+                        g += "(Pad/smd " + padCtr + ")\n";
+                    }
 
                     // save boolean that we're at first pad so next move is G0
                     isAtNewPad = true;
