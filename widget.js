@@ -125,7 +125,7 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
          * The ID of the widget. You must define this and make it unique.
          */
         id: "com-chilipeppr-widget-eagle",
-        name: "Widget / Eagle BRD v4",
+        name: "Widget / Eagle BRD v5.1",
         desc: "This widget lets you drag in an Eagle PCB \".brd\" file to mill.",
         url: "(auto fill by runme.js)",       // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
         fiddleurl: "(auto fill by runme.js)", // The edit URL. This can be auto-filled by runme.js in Cloud9 if you'd like, or just define it on your own to help people know where they can edit/fork your widget
@@ -316,10 +316,11 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // setup clear button
             $('#com-chilipeppr-widget-eagle .btn-clear').click(this.clearEagleBrd.bind(this));
             
+            this.setupMirrorAxis(); //V5.1D20161229 - Added
             
             this.setupLayerToggleDropdown();
             
-            this.setupBoardMirrorCheckboxes();
+            //this.setupBoardMirrorCheckboxes(); V5.1D20161229 - Commented
             
             this.setupSolderMaskTab();
 
@@ -1186,6 +1187,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             return { x : centroidX, y : centroidY, z : centroidZ };
         
         },
+        
+        //V5.1D20161229 - commented (incomplete experimental mirror code)
+        /*
         setupBoardMirrorCheckboxes: function() {
             $('#com-chilipeppr-widget-eagle .mirrorLayerY').change(this.onChangeMirrorLayerYCheckbox.bind(this));
             $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked", false);
@@ -1201,7 +1205,24 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.draw3d();
             
         },
+        */
         
+        //V5.1D20161229 - Added
+        onChangeMirrorAxis: function() {
+            this.mirrorX = $('#com-chilipeppr-widget-eagle .mirrorAxisX').prop ("checked");
+            this.mirrorY = $('#com-chilipeppr-widget-eagle .mirrorAxisY').prop ("checked");
+            
+            this.clearEagleBrd();
+            this.draw3d();
+        },
+        
+        //V5.1D20161229 - Added
+        setupMirrorAxis: function() {
+            $("#com-chilipeppr-widget-eagle .mirrorAxisX").change(this.onChangeMirrorAxis.bind(this));
+            $("#com-chilipeppr-widget-eagle .mirrorAxisY").change(this.onChangeMirrorAxis.bind(this));
+            $('#com-chilipeppr-widget-eagle .mirrorAxisX').prop ("checked", false);
+            $('#com-chilipeppr-widget-eagle .mirrorAxisY').prop ("checked", false);
+        },
         
         setupLayerToggleDropdown: function() {
         	$('#com-chilipeppr-widget-eagle .selectLayer').change(this.onChangeLayerToggleDropdown.bind(this));
@@ -1804,6 +1825,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         pathsUnion: null,
         pathsUnionHoles: null,
         threeDimensions: null,
+        boardBoundaries: null, //V5.1D20161229
         activeLayer: 'Top',
         clipperDimensions: [], // contains the dimensions of the board as clipper path
         /**
@@ -1835,6 +1857,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // these methods will draw all Eagle objects into several global
             // properties, the most important of which is this.clipperBySignalKey
             // which holds a structured object of each signal, i.e. +3V, GND, etc.
+            this.boardBoundaries = this.getBoardBoundaries(); //V5.1D20161229
             this.draw3dSignalWires(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dSignalPolygons(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dElements(this.eagle.eagleLayersByName[this.activeLayer]);
@@ -4494,12 +4517,12 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var wire = wires[i];
                 //console.log("clipper appending wire:", wire);
                 this.clipperDimension.push({
-                    X: wire.x1,
-                    Y: wire.y1
+                    X: this.flipX(wire.x1), //V5.1D20161229 - flipX/flipY added
+                    Y: this.flipY(wire.y1)  //V5.1D20161229 - flipX/flipY added
                 });
                 this.clipperDimension.push({
-                    X: wire.x2,
-                    Y: wire.y2
+                    X: this.flipX(wire.x2), //V5.1D20161229 - flipX/flipY added
+                    Y: this.flipY(wire.y2)  //V5.1D20161229 - flipX/flipY added
                 });
             }
 
@@ -4508,6 +4531,65 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             return wires;
         },
         
+        //V5.1D20161229 - Added
+        boardBoundaries:{},// holds minimum X, Maximum X, Minimum Y, Maximum Y respectively
+        /**This function calculates board boundaries (minimum and maximum values of X & Y from dimensions layer)
+        * board boundaries will be used to mirror board components (wires, pads, vias, holes ... etc)
+        */
+        getBoardBoundaries: function () {
+            var minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
+            var layerNumber = this.eagle.eagleLayersByName['Dimension'].number;
+
+            // dimension is wires on layer 20
+            var wires = [];
+            for (var pkgKey in this.eagle.packagesByName) {
+
+                if ('wires' in this.eagle.packagesByName[pkgKey]) {
+                    // yes, there's wires
+                    for (var i = 0; i < this.eagle.packagesByName[pkgKey].wires.length; i++) {
+                        var wire = this.eagle.packagesByName[pkgKey].wires[i];
+                        if (wire.layer == layerNumber) {
+                            if (wire.x1 < minX) minX = wire.x1;
+                            if (wire.x2 < minX) minX = wire.x2;
+                            if (wire.y1 < minY) minY = wire.y1;
+                            if (wire.y2 < minY) minY = wire.y2;
+                            if (wire.x1 > maxX) maxX = wire.x1;
+                            if (wire.x2 > maxX) maxX = wire.x2;
+                            if (wire.y1 > maxY) maxY = wire.y1;
+                            if (wire.y2 > maxY) maxY = wire.y2;
+                        }
+                    }
+                }
+            }
+            for (var plainWireKey in this.eagle.plainWires) {
+                if (this.eagle.plainWires[plainWireKey].length > 0) {
+                    // yes, there's wires in this array
+                    for (var i = 0; i < this.eagle.plainWires[plainWireKey].length; i++) {
+                        var wire = this.eagle.plainWires[plainWireKey][i];
+                        if (wire.layer == layerNumber) {
+                            // we have a dimension
+                            if (wire.x1 < minX) minX = wire.x1;
+                            if (wire.x2 < minX) minX = wire.x2;
+                            if (wire.y1 < minY) minY = wire.y1;
+                            if (wire.y2 < minY) minY = wire.y2;
+                            if (wire.x1 > maxX) maxX = wire.x1;
+                            if (wire.x2 > maxX) maxX = wire.x2;
+                            if (wire.y1 > maxY) maxY = wire.y1;
+                            if (wire.y2 > maxY) maxY = wire.y2;
+                        }
+                    }
+                }
+            }
+            var bDimensions = {
+                MinimumX: minX,
+                MinimumY: minY,
+                MaximumX: maxX,
+                MaximumY: maxY
+                
+            };
+                
+            return bDimensions;
+        },
         
         
         draw3dDimension: function (endmillSize) {
@@ -4529,8 +4611,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var wire = wires[i];
                 //console.log("working on wire:", wire);
 
-                lineGeo.vertices.push(new THREE.Vector3(wire.x1, wire.y1, 0));
-                lineGeo.vertices.push(new THREE.Vector3(wire.x2, wire.y2, 0));
+                lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x1), that.flipY(wire.y1), 0));//V5.1D20161229 - flipX/flipY added
+                lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x2), that.flipY(wire.y2), 0));//V5.1D20161229 - flipX/flipY added
 
             }
             // now close the line by pushing first vertices
@@ -4546,6 +4628,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 //placeholder for translating object by x or y board length
             }*/
             
+            //V5.1D20161229 - commented (incomplete experimental mirror code)
+            /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
             if (this.activeLayer == 'Bottom' && this.flipTheBoard == true) {  //If bottom layer flip board
@@ -4553,7 +4637,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 that.rotateAroundObjectAxis (line, axisFlip, rFlip);
                 //placeholder for translating object by x or y board length
             }
-            
+            */
             this.sceneAdd(line);
 
             // get the inflated milling area
@@ -4755,11 +4839,11 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         D: via.drill.toFixed(4)
                     });
                     
-                    
+                    //1:Draw outter via shape
                     var viashape = "round";
                     if ('shape' in via) viashape = via.shape;
                     
-                    var radius = via.drill; //(via.drill * 2) / 2;
+                    var radius = via.diameter/2;//V5.1D20161227
                     var segments = 32;
                     if (viashape == "octagon") segments = 8;
                     
@@ -4768,8 +4852,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     // Remove center vertex
                     viaGeo.vertices.shift();
                     //viaGeo.vertices.pop();
-                   
-                    var line = that.drawCircle(via.x, via.y, via.drill/2, that.colorHole);
+                    //2:Draw circle around the drill hole
+                    var line = that.drawCircle(that.flipX(via.x), that.flipY(via.y), via.drill/2, that.colorHole);//V5.1D20161229 - flipX/flipY added
                     line.rotateZ(Math.PI / 8);
                     
                     bigSceneGroup.add (line);
@@ -4791,6 +4875,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     //var pt = viaGeo.vertices[0];
                     //shape.lineTo(pt.X, pt.y);
                     
+                    //V5.1D20161227, code commented, no need to remove inner hole
+                    /*
                     // Create hole inside
                     radius = via.drill / 2;
                     segments = 32;
@@ -4808,13 +4894,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         ptCtr++;
                     }, this);
                     shape.holes.push(hole);
+                    */
                     
                     // create mesh for the via
                     var geometry = new THREE.ShapeGeometry( shape );
                     var mesh = new THREE.Mesh(geometry, viaMat );
 
                     // move shape to correct position
-                    mesh.position.set(via.x, via.y, 0);
+                    mesh.position.set(that.flipX(via.x), that.flipY(via.y), 0); //V5.1D20161229 - flipX/flipY added
                     mesh.rotateZ(Math.PI / 8);
                     
                     mesh.userData["type"] = "via";
@@ -4832,13 +4919,17 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     // add to via object
                     via["threeObj"] = mesh;
                     
+                    //V5.1D20161227 - previously line varibale is used is below code to created clipperPath, line uses drill hole diameter which is not right, I created new lineV for via outter circle
+                    //TODO-AMEEN: This code draws via milling path as circle regardless the shape, we need to adjust the code to drew octagons and squares
+                    var lineV = that.drawCircle(via.x, via.y, via.diameter/2, that.colorHole);//V5.1D20161227
+                    lineV.rotateZ(Math.PI / 8);//V5.1D20161227
                     // add clipper path
                     var clipperPath = [];
-                    line.updateMatrixWorld();
-                    line.geometry.vertices.forEach(function(v) {
+                    lineV.updateMatrixWorld();                      //V5.1D20161227 - line changed to LineV
+                    lineV.geometry.vertices.forEach(function(v) {   //V5.1D20161227 - line changed to LineV
                         var vector = v.clone();
-                        var vec = line.localToWorld(vector);
-                        clipperPath.push({X: vec.x, Y: vec.y});
+                        var vec = lineV.localToWorld(vector);       //V5.1D20161227 - line changed to LineV
+                        clipperPath.push({X: that.flipX(vec.x), Y: that.flipY(vec.y)}); //V5.1D20161229 - flipX/flipY added
                     }, this);
                     this.clipperVias.push(clipperPath);
                     
@@ -4853,6 +4944,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
             }
             
+            //V5.1D20161229 - commented (incomplete experimental mirror code)
+            /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
             if (this.activeLayer == 'Bottom' && this.flipTheBoard == true) { //If bottom layer flip board
@@ -4860,7 +4953,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 that.rotateAroundObjectAxis(bigSceneGroup, axisFlip, rFlip);
                 //placeholder for translating object by x or y board length
             } //vias get flipped
-
+            */
             that.sceneAdd(bigSceneGroup);
             
             console.log("this.clipperBySignalKey[]:", this.clipperBySignalKey);
@@ -4934,7 +5027,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     //console.log("drawing wires. wire:", wire);
 
                     // use new util function
-                    var sol_paths = that.addStrokeCapsToLine(wire.x1, wire.y1, wire.x2, wire.y2, wire.width);
+                    var sol_paths = that.addStrokeCapsToLine(
+                        that.flipX(wire.x1), that.flipY(wire.y1), //V5.1D20161229 - flipX/flipY added
+                        that.flipX(wire.x2), that.flipY(wire.y2), //V5.1D20161229 - flipX/flipY added
+                        wire.width);
                     //that.drawClipperPaths(sol_paths, that.colorSignal, 0.2);
 
                     //console.log("about to add sol_paths to centipede:", sol_paths);
@@ -5028,6 +5124,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             
             console.log("SignalWires mesh:  ", mesh, "  group:  ", bigSceneGroup);
+            
+            //V5.1D20161229 - commented (incomplete experimental mirror code)
+            /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
             if (this.activeLayer == 'Bottom' && this.flipTheBoard == true) { //If bottom layer flip board
@@ -5035,7 +5134,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 that.rotateAroundObjectAxis(bigSceneGroup, axisFlip, rFlip);
                 //placeholder for translating object by x or y board length
             } //signals flip code
-
+            */
+            
             that.sceneAdd(bigSceneGroup);
             
             
@@ -5095,7 +5195,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var clipperPoly = [];
                     
                     poly.vertices.forEach(function(v) {
-                        clipperPoly.push({X:v.x, Y:v.y});
+                        clipperPoly.push({X:that.flipX(v.x), Y:that.flipY(v.y)}); //V5.1D20161229 - flipX/flipY added
                     });
                     
                     // store in eagle obj for retrieval from mondo object
@@ -5119,6 +5219,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // to make rendering prettier
                 mesh.position.set(0,0,0.00001);
                 
+                //V5.1D20161229 - commented (incomplete experimental mirror code)
+                /*
                 var rFlip = (Math.PI / 180) * 180;
                 var axisFlip = new THREE.Vector3(0, 1, 0);
                 if (this.activeLayer == 'Bottom' && this.flipTheBoard == true) { //If bottom layer flip board
@@ -5126,6 +5228,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     that.rotateAroundObjectAxis(mesh, axisFlip, rFlip);
                     //placeholder for translating object by x or y board length
                 }   //polygons flip code
+                */
                 
                 this.sceneAdd(mesh);
                 
@@ -5367,9 +5470,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
                 } // (if renderThisPad) ends here
                 
-
+                that.flipObject3D(smdgroup); //V5.1D20161229 - Added
+                
                 // set position
-                smdgroup.position.set(elem.x, elem.y, 0);
+                smdgroup.position.set(that.flipX(elem.x), that.flipY(elem.y), 0); //V5.1D20161229 - flipX/flipY added
                 //that.sceneAdd(smdgroup);
                 bigSceneGroup.add (smdgroup);
                 
@@ -5698,9 +5802,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 }
                 //} // (if renderThisPad) ends here
 
-                
+                that.flipObject3D(padgroup); //V5.1D20161229 - Added
                 // set padgroup's x/y
-                padgroup.position.set(elem.x, elem.y, 0);
+                padgroup.position.set(that.flipX(elem.x), that.flipY(elem.y), 0);//V5.1D20161229 - flipX/flipY added
                 //that.sceneAdd(padgroup);
                 
                 // Now convert the Three.js drawn padgroup to a Clipper path
@@ -6003,6 +6107,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 */
             }
             
+            //V5.1D20161229 - commented (incomplete experimental mirror code)
+            /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
             if (this.activeLayer == 'Bottom' && this.flipTheBoard == true) { //If bottom layer flip board
@@ -6010,7 +6116,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 that.rotateAroundObjectAxis(bigSceneGroup, axisFlip, rFlip);
                 //placeholder for translating object by x or y board length
             } //Elements flip code
-
+            */
+            
             that.sceneAdd(bigSceneGroup);
             
             
@@ -6058,6 +6165,36 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // object.rotation.setEulerFromRotationMatrix(object.matrix);
             // code for r59+:
             object.rotation.setFromRotationMatrix(object.matrix);
+        },
+        //V5.1D20161229 - Added
+        /**Recalculate value of X if board is being mirrored*/
+        flipX: function (x){
+            if (this.mirrorY)
+                return this.boardBoundaries.MinimumX + this.boardBoundaries.MaximumX - x;
+            else
+                return x;
+        },
+        //V5.1D20161229 - Added
+        /**Recalculate value of Y if board is being mirrored*/
+        flipY: function (y){
+            if (this.mirrorX)
+                return this.boardBoundaries.MinimumY + this.boardBoundaries.MaximumY - y;
+            else
+                return y;
+        },
+        //V5.1D20161229 - Added
+        /**Mirror Object3D (smdgroups and padgroups) if board is being mirrored
+        this function must be called before setting the position of the group*/
+        flipObject3D: function(o){
+            if (this.mirrorX || this.mirrorY){
+                var mS = (new THREE.Matrix4()).identity();
+                //set -1 to the corresponding axis
+                if (this.mirrorY) mS.elements[0] = -1;
+                if (this.mirrorX) mS.elements[5] = -1;
+                //mS.elements[10] = -1;
+                        
+                o.applyMatrix(mS);
+            }
         },
         drawCircle: function (x, y, radius, color){
             // draw a hole
@@ -6707,11 +6844,31 @@ EagleCanvas.prototype.parseSmd = function (smd) {
     };
 }
 
+//V5.1D20161227 this function is updated to calculate and return via diameter
+/**Parse via attributes from .brd file
+ * When via diameter is set to auto in Eagle, via is stores without diameter attribute
+ * in this case we need to calculate diameter size the same way eagle does it and based on drill size
+ * Vias with drill size smaller than 0.9mm get auto diameter of (drill size + 0.4064mm)
+ * Vias with drill size larger than 2.1mm get auto diameter of (drill size + 1.016mm)
+ * In between auto diameter is (drill x 1.5
+ */
 EagleCanvas.prototype.parseVia = function (via) {
+    var diameter = parseFloat(via.getAttribute('diameter'));
+    var drill = parseFloat(via.getAttribute('drill'));
+    if(!diameter || diameter <= drill){
+        if(drill < 0.9) 
+            diameter = drill + 0.4064;
+        else
+            if (drill > 2.1) 
+                diameter = drill + 1.016;
+            else 
+                diameter = drill * 1.5;
+    }
     return {
         'x': parseFloat(via.getAttribute('x')),
         'y': parseFloat(via.getAttribute('y')),
         'drill': parseFloat(via.getAttribute('drill')),
+        'diameter': diameter,
         'layers': via.getAttribute('extent'),
         'shape': via.getAttribute('shape')
     };
