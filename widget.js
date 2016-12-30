@@ -1188,6 +1188,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             return { x : centroidX, y : centroidY, z : centroidZ };
         
         },
+        
+        //V5.1D20161229 - commented (uncompleted experemental mirror code)
+        /*
         setupBoardMirrorCheckboxes: function() {
             $('#com-chilipeppr-widget-eagle .mirrorLayerY').change(this.onChangeMirrorLayerYCheckbox.bind(this));
             $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked", false);
@@ -1203,6 +1206,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.draw3d();
             
         },
+        */
         
         //V5.1D20161229 - Added
         onChangeMirrorAxis: function() {
@@ -4625,6 +4629,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 //placeholder for translating object by x or y board length
             }*/
             
+            //V5.1D20161229 - commented (uncompleted experemental mirror code)
+            /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
             if (this.activeLayer == 'Bottom' && this.flipTheBoard == true) {  //If bottom layer flip board
@@ -4632,7 +4638,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 that.rotateAroundObjectAxis (line, axisFlip, rFlip);
                 //placeholder for translating object by x or y board length
             }
-            
+            */
             this.sceneAdd(line);
 
             // get the inflated milling area
@@ -4939,6 +4945,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
             }
             
+            //V5.1D20161229 - commented (uncompleted experemental mirror code)
+            /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
             if (this.activeLayer == 'Bottom' && this.flipTheBoard == true) { //If bottom layer flip board
@@ -4946,7 +4954,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 that.rotateAroundObjectAxis(bigSceneGroup, axisFlip, rFlip);
                 //placeholder for translating object by x or y board length
             } //vias get flipped
-
+            */
             that.sceneAdd(bigSceneGroup);
             
             console.log("this.clipperBySignalKey[]:", this.clipperBySignalKey);
@@ -5117,6 +5125,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             
             console.log("SignalWires mesh:  ", mesh, "  group:  ", bigSceneGroup);
+            
+            //V5.1D20161229 - commented (uncompleted experemental mirror code)
+            /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
             if (this.activeLayer == 'Bottom' && this.flipTheBoard == true) { //If bottom layer flip board
@@ -5124,7 +5135,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 that.rotateAroundObjectAxis(bigSceneGroup, axisFlip, rFlip);
                 //placeholder for translating object by x or y board length
             } //signals flip code
-
+            */
+            
             that.sceneAdd(bigSceneGroup);
             
             
@@ -5208,6 +5220,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // to make rendering prettier
                 mesh.position.set(0,0,0.00001);
                 
+                //V5.1D20161229 - commented (uncompleted experemental mirror code)
+                /*
                 var rFlip = (Math.PI / 180) * 180;
                 var axisFlip = new THREE.Vector3(0, 1, 0);
                 if (this.activeLayer == 'Bottom' && this.flipTheBoard == true) { //If bottom layer flip board
@@ -5215,6 +5229,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     that.rotateAroundObjectAxis(mesh, axisFlip, rFlip);
                     //placeholder for translating object by x or y board length
                 }   //polygons flip code
+                */
                 
                 this.sceneAdd(mesh);
                 
@@ -6093,6 +6108,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 */
             }
             
+            //V5.1D20161229 - commented (uncompleted experemental mirror code)
+            /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
             if (this.activeLayer == 'Bottom' && this.flipTheBoard == true) { //If bottom layer flip board
@@ -6100,7 +6117,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 that.rotateAroundObjectAxis(bigSceneGroup, axisFlip, rFlip);
                 //placeholder for translating object by x or y board length
             } //Elements flip code
-
+            */
+            
             that.sceneAdd(bigSceneGroup);
             
             
@@ -6833,8 +6851,8 @@ EagleCanvas.prototype.parseSmd = function (smd) {
  * in this case we need to calculate diameter size the same way eagle does it and based on drill size
  * Vias with drill size smaller than 0.9mm get auto diameter of (drill size + 0.4064mm)
  * Vias with drill size larger than 2.1mm get auto diameter of (drill size + 1.016mm)
- * In between auto diameter is drill x 1.5
- */ 
+ * In between auto diameter is (drill x 1.5
+ */
 EagleCanvas.prototype.parseVia = function (via) {
     var diameter = parseFloat(via.getAttribute('diameter'));
     var drill = parseFloat(via.getAttribute('drill'));
