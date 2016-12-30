@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
-    <title>Widget / Eagle BRD v4</title>
+    <title>Widget / Eagle BRD v5.1</title>
 
     <!-- ChiliPeppr is based on bootstrap CSS. -->
     <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
@@ -250,7 +250,7 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
          * The ID of the widget. You must define this and make it unique.
          */
         id: "com-chilipeppr-widget-eagle",
-        name: "Widget / Eagle BRD v4",
+        name: "Widget / Eagle BRD v5.1",
         desc: "This widget lets you drag in an Eagle PCB \".brd\" file to mill.",
         url: "http://raw.githubusercontent.com/ameennihad/widget-eagle/master/auto-generated-widget.html",       // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
         fiddleurl: "http://ide.c9.io/ameennihad/widget-eagle", // The edit URL. This can be auto-filled by runme.js in Cloud9 if you'd like, or just define it on your own to help people know where they can edit/fork your widget
@@ -4639,12 +4639,12 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var wire = wires[i];
                 //console.log("clipper appending wire:", wire);
                 this.clipperDimension.push({
-                    X: wire.x1,
-                    Y: wire.y1
+                    X: this.flipX(wire.x1), //V5.1D20161229 - flipX/flipY added
+                    Y: this.flipY(wire.y1)  //V5.1D20161229 - flipX/flipY added
                 });
                 this.clipperDimension.push({
-                    X: wire.x2,
-                    Y: wire.y2
+                    X: this.flipX(wire.x2), //V5.1D20161229 - flipX/flipY added
+                    Y: this.flipY(wire.y2)  //V5.1D20161229 - flipX/flipY added
                 });
             }
 
@@ -4656,7 +4656,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         //V5.1D20161229 - Added
         boardBoundaries:{},// holds minimum X, Maximum X, Minimum Y, Maximum Y respectively
         /**
-        * This function calculates board boundaries (minimum ad maximum values of X & Y from dimensions layer)
+        * This function calculates board boundaries (minimum and maximum values of X & Y from dimensions layer)
         * board boundaries will be used to mirror board components (wires, pads, vias, holes ... etc)
         */
         getBoardBoundaries: function () {
@@ -4734,8 +4734,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var wire = wires[i];
                 //console.log("working on wire:", wire);
 
-                lineGeo.vertices.push(new THREE.Vector3(wire.x1, wire.y1, 0));
-                lineGeo.vertices.push(new THREE.Vector3(wire.x2, wire.y2, 0));
+                lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x1), that.flipY(wire.y1), 0));//V5.1D20161229 - flipX/flipY added
+                lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x2), that.flipY(wire.y2), 0));//V5.1D20161229 - flipX/flipY added
 
             }
             // now close the line by pushing first vertices
@@ -4974,7 +4974,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     viaGeo.vertices.shift();
                     //viaGeo.vertices.pop();
                     //2:Draw circle around the drill hole
-                    var line = that.drawCircle(via.x, via.y, via.drill/2, that.colorHole);
+                    var line = that.drawCircle(that.flipX(via.x), that.flipY(via.y), via.drill/2, that.colorHole);//V5.1D20161229 - flipX/flipY added
                     line.rotateZ(Math.PI / 8);
                     
                     bigSceneGroup.add (line);
@@ -5022,7 +5022,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var mesh = new THREE.Mesh(geometry, viaMat );
 
                     // move shape to correct position
-                    mesh.position.set(via.x, via.y, 0);
+                    mesh.position.set(that.flipX(via.x), that.flipY(via.y), 0); //V5.1D20161229 - flipX/flipY added
                     mesh.rotateZ(Math.PI / 8);
                     
                     mesh.userData["type"] = "via";
@@ -5050,7 +5050,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     lineV.geometry.vertices.forEach(function(v) {   //V5.1D20161227 - line changed to LineV
                         var vector = v.clone();
                         var vec = lineV.localToWorld(vector);       //V5.1D20161227 - line changed to LineV
-                        clipperPath.push({X: vec.x, Y: vec.y});
+                        clipperPath.push({X: that.flipX(vec.x), Y: that.flipY(vec.y)}); //V5.1D20161229 - flipX/flipY added
                     }, this);
                     this.clipperVias.push(clipperPath);
                     
@@ -5146,7 +5146,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     //console.log("drawing wires. wire:", wire);
 
                     // use new util function
-                    var sol_paths = that.addStrokeCapsToLine(wire.x1, wire.y1, wire.x2, wire.y2, wire.width);
+                    var sol_paths = that.addStrokeCapsToLine(
+                        that.flipX(wire.x1), that.flipY(wire.y1), //V5.1D20161229 - flipX/flipY added
+                        that.flipX(wire.x2), that.flipY(wire.y2), //V5.1D20161229 - flipX/flipY added
+                        wire.width);
                     //that.drawClipperPaths(sol_paths, that.colorSignal, 0.2);
 
                     //console.log("about to add sol_paths to centipede:", sol_paths);
@@ -5307,7 +5310,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var clipperPoly = [];
                     
                     poly.vertices.forEach(function(v) {
-                        clipperPoly.push({X:v.x, Y:v.y});
+                        clipperPoly.push({X:that.flipX(v.x), Y:that.flipY(v.y)}); //V5.1D20161229 - flipX/flipY added
                     });
                     
                     // store in eagle obj for retrieval from mondo object
@@ -5579,9 +5582,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
                 } // (if renderThisPad) ends here
                 
-
+                that.flipObject3D(smdgroup); //V5.1D20161229 - Added
+                
                 // set position
-                smdgroup.position.set(elem.x, elem.y, 0);
+                smdgroup.position.set(that.flipX(elem.x), that.flipY(elem.y), 0); //V5.1D20161229 - flipX/flipY added
                 //that.sceneAdd(smdgroup);
                 bigSceneGroup.add (smdgroup);
                 
@@ -5910,9 +5914,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 }
                 //} // (if renderThisPad) ends here
 
-                
+                that.flipObject3D(padgroup); //V5.1D20161229 - Added
                 // set padgroup's x/y
-                padgroup.position.set(elem.x, elem.y, 0);
+                padgroup.position.set(that.flipX(elem.x), that.flipY(elem.y), 0);//V5.1D20161229 - flipX/flipY added
                 //that.sceneAdd(padgroup);
                 
                 // Now convert the Three.js drawn padgroup to a Clipper path
@@ -6270,6 +6274,36 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // object.rotation.setEulerFromRotationMatrix(object.matrix);
             // code for r59+:
             object.rotation.setFromRotationMatrix(object.matrix);
+        },
+        //V5.1D20161229 - Added
+        /**Recalculate value of X if board is being mirrored*/
+        flipX: function (x){
+            if (this.mirrorY)
+                return this.boardBoundaries.MinimumX + this.boardBoundaries.MaximumX - x;
+            else
+                return x;
+        },
+        //V5.1D20161229 - Added
+        /**Recalculate value of Y if board is being mirrored*/
+        flipY: function (y){
+            if (this.mirrorX)
+                return this.boardBoundaries.MinimumY + this.boardBoundaries.MaximumY - y;
+            else
+                return y;
+        },
+        //V5.1D20161229 - Added
+        /**Mirror Object3D (smdgroups and padgroups) if board is being mirrored
+        this function must be called before setting the position of the group*/
+        flipObject3D: function(o){
+            if (this.mirrorX || this.mirrorY){
+                var mS = (new THREE.Matrix4()).identity();
+                //set -1 to the corresponding axis
+                if (this.mirrorY) mS.elements[0] = -1;
+                if (this.mirrorX) mS.elements[5] = -1;
+                //mS.elements[10] = -1;
+                        
+                o.applyMatrix(mS);
+            }
         },
         drawCircle: function (x, y, radius, color){
             // draw a hole
@@ -6920,6 +6954,13 @@ EagleCanvas.prototype.parseSmd = function (smd) {
 }
 
 //V5.1D20161227 this function is updated to calculate and return via diameter
+/**Parse via attributes from .brd file
+ * When via diameter is set to auto in Eagle, via is stores without diameter attribute
+ * in this case we need to calculate diameter size the same way eagle does it and based on drill size
+ * Vias with drill size smaller than 0.9mm get auto diameter of (drill size + 0.4064mm)
+ * Vias with drill size larger than 2.1mm get auto diameter of (drill size + 1.016mm)
+ * In between auto diameter is drill x 1.5
+ */ 
 EagleCanvas.prototype.parseVia = function (via) {
     var diameter = parseFloat(via.getAttribute('diameter'));
     var drill = parseFloat(via.getAttribute('drill'));
@@ -7183,7 +7224,7 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
                     </div>
                 </div>
             </div> <span class="panel-title" data-toggle="popover">Eagle BRD</span> <span 
-            style="font-size:9px;" class="fb-build">v5</span>
+            style="font-size:9px;" class="fb-build">v5.1</span>
 
         </div>
         <div class="panel-body">
@@ -7214,17 +7255,25 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
                             <!-- <option>Select Layer</option> -->
                         </select>
                     </div>
-                    
-                    <!--<div>
+                    <div class="form-group">
+                        Select Mirror Axis
+                        <div class="checkbox">
+                            <input type="checkbox" class="mirrorAxisY" checked />Mirror horizontally - Y Axis
+                        </div>
+                        <div class="checkbox">
+                            <input type="checkbox" class="mirrorAxisX" checked />Mirror vertically - X Axis
+                        </div> 
+                    </div>
+                    <!--<div>//V5.1D20161229 - Commented
                         Mirror This Layer: 
                         
-                    </div>-->
+                    </div>
                     
                     <div class="checkbox">
                             <label>
                                 <input type="checkbox" class="mirrorLayerY" checked />Mirror this layer (Bottom only, highly experimental) 
                             </label>
-                        </div>
+                        </div>-->
 
                     <div class="form-group">
                         Inflate Milling Path By
