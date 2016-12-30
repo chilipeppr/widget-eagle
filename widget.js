@@ -4529,7 +4529,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         
         //V5.1D20161229
-        /*
+        /**
         * This function calculates board boundaries (minimum ad maximum values of X & Y from dimensions layer)
         * board boundaries will be used to mirror board components (wires, pads, vias, holes ... etc)
         */
