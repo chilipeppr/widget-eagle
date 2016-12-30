@@ -4529,8 +4529,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         
         //V5.1D20161229
-        // This function calculates board boundaries (minimum ad maximum values of X & Y from dimensions layer)
-        // board boundaries will be used to mirror board components (wires, pads, vias, holes ... etc)
+        /*
+        * This function calculates board boundaries (minimum ad maximum values of X & Y from dimensions layer)
+        * board boundaries will be used to mirror board components (wires, pads, vias, holes ... etc)
+        */
         boardBoundaries:{},// holds minimum X, Maximum X, Minimum Y, Maximum Y respectively
         getBoardBoundaries: function () {
             var minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
