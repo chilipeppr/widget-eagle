@@ -1189,7 +1189,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         
         },
         
-        //V5.1D20161229 - commented (uncompleted experemental mirror code)
+        //V5.1D20161229 - commented (incomplete experimental mirror code)
         /*
         setupBoardMirrorCheckboxes: function() {
             $('#com-chilipeppr-widget-eagle .mirrorLayerY').change(this.onChangeMirrorLayerYCheckbox.bind(this));
@@ -4629,7 +4629,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 //placeholder for translating object by x or y board length
             }*/
             
-            //V5.1D20161229 - commented (uncompleted experemental mirror code)
+            //V5.1D20161229 - commented (incomplete experimental mirror code)
             /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
@@ -4945,7 +4945,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
             }
             
-            //V5.1D20161229 - commented (uncompleted experemental mirror code)
+            //V5.1D20161229 - commented (incomplete experimental mirror code)
             /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
@@ -5126,7 +5126,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             
             console.log("SignalWires mesh:  ", mesh, "  group:  ", bigSceneGroup);
             
-            //V5.1D20161229 - commented (uncompleted experemental mirror code)
+            //V5.1D20161229 - commented (incomplete experimental mirror code)
             /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
@@ -5220,7 +5220,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // to make rendering prettier
                 mesh.position.set(0,0,0.00001);
                 
-                //V5.1D20161229 - commented (uncompleted experemental mirror code)
+                //V5.1D20161229 - commented (incomplete experimental mirror code)
                 /*
                 var rFlip = (Math.PI / 180) * 180;
                 var axisFlip = new THREE.Vector3(0, 1, 0);
@@ -6108,7 +6108,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 */
             }
             
-            //V5.1D20161229 - commented (uncompleted experemental mirror code)
+            //V5.1D20161229 - commented (incomplete experimental mirror code)
             /*
             var rFlip = (Math.PI / 180) * 180;
             var axisFlip = new THREE.Vector3(0, 1, 0);
