@@ -4530,8 +4530,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         
         //V5.1D20161229 - Added
         boardBoundaries:{},// holds minimum X, Maximum X, Minimum Y, Maximum Y respectively
-        /**
-        * This function calculates board boundaries (minimum and maximum values of X & Y from dimensions layer)
+        /**This function calculates board boundaries (minimum and maximum values of X & Y from dimensions layer)
         * board boundaries will be used to mirror board components (wires, pads, vias, holes ... etc)
         */
         getBoardBoundaries: function () {
