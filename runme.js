@@ -1411,10 +1411,10 @@ var mergeFromCpTemplateRepo = function() {
   // git push
   var stdout = "";
   stdout += pushToGithubSync();
-  stdout += "> git checkout master\n";
+  stdout += "> git checkout staging\n";
   stdout += "> git pull https://github.com/chilipeppr/widget-template.git\n";
   try {
-    stdout += proc.execSync('git checkout master; git pull https://github.com/chilipeppr/widget-template.git', { encoding: 'utf8' });
+    stdout += proc.execSync('git checkout staging; git pull https://github.com/chilipeppr/widget-template.git', { encoding: 'utf8' });
   } catch (ex) {
     console.log("error on merge:", ex);
     stdout += "Tiny little error on merge.\n";
@@ -1545,7 +1545,7 @@ var getGithubUrl = function(callback) {
   url = "http://github.com/" + url;
   
   var rawurl = url.replace(/\/github.com\//i, "/raw.githubusercontent.com/");
-  rawurl += '/master/auto-generated-widget.html';
+  rawurl += '/staging/auto-generated-widget.html';
   
   var ret = {
     url: url,
