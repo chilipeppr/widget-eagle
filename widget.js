@@ -1816,6 +1816,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         colorPad: 2329891, // pads are green
         colorMill: 255, // match color ChiliPeppr shows for milling
         colorHole: 9276813, // light gray
+        colorHoleUnhandled: 9046024,
         colorsDrop: [2722312, 8817160, 9046024] , // green, yellow, red
         colorDimension: 9276813, // light gray
         opacitySignal: 0.1,
@@ -1865,8 +1866,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.draw3dSignalWires(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dSignalPolygons(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dElements(this.eagle.eagleLayersByName[this.activeLayer]);
-            
             this.draw3dVias('1-16');
+            this.draw3dHoles(); //V5.2D201701XX Added
             this.threeDimensions = this.draw3dDimension(this.endmillSize);
             //this.obj3d.children = [];
             
@@ -1908,7 +1909,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
 
         // Section on exporting Gcode
-        
+        //TODO: I think following variables should be initialized from HTML values or the other way around
         clearanceHeight: 1.0, // move z to clearance
         // 1 oz = 0.035mm, 2 oz = 0.07mm, 3 oz = 0.105mm
         depthOfSignalMilling: -0.1, // cutting how deep?
@@ -1916,7 +1917,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         feedRateSignals: 80, // feedrate for milling signals,pads,smds,vias
         feedRateDimensions: 100,
         drillFeedrate: 100.0, // mm/min
-        drillMaxDiameter: 3.00, //mm/min
+        drillMaxDiameter: 2.00, //mm/min //V5.2D201701XX changed to 2.00 to match default value on widget.html
         drillDepth: -1.7, // std thickness
         depthOfDimensions: -1.7, // std thickness
         millDiameter: 2,
@@ -4792,6 +4793,23 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         clipperSignalWires: [], // holds clipper formatted paths
         clipperSignalPolys: [], // holds clipper formatted polygons
+        draw3dHoles: function(){//V5.2D201701XX Added
+            var that = this;
+            console.group("draw3dVias");
+            
+            var bigSceneGroup = new THREE.Group();
+            
+            this.eagle.plainHoles.forEach(function(hole){
+                var colorHole = that.colorHole; //V5.2D201701XX Aded
+                if(!that.addHole(hole.drill, hole.x, hole.y)) colorHole = that.colorHoleUnhandled; //V5.2D201701XX Added if hole cannot be drilled or milled change color to red
+                var line = that.drawCircle(that.flipX(hole.x), that.flipY(hole.y), hole.drill/2, colorHole);
+                line.rotateZ(Math.PI / 8);
+                
+                bigSceneGroup.add (line);
+            });
+            
+            that.sceneAdd(bigSceneGroup);
+        },
         draw3dVias: function (layersName) {
             if (!layersName) return;
             var that = this;
@@ -4843,6 +4861,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         D: via.drill.toFixed(4)
                     });
                     
+                    var colorHole = this.colorHole; //V5.2D201701XX Aded
+                    if(!this.addHole(via.drill, via.x, via.y)) colorHole = this.colorHoleUnhandled; //V5.2D201701XX Added if hole cannot be drilled or milled change color to red
+
                     //1:Draw outter via shape
                     var viashape = "round";
                     if ('shape' in via) viashape = via.shape;
@@ -4857,7 +4878,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     viaGeo.vertices.shift();
                     //viaGeo.vertices.pop();
                     //2:Draw circle around the drill hole
-                    var line = that.drawCircle(that.flipX(via.x), that.flipY(via.y), via.drill/2, that.colorHole);//V5.1D20161229 - flipX/flipY added
+                    var line = that.drawCircle(that.flipX(via.x), that.flipY(via.y), via.drill/2, colorHole);//V5.1D20161229 - flipX/flipY added //V5.2D201701XXchanged this.colorHole to colorHole
                     line.rotateZ(Math.PI / 8);
                     
                     bigSceneGroup.add (line);
@@ -5280,18 +5301,21 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                                 //(drill diameter > drillMaxDiameter and <= millDiameter)
         addHole(drill, x, y){//V5.2D201701XX Added
             var handled = true;
-            if(drill > this.drillMaxDiameter) {//Hole diameter bigger tham drillMaxDiameter, try to mill it
-                if(drill <= this.millDiameter){
-                   this.holesToMill.push({
-                       X: x.toFixed(4),
-                       Y: y.toFixed(4),
-                       D: drill.toFixed(4)
-                   });
-                }
-                else {
-                    this.holesUnhandledCount++; //Warning message will pop-up if this is not zero
-                    handled = false;
-                }
+            if(drill > this.drillMaxDiameter && drill <= this.millDiameter){
+                this.holesUnhandledCount++
+                return false; //We don't have tool suitable for this hole.
+            }
+            chilipeppr.publish("/com-chilipeppr-elem-flashmsg/flashmsg", 
+               "Warning", 
+               "Max: " + this.drillMaxDiameter + "mm  " + 
+               "Mill: " + this.millDiameter + "mm " + 
+               "Drill: " + drill + "mm ",  2 * 1000);
+            if(drill > this.drillMaxDiameter) {//Hole diameter bigger tham drillMaxDiameter, mill it
+                this.holesToMill.push({
+                   X: x.toFixed(4),
+                   Y: y.toFixed(4),
+                   D: drill.toFixed(4)
+                });
             }
             else {//Hole diameter smaller or equel to drillMaxDiameter, drill it
                 if(this.holesToDrill[drill.toFixed(1)] === undefined)
@@ -5872,7 +5896,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
                         // Get absolute coordinates from drill hole
                         // in an element
-                        if( line.position.x == 0 ){ // only middle point holes
+                        /*if( line.position.x == 0 ){ // only middle point holes
                            var vector = new THREE.Vector3();
                            vector.setFromMatrixPosition( line.matrixWorld  );
                            // Most exists only drills with diameter 1.0 0.9 0.8 ...
@@ -5890,7 +5914,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                            //bigSceneGroup.add (this.drawCircle(vector.x, vector.y, drill / 2, this.colorHole));//V5.2D201701XX commented
 
                            // drill hole --> end
-                         }
+                         }*/
                          //V5.2D201701XX holes handling --> Start - To replace above code
                          if( line.position.x == 0 ){ // only middle point holes
                            var vector = new THREE.Vector3();
@@ -5898,8 +5922,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                            var drill = line.parent.userData.pad.drill;
                            var shape = line.parent.userData.pad.shape;
                            var colorHole = this.colorHole;
-                           if(!this.addHole(drill, vector.x, vector.y))
-                            colorHole = 9046024; //Red
+                           if(!this.addHole(drill, vector.x, vector.y)) colorHole = this.colorHoleUnhandled; //Red
                            // New routine to draw a cirlce in threed
                            //this.sceneAdd( this.drawCircle(vector.x, vector.y, drill/2, this.colorHole ) );
                            bigSceneGroup.add (this.drawCircle(vector.x, vector.y, drill / 2, colorHole));
