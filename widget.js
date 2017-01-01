@@ -5271,6 +5271,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         clipperVias: [], // subset of elements (vias)
         drillPads: {}, // save all pad drill vectors
         drillVias: {}, // save all via drill vectors
+        holesToDrill: {}, //V5.2D201701XX Added should replace drillPads/drillVias
+        holesToMill: {},  //V5.2D201701XX Added should replace drillPads/drillVias
         draw3dElements: function (layer) {
 
             if (!layer) return;
@@ -6807,6 +6809,7 @@ EagleCanvas.prototype.parse = function () {
     }
 
     this.plainWires = {};
+    this.plainHoles = []; //V5.2D201701XX Added
     var plains = this.boardXML.getElementsByTagName('plain'); //Usually only one
     for (var plainIdx = 0; plainIdx < plains.length; plainIdx++) {
         var plain = plains[plainIdx],
@@ -6817,6 +6820,12 @@ EagleCanvas.prototype.parse = function () {
                 layer = wireDict.layer;
             if (!this.plainWires[layer]) this.plainWires[layer] = [];
             this.plainWires[layer].push(wireDict);
+        }
+        //V5.2D201701XX Added
+        var holes = plain.getElementsByTagName('hole');
+        for (var holeIdx = 0; holeIdx < holes.length; holeIdx++) {
+            var holeDict = this.parseHole(holes[holeIdx]);
+            this.plainHoles.push(holeDict);
         }
     }
 
@@ -6842,6 +6851,15 @@ EagleCanvas.prototype.parseSmd = function (smd) {
         'rot': smd.getAttribute('rot'),
         'name': smd.getAttribute('name'),
         'layer': smd.getAttribute('layer')
+    };
+}
+
+//V5.2D201701XX Added
+EagleCanvas.prototype.parseHole = function (hole) {
+    return {
+        'x': parseFloat(hole.getAttribute('x')),
+        'y': parseFloat(hole.getAttribute('y')),
+        'drill': parseFloat(hole.getAttribute('drill'))
     };
 }
 
