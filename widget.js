@@ -1650,6 +1650,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.clipperVias = [];
             this.drillPads = {};
             this.drillVias = {};
+            this.holesToDrill = {};         //V5.2D201701XX
+            this.holesToMill = [];          //V5.2D201701XX
+            this.holesUnhandledCount = 0;   //V5.2D201701XX
             this.paths = null; // final paths generated from onRefresh() used to export gcode
             this.pathsUnion = null;
             this.pathsUnionHoles = null;
@@ -5272,7 +5275,36 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         drillPads: {}, // save all pad drill vectors
         drillVias: {}, // save all via drill vectors
         holesToDrill: {}, //V5.2D201701XX Added should replace drillPads/drillVias
-        holesToMill: {},  //V5.2D201701XX Added should replace drillPads/drillVias
+        holesToMill: [],  //V5.2D201701XX Added should replace drillPads/drillVias
+        holesUnhandledCount: 0, //V5.2D201701XX Count number of holes that cannot be drilled/milled 
+                                //(drill diameter > drillMaxDiameter and <= millDiameter)
+        addHole(drill, x, y){//V5.2D201701XX Added
+            var handled = true;
+            if(drill > this.drillMaxDiameter) {//Hole diameter bigger tham drillMaxDiameter, try to mill it
+                if(drill <= this.millDiameter){
+                   this.holesToMill.push({
+                       X: x.toFixed(4),
+                       Y: y.toFixed(4),
+                       D: drill.toFixed(4)
+                   });
+                }
+                else {
+                    this.holesUnhandledCount++; //Warning message will pop-up if this is not zero
+                    handled = false;
+                }
+            }
+            else {//Hole diameter smaller or equel to drillMaxDiameter, drill it
+                if(this.holesToDrill[drill.toFixed(1)] === undefined)
+                   this.holesToDrill[drill.toFixed(1)] = [];
+                this.holesToDrill[drill.toFixed(1)].push({
+                   X: x.toFixed(4),
+                   Y: y.toFixed(4),
+                   D: drill.toFixed(4)
+                });
+            }
+            return handled;
+        },
+        
         draw3dElements: function (layer) {
 
             if (!layer) return;
@@ -5855,11 +5887,26 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                            });
                            // New routine to draw a cirlce in threed
                            //this.sceneAdd( this.drawCircle(vector.x, vector.y, drill/2, this.colorHole ) );
-                           bigSceneGroup.add (this.drawCircle(vector.x, vector.y, drill / 2, this.colorHole));
+                           //bigSceneGroup.add (this.drawCircle(vector.x, vector.y, drill / 2, this.colorHole));//V5.2D201701XX commented
 
                            // drill hole --> end
                          }
-                        
+                         //V5.2D201701XX holes handling --> Start - To replace above code
+                         if( line.position.x == 0 ){ // only middle point holes
+                           var vector = new THREE.Vector3();
+                           vector.setFromMatrixPosition( line.matrixWorld  );
+                           var drill = line.parent.userData.pad.drill;
+                           var shape = line.parent.userData.pad.shape;
+                           var colorHole = this.colorHole;
+                           if(!this.addHole(drill, vector.x, vector.y))
+                            colorHole = 9046024; //Red
+                           // New routine to draw a cirlce in threed
+                           //this.sceneAdd( this.drawCircle(vector.x, vector.y, drill/2, this.colorHole ) );
+                           bigSceneGroup.add (this.drawCircle(vector.x, vector.y, drill / 2, colorHole));
+
+                           // holes handling --> end
+                             
+                         }
                         line.geometry.vertices.forEach(function (v) {
                             //console.log("pushing v onto clipper:", v);
                             var vector = v.clone();
