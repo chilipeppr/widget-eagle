@@ -418,6 +418,12 @@ return g;
 },
 exportGcodeMilling:function(){
 var g = '';
+// if($('#com-chilipeppr-widget-eagle .skipLastPath').is(':checked')){
+//     this.paths.splice(this.paths.lenght-2, 1); //V5.2D201701XX Testing Remove last path
+// chilipeppr.publish("/com-chilipeppr-elem-flashmsg/flashmsg", 
+//   "Info", 
+//   "Paths " + this.paths.length,  2 * 1000);
+//}
 this.paths.forEach(function(path) {
 // move to clearance
 g += "G0 Z" + this.clearanceHeight + "\n";
