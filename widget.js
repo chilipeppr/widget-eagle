@@ -1478,6 +1478,15 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 console.log("evt:", evt);
                 that.feedRateDimensions = evt.currentTarget.valueAsNumber;
             });
+            el.find('.pcbholder-length').change(function(evt) {
+                console.log("evt:", evt);
+                that.PCBHolderLength = evt.currentTarget.valueAsNumber;
+            });
+            el.find('.pcbholder-count').change(function(evt) {
+                console.log("evt:", evt);
+                that.PCBHolderCount = evt.currentTarget.valueAsNumber;
+            });
+            
             el.find('.dispenser-axis').change(function(evt) {
                 console.log("evt:", evt);
                 that.dispenserAxis = evt.currentTarget.valueAsNumber;
@@ -1490,6 +1499,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 console.log("evt:", evt);
                 that.cannulaDiameter = evt.currentTarget.valueAsNumber;
             });
+            
+            el.find('input').trigger('change');
         },
         calcPasses: function(el) {
             // calc passes
@@ -1679,21 +1690,22 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             
             // convert the color on the end mill path because it's irrelevant now based
             // on the gcode being shown by the 3d viewer
+            /* Uncaught TypeError: Failed to execute 'uniform3fv'
             this.threePathEndMill.forEach(function(threeObj) {
                 console.log("tweaking endmill path now that we're sending gcode. threeObj:", threeObj);
                 if (threeObj.children.length > 0) {
                     threeObj.children[0].material.opacity = 0.1;
                     threeObj.children[0].material.color = 0x000000;
-                    /*threeObj.children.forEach(function(threeObjChild) {
-                        threeObjChild.material.color = 0x000000;
-                        threeObjChild.material.opacity = 0.1;
-                    });*/
+                    // threeObj.children.forEach(function(threeObjChild) {
+                    //    threeObjChild.material.color = 0x000000;
+                    //    threeObjChild.material.opacity = 0.1;
+                    //});
                 } else {
                     threeObj.material.color = 0x000000;
                     threeObj.material.opacity = 0.1;
                 }
             }, this);
-            
+            */            
             // or use alternate pubsub
             // "/com-chilipeppr-elem-dragdrop/loadGcode"
             var that = this;
@@ -2163,11 +2175,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         //console.log("dimension mill: skipping pt:", pt);
                     } else {
                         //console.log("dimension mill: adding pt:", pt);
-                        g += "G1 X" + pt.X + " Y" + pt.Y + "\n";
+                        g += that.exportPCBDimensionHolder(pt, lastPt, newZ, diaOfEndmill/2);
                     }
                     lastPt = pt;
-                });
-                // move to first point
+                });                // move to first point
                 //g += "G1 X" + this.clipperDimension[0].X + " Y" + this.clipperDimension[0].Y + "\n";
                 // just to be safe, move to 2nd point no more than 3mm
                 //g += "G1 X" + this.clipperDimension[1].X + " Y" + this.clipperDimension[1].Y + "\n";
@@ -2176,6 +2187,65 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             this.clipperDimension = origClipperDimensions;
             console.groupEnd();
+            return g;
+        },
+        exportPCBDimensionHolder: function(point, lastpoint, z, radiusEndmill){
+            // Set pcb holder if user like
+            // Measure distance between points and 
+            // decide to set a holder or not
+
+            // User data:
+            // this.PCBHolderCount = 1; 
+            // this.PCBHolderLength= 1; // mm
+
+            var defmove = "G1 X" + point.X + " Y" + point.Y + " F" + this.feedRateDimensions + "\n";
+            if(this.PCBHolderCount == 0 || lastpoint.X == null)
+                return defmove;            
+                
+            // PCBHolderCount for one distance: 1 // 2 // 3 ...
+            // PCBHolderLength: 1 mmm  
+            var distance = { 
+                x: point.X - lastpoint.X,
+                y: point.Y - lastpoint.Y,
+                segment: {},
+            };
+            
+            distance.segment.x = distance.x/(this.PCBHolderCount+1);
+            distance.segment.y = distance.y/(this.PCBHolderCount+1);
+
+            // ony straigth lines
+            if(distance.x != 0 && distance.y != 0)
+                return defmove;
+
+            if(Math.abs(distance.segment.x) < this.PCBHolderLength && Math.abs(distance.segment.y) < this.PCBHolderLength*3)
+                return defmove;            
+
+            var g = '',x = lastpoint.X, y = lastpoint.Y;
+            for(var c=0;c < this.PCBHolderCount;c++){
+                if(Math.abs(distance.segment.x) > this.PCBHolderLength)
+                    x += (distance.segment.x - (this.PCBHolderLength + radiusEndmill));
+                else
+                    x += distance.segment.x;
+
+                if(Math.abs(distance.segment.y) > this.PCBHolderLength)
+                    y += (distance.segment.y - (this.PCBHolderLength + radiusEndmill));
+                else
+                    y += distance.segment.y;
+                    
+                g += "G1 X" + x + " Y" + y + " F" + this.feedRateDimensions + "\n";
+                // go up ..     
+                g += "G0 Z" + (z+1) + "\n"; // let 1mm material stay in this tab
+
+                // move to next plunge
+                if(Math.abs(distance.segment.x) > this.PCBHolderLength)
+                    (distance.segment.x < 0 ? x -= (this.PCBHolderLength + radiusEndmill) : x += (this.PCBHolderLength + radiusEndmill));
+                if(Math.abs(distance.segment.y) > this.PCBHolderLength)
+                    (distance.segment.y < 0 ? y -= (this.PCBHolderLength + radiusEndmill) : y += (this.PCBHolderLength + radiusEndmill));
+
+                g += "G1 X" + x + " Y" + y + " F" + this.feedRateDimensions + "\n";  // jump and ...
+                g += "G1 Z" + z + " F" + this.feedRatePlunge + "\n";
+            }
+
             return g;
         },
         exportGcodeFooter:function(){
