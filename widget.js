@@ -3345,8 +3345,46 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 //this.threePathDeflatedActualArr.push( group );
             }
             
+            //V5.2D201701XX Experimenting (Try to reduce number of paths)
+            // this.paths = [];
+            // this.paths.push(paths[0]);
+            // for(var i=1; i < paths.length-1; i++){
+                
+            //     for(var j=i+1; j < paths.length; j++){
+            //         var b1 = ClipperLib.JS.BoundsOfPath(paths[i], 1);
+            //         var b2 = ClipperLib.JS.BoundsOfPath(paths[j], 1);
+            //         var a1 = ClipperLib.JS.AreaOfPolygon (paths[i], 1);
+            //         var a2 = ClipperLib.JS.AreaOfPolygon (paths[j], 1);
+            //         //var dl = 0.1;
+            //         // if( (Math.abs(b1.left  - b2.left)<0.1) &&
+            //         //     (Math.abs(b1.right - b2.right)<0.1) &&
+            //         //     (Math.abs(b1.top   - b2.top)<0.1) &&
+            //         //     (Math.abs(b1.bottom- b2.bottom)<0.1)){
+            //         if((Math.abs(a1 - a2)) > 2)
+            //             this.paths.push(paths[i]);
+            //             // }
+            //         chilipeppr.publish("/com-chilipeppr-elem-flashmsg/flashmsg", "Experimental Code", "Interest paths " + i + " " + j, 100);
+            //         // var solution = new ClipperLib.Paths();
+            //         // var c = new ClipperLib.Clipper();
+            //         // c.AddPath(paths[i], ClipperLib.PolyType.ptSubject, true);
+            //         // c.AddPath(paths[j], ClipperLib.PolyType.ptClip, true);
+                    
+            //         // c.Execute(ClipperLib.ClipType.ctIntersection, solution);
+            //         // if(solution.length == 0){
+            //         //     this.paths.push(paths[i]);
+            //         //     //chilipeppr.publish("/com-chilipeppr-elem-flashmsg/flashmsg", "Experimental Code", "Interest paths " + i + " " + j, 2000);
+            //         // }
+            //         // else {
+            //         //     var areaS = ClipperLib.JS.AreaOfPolygon (solution, 1);
+            //         //     var areaP = ClipperLib.JS.AreaOfPolygon (paths[i], 1);
+            //         //     if((Math.abs(areaP - areaS)/areaP) < 0.05){
+            //         //         this.paths.push(paths[i]);
+            //         //     }
+            //         // }
+            //     }
+            // }
             // Export Gcode
-            this.paths = paths; //V5.2D201701XX Commented
+            this.paths = paths; 
             setTimeout(this.exportGcode.bind(this), 500);
             
             if (callback) {
@@ -4601,6 +4639,38 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 }
             }
 
+            //V5.2D201701XX Added: Sort wires to make sure consecutive wires end and start at same point.
+            //First step is to sort the wires
+            for(i = 0; i < wires.length-1; i++){
+                var j = i + 1;
+                if( (wires[i].x2 != wires[j].x1) && (wires[i].y2 != wires[j].y1) ||
+                    (wires[i].x2 != wires[j].x2) && (wires[i].y2 != wires[j].y2) ){
+                    var found = false;
+                    while(!found && j < wires.length){
+                        found = (wires[i].x2 == wires[j].x1) && (wires[i].y2 == wires[j].y1) ||
+                                (wires[i].x2 == wires[j].x2) && (wires[i].y2 == wires[j].y2);
+                        if(found){
+                            var tWire = wires[i+1];
+                            wires[i+1] = wires[j];
+                            wires[j] = tWire;
+                        }
+                        j++;
+                    }
+                }
+            }
+            //Second step is to wires direction, swap point if required.
+            for(i = 0; i < wires.length-1; i++){
+                var j = i + 1;
+                if((wires[i].x2 != wires[j].x1) && (wires[i].y2 != wires[j].y1)){
+                    var t = wires[j].x1;
+                    wires[j].x1 = wires[j].x2;
+                    wires[j].x2 = t;
+                    t = wires[j].y1;
+                    wires[j].y1 = wires[j].y2;
+                    wires[j].y2 = t;
+                }
+            }
+            
             // build clipper dimension format
             this.clipperDimension = [];
             for (var i = 0; i < wires.length; i++) {
@@ -4690,7 +4760,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var color = this.colorDimension;
 
             var lineMat = new THREE.LineBasicMaterial({
-                color: color,
+                color: 0xff0000,
                 transparent: true,
                 opacity: this.opacityDimension
             });
@@ -4700,14 +4770,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             for (var i = 0; i < wires.length; i++) {
                 var wire = wires[i];
                 //console.log("working on wire:", wire);
-
                 lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x1), that.flipY(wire.y1), 0));//V5.1D20161229 - flipX/flipY added
                 lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x2), that.flipY(wire.y2), 0));//V5.1D20161229 - flipX/flipY added
 
             }
+            //TODO: Is it necessary to add first virtex to the geometry? I guess it's not, Clipper requires that but not three.js -- I need to check ... Ameen
             // now close the line by pushing first vertices
             if (wires.length > 0) {
-                lineGeo.vertices.push(new THREE.Vector3(wires[0].x1, wires[0].y1, 0));
+                lineGeo.vertices.push(new THREE.Vector3(that.flipX(wires[0].x1), that.flipY(wires[0].y1, 0))); //V5.2D201701XX - bug fixed by adding flipX/flipY
             }
 
             var line = new THREE.Line(lineGeo, lineMat);
@@ -4881,66 +4951,36 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         draw3dHoles: function(){//V5.2D201701XX Added
             var that = this;
             console.group("draw3dVias");
-            
+            //Add Plain holes
             var bigSceneGroup = new THREE.Group();
-            
-            // var holeMat = new THREE.MeshBasicMaterial({
-            //     color: this.colorHole,
-            //     transparent: true,
-            //     opacity: this.opacityVia,
-            //     side: THREE.DoubleSide,
-            //     depthWrite: false
-            // });
-            // var lineMat = new THREE.LineBasicMaterial({
-            //     color: this.colorVia,
-            //     transparent: true,
-            //     opacity: 0.99
-            // });
-            
             this.eagle.plainHoles.forEach(function(hole){
-                var colorHole = that.colorHole; //V5.2D201701XX Aded
+                var colorHole = that.colorHole;
                 var hx = that.flipX(hole.x);
                 var hy = that.flipY(hole.y);
-                if(!that.addHole(hole.drill, hx, hy)) colorHole = that.colorHoleUnhandled; //V5.2D201701XX Added if hole cannot be drilled or milled change color to red
+                if(!that.addHole(hole.drill, hx, hy)) colorHole = that.colorHoleUnhandled; //If hole cannot be drilled or milled change color to red
                 var line = that.drawCircle(hx, hy, hole.drill/2, colorHole);
                 line.rotateZ(Math.PI / 8);
                 
                 bigSceneGroup.add (line);
-                
-            //   // create mesh for the hole
-                
-            //     var holeGeo = new THREE.CircleGeometry(hole.drill/2, 32);
-            //     var shape = new THREE.Shape();
-                
-            //     var ptCtr = 0;
-                
-            //     holeGeo.vertices.forEach(function (pt) {
-            //         if (ptCtr == 0) shape.moveTo(pt.x, pt.y);
-            //         else shape.lineTo(pt.x, pt.y);
-            //         ptCtr++;
-            //     }, this);
-                
-            //     var geometry = new THREE.ShapeGeometry( shape );
-            //     var mesh = new THREE.Mesh(geometry, holeMat );
-    
-            //     // move shape to correct position
-            //     mesh.position.set(that.flipX(hole.x), that.flipY(hole.y), 0); 
-            //     mesh.rotateZ(Math.PI / 8);
-                
-            //     //mesh.userData["type"] = "hole";
-            //     //mesh.userData["hole"] = hole;
-            //     //mesh.userData["name"] = "X Hole";
-            //     //mesh.userData["layerHole"] = "All";
-                
-            //     bigSceneGroup.add (mesh);
-            //     // this.sceneAdd(mesh);
-                
-            //     // add that these get detected during
-            //     // mouseover
-            //     //this.intersectObjects.push(mesh);
-                
             });
-
+            //Add Package holes
+            
+            for (var elemKey in this.eagle.elements) {
+                var elem = this.eagle.elements[elemKey];
+                
+                var pkg = this.eagle.packagesByName[elem.pkg];
+                
+                pkg.holes.forEach(function(hole){
+                    var colorHole = that.colorHole;
+                    var hx = that.flipX(hole.x + elem.x);
+                    var hy = that.flipY(hole.y + elem.y);
+                    if(!that.addHole(hole.drill, hx, hy)) colorHole = that.colorHoleUnhandled; //If hole cannot be drilled or milled change color to red
+                    var line = that.drawCircle(hx, hy, hole.drill/2, colorHole);
+                    line.rotateZ(Math.PI / 8);
+                    
+                    bigSceneGroup.add (line);
+                });
+            }
             that.sceneAdd(bigSceneGroup);
         },
         draw3dVias: function (layersName) {
@@ -6954,6 +6994,7 @@ EagleCanvas.prototype.parse = function () {
         // need to add rectangles as well
 
         var packageWires = [];
+        var packageHoles = [];
         var bbox = [EagleCanvas.LARGE_NUMBER, EagleCanvas.LARGE_NUMBER, -EagleCanvas.LARGE_NUMBER, -EagleCanvas.LARGE_NUMBER];
         var wires = pkg.getElementsByTagName('wire');
         for (var wireIdx = 0; wireIdx < wires.length; wireIdx++) {
@@ -6994,11 +7035,17 @@ EagleCanvas.prototype.parse = function () {
             var text = texts[textIdx];
             packageTexts.push(this.parseText(text));
         }
-
+        //V5.2D201701XX Added
+        var holes = pkg.getElementsByTagName('hole');
+        for (var holeIdx = 0; holeIdx < holes.length; holeIdx++) {
+            var holeDict = this.parseHole(holes[holeIdx]);
+            packageHoles.push(holeDict);
+        }
         var packageDict = {
             'pads': packagePads,
             'smds': packageSmds,
             'wires': packageWires,
+            'holes': packageHoles,
             'texts': packageTexts,
             'bbox': bbox,
             'name' : packageName
