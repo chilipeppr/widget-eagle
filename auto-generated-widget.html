@@ -4768,34 +4768,66 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             //First step is to sort the wires
             for(i = 0; i < wires.length-1; i++){
                 var j = i + 1;
-                if( (wires[i].x2 != wires[j].x1) && (wires[i].y2 != wires[j].y1) ||
-                    (wires[i].x2 != wires[j].x2) && (wires[i].y2 != wires[j].y2) ){
+                if(!((wires[i].x2 == wires[j].x1) && (wires[i].y2 == wires[j].y1) ||
+                     (wires[i].x2 == wires[j].x2) && (wires[i].y2 == wires[j].y2))){
+                    console.log("Ameen", "Wire ", j, "in wrong position");
                     var found = false;
                     while(!found && j < wires.length){
                         found = (wires[i].x2 == wires[j].x1) && (wires[i].y2 == wires[j].y1) ||
                                 (wires[i].x2 == wires[j].x2) && (wires[i].y2 == wires[j].y2);
                         if(found){
-                            var tWire = wires[i+1];
-                            wires[i+1] = wires[j];
+                            console.log("Ameen", "Wire ", j, "found");
+                            var h = i + 1;
+                            var tWire = wires[h];
+                            wires[h] = wires[j];
                             wires[j] = tWire;
+                            console.log("Ameen", "Wire ", j, "swapped with wire", h);
+                            if(!((wires[i].x2 == wires[h].x1) && (wires[i].y2 == wires[h].y1))){
+                                console.log("Ameen", "Wire ", h, "not in the right direction");
+                                console.log("Ameen", "before", JSON.stringify(wires[h]));
+                                var t = wires[h].x1;
+                                wires[h].x1 = wires[h].x2;
+                                wires[h].x2 = t;
+                                t = wires[h].y1;
+                                wires[h].y1 = wires[h].y2;
+                                wires[h].y2 = t;
+                                console.log("Ameen", "Wire ", h, "flipped");
+                                console.log("Ameen", "after", JSON.stringify(wires[h]));
+                            }
                         }
                         j++;
                     }
                 }
-            }
-            //Second step is to wires direction, swap point if required.
-            for(i = 0; i < wires.length-1; i++){
-                var j = i + 1;
-                if((wires[i].x2 != wires[j].x1) && (wires[i].y2 != wires[j].y1)){
-                    var t = wires[j].x1;
-                    wires[j].x1 = wires[j].x2;
-                    wires[j].x2 = t;
-                    t = wires[j].y1;
-                    wires[j].y1 = wires[j].y2;
-                    wires[j].y2 = t;
+                else { //We still need to check wire direction
+                    console.log("Ameen", "Wire ", j, "in right position");
+                    var h = i + 1;
+                    if(!((wires[i].x2 == wires[h].x1) && (wires[i].y2 == wires[h].y1))){
+                        console.log("Ameen", "Wire ", h, "not in the right direction");
+                        console.log("Ameen", "before", JSON.stringify(wires[h]));
+                        var t = wires[h].x1;
+                        wires[h].x1 = wires[h].x2;
+                        wires[h].x2 = t;
+                        t = wires[h].y1;
+                        wires[h].y1 = wires[h].y2;
+                        wires[h].y2 = t;
+                        console.log("Ameen", "Wire ", h, "flipped");
+                        console.log("Ameen", "after", JSON.stringify(wires[h]));
+                    }
                 }
             }
-            
+            //Second step is to wires direction, swap point if required.
+            // for(i = 0; i < wires.length-1; i++){
+            //     var j = i + 1;
+            //     if(!((wires[i].x2 == wires[j].x1) && (wires[i].y2 != wires[j].y1))){
+            //         var t = wires[j].x1;
+            //         wires[j].x1 = wires[j].x2;
+            //         wires[j].x2 = t;
+            //         t = wires[j].y1;
+            //         wires[j].y1 = wires[j].y2;
+            //         wires[j].y2 = t;
+            //     }
+            // }
+            for(var x = 0; x < wires.length; x++) console.log("Ameen", x, JSON.stringify(wires[x]));
             // build clipper dimension format
             this.clipperDimension = [];
             for (var i = 0; i < wires.length; i++) {
