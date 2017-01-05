@@ -3,10 +3,13 @@ Versoin 5.2
 Auther: Ameen Nihad
 
 - Changed how holes are handled, holes for Pads, Vias and Plains are treated exactly the same.
-- Holes are eather drilled or milled, that depending on diameter of tools used, i.e. values of:
+- Holes are either drilled or milled, that depending on diameter of tools used, i.e. values of:
     - Maximum hole diameter to drill
     - Diameter of tool for cutting dimension
-    
+- Fix the bug of "Board dimensions rendered incorrectly", Eagle don't care about order of wires and previous code assumes they are in right order,
+  bug fixed by sorting the wires and correct their direction.
+- TODO: Curves in board dimensions.
+
 Versoin 5.1
 **************************************************
 Auther: Ameen Nihad

@@ -304,7 +304,7 @@ millDiameter: 2,
 stepDownDimensions: -0.5,
 stepDownPasses: 3, // use passes or dimension
 spindleRPM: 12000, // spindle rotation speed (rpm)
-//V5.2D201701XX Comment Replaced by exportGcodeMillHoles
+//V5.2D201701XX Commented Replaced by exportGcodeMillHoles
 /*generateGcodeHole:function(diameter, x, y){
 var radius = diameter/2;
 var gdiameter = radius-(this.millDiameter/2); // inside milling 
@@ -387,7 +387,7 @@ millDiameter: 2,
 stepDownDimensions: -0.5,
 stepDownPasses: 3, // use passes or dimension
 spindleRPM: 12000, // spindle rotation speed (rpm)
-//V5.2D201701XX Comment Replaced by exportGcodeMillHoles
+//V5.2D201701XX Commented Replaced by exportGcodeMillHoles
 /*generateGcodeHole:function(diameter, x, y){
 var radius = diameter/2;
 var gdiameter = radius-(this.millDiameter/2); // inside milling 
@@ -418,12 +418,6 @@ return g;
 },
 exportGcodeMilling:function(){
 var g = '';
-// if($('#com-chilipeppr-widget-eagle .skipLastPath').is(':checked')){
-//     this.paths.splice(this.paths.lenght-2, 1); //V5.2D201701XX Testing Remove last path
-// chilipeppr.publish("/com-chilipeppr-elem-flashmsg/flashmsg", 
-//   "Info", 
-//   "Paths " + this.paths.length,  2 * 1000);
-//}
 this.paths.forEach(function(path) {
 // move to clearance
 g += "G0 Z" + this.clearanceHeight + "\n";
@@ -496,11 +490,12 @@ return g;
 //V5.2D201701XX Added
 exportGcodeMarkHoles:function(){
 var g = '';
-var that = this;<br><br>if(! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked'))
+var that = this;<br><br>if((! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked')) ||
+this.holesToDrill.lenght == 0)
 return g;<br><br>// Drilling, first sort to drill diameter and change tool to first diameter
 g += "(------ MARK HOLES -------)\n";
-for ( var diameter in this.sortObjByKey(this.drillHoles) ){
-this.drillHoles[diameter].forEach(function(dvector){
+for ( var diameter in this.sortObjByKey(this.holesToDrill) ){
+this.holesToDrill[diameter].forEach(function(dvector){
 g += "G0 Z" + that.clearanceHeight + "\n";
 g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
 g += "G0 Z0.1\n";
@@ -513,7 +508,8 @@ return g;
 //V5.2D201701XX Added
 exportGcodeDrillHoles:function(){
 var g = '';
-var that = this;<br><br>if(! $('#com-chilipeppr-widget-eagle .use-drilling').is(':checked'))
+var that = this;<br><br>if((! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked')) ||
+this.holesToDrill.lenght == 0)
 return g;
 g += "(------ DRILLING HOLES -------)\n";
 for ( var diameter in this.sortObjByKey(this.holesToDrill) ){
@@ -534,7 +530,8 @@ return g;
 //V5.2D201701XX Added
 exportGcodeMillHoles:function(){
 var g = '';
-var that = this;<br><br>if(! $('#com-chilipeppr-widget-eagle .use-drilling').is(':checked'))
+var that = this;<br><br>if((! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked')) ||
+this.holesToMill.lenght == 0)
 return g;
 g += "(------ MILLING HOLES -------)\n";
 this.holesToMill.forEach(function(hole) {
@@ -617,7 +614,7 @@ in a pos/neg number for how much to inflate or deflate by. So to inflate by
 default is ClipperLib.JoinType.jtRound. See ClipperLib docs for joinType or
 leave empty.</td></tr><tr valign="top"><td>createThermalCutoutsFromSmd</td><td>function</td><td>function (smd, poly, myInflateBy) </td></tr><tr valign="top"><td>sortObjByKey</td><td>function</td><td>function (obj)</td></tr><tr valign="top"><td>clipperDimension</td><td>object</td><td></td></tr><tr valign="top"><td>getDimensionWires</td><td>function</td><td>function () </td></tr><tr valign="top"><td>getBoardBoundaries</td><td>function</td><td>function () <br><br>This function calculates board boundaries (minimum and maximum values of X & Y from dimensions layer)
 board boundaries will be used to mirror board components (wires, pads, vias, holes ... etc)</td></tr><tr valign="top"><td>draw3dDimension</td><td>function</td><td>function (endmillSize) </td></tr><tr valign="top"><td>addStrokeCapsToLine</td><td>function</td><td>function (x1, y1, x2, y2, width, capType) </td></tr><tr valign="top"><td>clipperBySignalKey</td><td>object</td><td></td></tr><tr valign="top"><td>clipperBySignalKeyItem</td><td>object</td><td></td></tr><tr valign="top"><td>clipperSignalWires</td><td>object</td><td></td></tr><tr valign="top"><td>clipperSignalPolys</td><td>object</td><td></td></tr><tr valign="top"><td>draw3dHoles</td><td>function</td><td>function ()//V5.2D201701XX Added</td></tr><tr valign="top"><td>draw3dVias</td><td>function</td><td>function (layersName) </td></tr><tr valign="top"><td>draw3dSignalWires</td><td>function</td><td>function (layer) </td></tr><tr valign="top"><td>draw3dSignalPolygons</td><td>function</td><td>function (layer) </td></tr><tr valign="top"><td>clipperElements</td><td>object</td><td></td></tr><tr valign="top"><td>clipperPads</td><td>object</td><td></td></tr><tr valign="top"><td>clipperSmds</td><td>object</td><td></td></tr><tr valign="top"><td>clipperVias</td><td>object</td><td></td></tr><tr valign="top"><td>holesToDrill</td><td>object</td><td></td></tr><tr valign="top"><td>holesToMill</td><td>object</td><td></td></tr><tr valign="top"><td>holesUnhandledCount</td><td>number</td><td></td></tr><tr valign="top"><td>addHole</td><td>function</td><td>addHole(drill, x, y)//V5.2D201701XX Added</td></tr><tr valign="top"><td>draw3dElements</td><td>function</td><td>function (layer) </td></tr><tr valign="top"><td>rotObjectMatrix</td><td>object</td><td></td></tr><tr valign="top"><td>rotateAroundObjectAxis</td><td>function</td><td>function (object, axis, radians) </td></tr><tr valign="top"><td>rotWorldMatrix</td><td>object</td><td></td></tr><tr valign="top"><td>rotateAroundWorldAxis</td><td>function</td><td>function (object, axis, radians) </td></tr><tr valign="top"><td>flipX</td><td>function</td><td>function (x)<br><br>Recalculate value of X if board is being mirrored</td></tr><tr valign="top"><td>flipY</td><td>function</td><td>function (y)<br><br>Recalculate value of Y if board is being mirrored</td></tr><tr valign="top"><td>flipObject3D</td><td>function</td><td>function (o)<br><br>Mirror Object3D (smdgroups and padgroups) if board is being mirrored
-this function must be called before setting the position of the group</td></tr><tr valign="top"><td>drawCircle</td><td>function</td><td>function (x, y, radius, color)</td></tr><tr valign="top"><td>drawSphere</td><td>function</td><td>function (x, y, radius, color)</td></tr><tr valign="top"><td>drawSquare</td><td>function</td><td>function (x1, y1, x2, y2) </td></tr><tr valign="top"><td>mySceneGroup</td><td>object</td><td></td></tr><tr valign="top"><td>sceneReAddMySceneGroup</td><td>function</td><td>function () </td></tr><tr valign="top"><td>sceneRemoveMySceneGroup</td><td>function</td><td>function () </td></tr><tr valign="top"><td>sceneAdd</td><td>function</td><td>function (obj) </td></tr><tr valign="top"><td>sceneRemove</td><td>function</td><td>function (obj) </td></tr><tr valign="top"><td>draw</td><td>function</td><td>function (e) </td></tr><tr valign="top"><td>onDropped</td><td>function</td><td>function (data, info) </td></tr><tr valign="top"><td>onDragOver</td><td>function</td><td>function () </td></tr><tr valign="top"><td>onDragLeave</td><td>function</td><td>function () </td></tr><tr valign="top"><td>isVidLoaded</td><td>boolean</td><td></td></tr><tr valign="top"><td>lazyLoadTutorial</td><td>function</td><td>function () </td></tr><tr valign="top"><td>options</td><td>object</td><td></td></tr><tr valign="top"><td>setupUiFromLocalStorage</td><td>function</td><td>function () </td></tr><tr valign="top"><td>saveOptionsLocalStorage</td><td>function</td><td>function () </td></tr><tr valign="top"><td>showBody</td><td>function</td><td>function (evt) </td></tr><tr valign="top"><td>hideBody</td><td>function</td><td>function (evt) </td></tr><tr valign="top"><td>btnSetup</td><td>function</td><td>function () </td></tr><tr valign="top"><td>statusEl</td><td>object</td><td></td></tr><tr valign="top"><td>status</td><td>function</td><td>function (txt) </td></tr><tr valign="top"><td>forkSetup</td><td>function</td><td>function () </td></tr>
+this function must be called before setting the position of the group</td></tr><tr valign="top"><td>drawCircle</td><td>function</td><td>function (x, y, radius, color)</td></tr><tr valign="top"><td>drawArc</td><td>function</td><td>function (x1, y1, x2, y2, curve, color)</td></tr><tr valign="top"><td>drawSphere</td><td>function</td><td>function (x, y, radius, color)</td></tr><tr valign="top"><td>drawSquare</td><td>function</td><td>function (x1, y1, x2, y2) </td></tr><tr valign="top"><td>mySceneGroup</td><td>object</td><td></td></tr><tr valign="top"><td>sceneReAddMySceneGroup</td><td>function</td><td>function () </td></tr><tr valign="top"><td>sceneRemoveMySceneGroup</td><td>function</td><td>function () </td></tr><tr valign="top"><td>sceneAdd</td><td>function</td><td>function (obj) </td></tr><tr valign="top"><td>sceneRemove</td><td>function</td><td>function (obj) </td></tr><tr valign="top"><td>draw</td><td>function</td><td>function (e) </td></tr><tr valign="top"><td>onDropped</td><td>function</td><td>function (data, info) </td></tr><tr valign="top"><td>onDragOver</td><td>function</td><td>function () </td></tr><tr valign="top"><td>onDragLeave</td><td>function</td><td>function () </td></tr><tr valign="top"><td>isVidLoaded</td><td>boolean</td><td></td></tr><tr valign="top"><td>lazyLoadTutorial</td><td>function</td><td>function () </td></tr><tr valign="top"><td>options</td><td>object</td><td></td></tr><tr valign="top"><td>setupUiFromLocalStorage</td><td>function</td><td>function () </td></tr><tr valign="top"><td>saveOptionsLocalStorage</td><td>function</td><td>function () </td></tr><tr valign="top"><td>showBody</td><td>function</td><td>function (evt) </td></tr><tr valign="top"><td>hideBody</td><td>function</td><td>function (evt) </td></tr><tr valign="top"><td>btnSetup</td><td>function</td><td>function () </td></tr><tr valign="top"><td>statusEl</td><td>object</td><td></td></tr><tr valign="top"><td>status</td><td>function</td><td>function (txt) </td></tr><tr valign="top"><td>forkSetup</td><td>function</td><td>function () </td></tr>
       </tbody>
   </table>
 
