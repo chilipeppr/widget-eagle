@@ -1426,7 +1426,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 Send user a message and prevent a change here
                 */
                 var choosedDiameter = evt.currentTarget.valueAsNumber;
-                for ( var diameter in that.sortObjByKey(that.holesToDrill) ){////V5.2D201701XX replaced drillPads with holesToDrill
+                for ( var diameter in that.sortObjByKey(that.holesToDrill) ){////V5.2D20170105 replaced drillPads with holesToDrill
                   if(diameter > that.drillMaxDiameter && diameter < choosedDiameter){
                      evt.currentTarget.style.color = "#ff0000";
                      chilipeppr.publish("/com-chilipeppr-elem-flashmsg/flashmsg", 
@@ -1647,11 +1647,11 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.clipperPads = [];
             this.clipperSmds = [];
             this.clipperVias = [];
-            //this.drillPads = {};  //V5.2D201701XX Commented replaced by holsToDrill/holesTolMill
-            //this.drillVias = {};  //V5.2D201701XX Commented replaced by holsToDrill/holesTolMill
-            this.holesToDrill = {}; //V5.2D201701XX
-            this.holesToMill = [];  //V5.2D201701XX
-            this.holesUnhandledCount = 0;   //V5.2D201701XX
+            //this.drillPads = {};  //V5.2D20170105 Commented replaced by holsToDrill/holesTolMill
+            //this.drillVias = {};  //V5.2D20170105 Commented replaced by holsToDrill/holesTolMill
+            this.holesToDrill = {}; //V5.2D20170105
+            this.holesToMill = [];  //V5.2D20170105
+            this.holesUnhandledCount = 0;   //V5.2D20170105
             this.paths = null; // final paths generated from onRefresh() used to export gcode
             this.pathsUnion = null;
             this.pathsUnionHoles = null;
@@ -1866,7 +1866,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.draw3dSignalPolygons(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dElements(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dVias('1-16');
-            this.draw3dHoles(); //V5.2D201701XX Added
+            this.draw3dHoles(); //V5.2D20170105 Added
             this.threeDimensions = this.draw3dDimension(this.endmillSize);
             //this.obj3d.children = [];
             
@@ -1904,7 +1904,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 this.obj3dmeta.widget.wakeAnimate();
             }
             
-            
         },
 
         // Section on exporting Gcode
@@ -1916,14 +1915,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         feedRateSignals: 80, // feedrate for milling signals,pads,smds,vias
         feedRateDimensions: 100,
         drillFeedrate: 100.0, // mm/min
-        drillMaxDiameter: 2.00, //mm/min //V5.2D201701XX changed to 2.00 to match default value on widget.html
+        drillMaxDiameter: 2.00, //mm/min //V5.2D20170105 changed to 2.00 to match default value on widget.html
         drillDepth: -1.7, // std thickness
         depthOfDimensions: -1.7, // std thickness
         millDiameter: 2,
         stepDownDimensions: -0.5,
         stepDownPasses: 3, // use passes or dimension
         spindleRPM: 12000, // spindle rotation speed (rpm)
-        //V5.2D201701XX Commented Replaced by exportGcodeMillHoles
+        //V5.2D20170105 Commented Replaced by exportGcodeMillHoles
         /*generateGcodeHole:function(diameter, x, y){
             var radius = diameter/2;
             var gdiameter = radius-(this.millDiameter/2); // inside milling 
@@ -2001,7 +2000,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
             return g;
         },
-        //V5.2D201701XX Commented Replaced by exportGcodeMarkHoles
+        //V5.2D20170105 Commented Replaced by exportGcodeMarkHoles
         /*exportGcodeMarkVias:function(){
             var g = '';
             var that = this;
@@ -2022,7 +2021,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             return g;
         },*/
-        //V5.2D201701XX Commented Replaced by exportGcodeMarkHoles
+        //V5.2D20170105 Commented Replaced by exportGcodeMarkHoles
         /*exportGcodeMarkPads:function(){
             var g = '';
             var that = this;
@@ -2043,7 +2042,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             return g;
         },*/
-        //V5.2D201701XX Added
+        //V5.2D20170105 Added
         exportGcodeMarkHoles:function(){
             var g = '';
             var that = this;
@@ -2065,7 +2064,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             return g;
         },
-        //V5.2D201701XX Added
+        //V5.2D20170105 Added
         exportGcodeDrillHoles:function(){
             var g = '';
             var that = this;
@@ -2089,7 +2088,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             return g;
         },
-        //V5.2D201701XX Added
+        //V5.2D20170105 Added
         exportGcodeMillHoles:function(){
             var g = '';
             var that = this;
@@ -2118,7 +2117,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             });
             return g;
         },
-        //V5.2D201701XX Commented Replaced by exportGcodeDrillHoles
+        //V5.2D20170105 Commented Replaced by exportGcodeDrillHoles
         /*exportGcodeDrillVias:function(){
             var g = '';
             var that = this;
@@ -2143,7 +2142,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             return g;
         },*/
-        //V5.2D201701XX Commented Replaced by exportGcodeDrillHoles
+        //V5.2D20170105 Commented Replaced by exportGcodeDrillHoles
         /*exportGcodeDrillPads:function(){
             var g = '';
 
@@ -2292,16 +2291,16 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             i += 100;
             this.addGcode(i, this.exportGcodeMilling()    );
             i += 100;
-            //this.addGcode(i, this.exportGcodeMarkVias()   );  //V5.2D201701XX Commented
-            //i += 100;                                         //V5.2D201701XX Commented
-            this.addGcode(i, this.exportGcodeMarkHoles()   );   //V5.2D201701XX added
-            // this.addGcode(i, this.exportGcodeMarkPads()   ); //V5.2D201701XX Commented
+            //this.addGcode(i, this.exportGcodeMarkVias()   );  //V5.2D20170105 Commented
+            //i += 100;                                         //V5.2D20170105 Commented
+            this.addGcode(i, this.exportGcodeMarkHoles()   );   //V5.2D20170105 added
+            // this.addGcode(i, this.exportGcodeMarkPads()   ); //V5.2D20170105 Commented
             i += 100;
-            this.addGcode(i, this.exportGcodeDrillHoles()  );   //V5.2D201701XX added
-            // this.addGcode(i, this.exportGcodeDrillVias()  ); //V5.2D201701XX Commented
+            this.addGcode(i, this.exportGcodeDrillHoles()  );   //V5.2D20170105 added
+            // this.addGcode(i, this.exportGcodeDrillVias()  ); //V5.2D20170105 Commented
             i += 100;
-            this.addGcode(i, this.exportGcodeMillHoles()  );    //V5.2D201701XX added
-            // this.addGcode(i, this.exportGcodeDrillPads()  ); //V5.2D201701XX Commented
+            this.addGcode(i, this.exportGcodeMillHoles()  );    //V5.2D20170105 added
+            // this.addGcode(i, this.exportGcodeDrillPads()  ); //V5.2D20170105 Commented
             i += 100;
             this.addGcode(i, this.exportGcodeDimensions() );
             i = 2000;
@@ -4596,7 +4595,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 }
             }
             //console.log("Ameen", "Wires unsorted \\n", JSON.stringify(wires));
-            //V5.2D201701XX Added: Sort wires to make sure consecutive wires end and start at same point.
+            //V5.2D20170105 Added: Sort wires to make sure consecutive wires end and start at same point.
             for(i = 0; i < wires.length-1; i++){
                 var j = i + 1;
                 var h = i + 1;
@@ -4637,7 +4636,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             for (var i = 0; i < wires.length; i++) {
                 var wire = wires[i];
                 //console.log("clipper appending wire:", wire);
-                if(wire.curve == 0){//V5.2D201701XX if statement added to support curved dimensions
+                if(wire.curve == 0){//V5.2D20170105 if statement added to support curved dimensions
                     this.clipperDimension.push({
                         X: this.flipX(wire.x1), //V5.1D20161229 - flipX/flipY added
                         Y: this.flipY(wire.y1)  //V5.1D20161229 - flipX/flipY added
@@ -4647,7 +4646,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         Y: this.flipY(wire.y2)  //V5.1D20161229 - flipX/flipY added
                     });
                 }
-                else {//V5.2D201701XX following code added to support curved dimensions, curver will be rendered as lines to arc
+                else {//V5.2D20170105 following code added to support curved dimensions, curvers will be rendered as lines not arcs
                     var arc = this.drawArc(wire.x1, wire.y1, wire.x2, wire.y2, wire.curve, 0);
                     arc.updateMatrixWorld();
                     for(var j = 0; j < arc.geometry.vertices.length - 1; j++){
@@ -4670,7 +4669,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
             //for (var signalKey in this.eagle.signalItems) {
             //}
-            console.log("Ameen", JSON.stringify(wires));
             return wires;
         },
         
@@ -4743,7 +4741,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var color = this.colorDimension;
 
             var lineMat = new THREE.LineBasicMaterial({
-                color: 0xff0000,
+                color: color,
                 transparent: true,
                 opacity: this.opacityDimension
             });
@@ -4753,13 +4751,13 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             for (var i = 0; i < wires.length; i++) {
                 var wire = wires[i];
                 //console.log("working on wire:", wire);
-                if(wire.curve == 0){//V5.2D201701XX added Test
+                if(wire.curve == 0){//V5.2D20170105 If statement added to support cured wires
                     lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x1), that.flipY(wire.y1), 0));//V5.1D20161229 - flipX/flipY added
-                    //V5.2D201701XX if statement added, We only need to add second vertex of last line 
+                    //V5.2D20170105 if statement added, We only need to add second vertex of last line 
                     if(i == (wires.length - 1))
                         lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x2), that.flipY(wire.y2), 0));//V5.1D20161229 - flipX/flipY added
                 }
-                else {//V5.2D201701XX Added Test
+                else {//V5.2D20170105 following code added to support cured wires
                     var arc = this.drawArc(wire.x1, wire.y1, wire.x2, wire.y2, wire.curve, 0);
                     arc.updateMatrixWorld();
                     for(var j = 0; j < arc.geometry.vertices.length; j++){
@@ -4769,7 +4767,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     }
                 }
             }
-            //V5.2D201701XX Comented because lineGeo already closed with above code
+            //V5.2D20170105 Comented because lineGeo already closed with above code
             // now close the line by pushing first vertices
             // if (wires.length > 0) {
             //     lineGeo.vertices.push(new THREE.Vector3(that.flipX(wires[0].x1), that.flipY(wires[0].y1, 0)));
@@ -4943,9 +4941,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         clipperSignalWires: [], // holds clipper formatted paths
         clipperSignalPolys: [], // holds clipper formatted polygons
-        draw3dHoles: function(){//V5.2D201701XX Added
+        draw3dHoles: function(){//V5.2D20170105 Added
             var that = this;
-            console.group("draw3dVias");
+            console.group("draw3dHoles");
             //Add Plain holes
             var bigSceneGroup = new THREE.Group();
             this.eagle.plainHoles.forEach(function(hole){
@@ -4958,8 +4956,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
                 bigSceneGroup.add (line);
             });
-            //Add Package holes
             
+            //Add Package holes
             for (var elemKey in this.eagle.elements) {
                 var elem = this.eagle.elements[elemKey];
                 
@@ -4967,16 +4965,41 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
                 pkg.holes.forEach(function(hole){
                     var colorHole = that.colorHole;
-                    var hx = that.flipX(hole.x + elem.x);
-                    var hy = that.flipY(hole.y + elem.y);
+                    var hx = hole.x, hy = hole.y;
+                    var cx = elem.x, cy = elem.y;
+                    console.log("Ameen - mirror:", elem.mirror);
+                    console.log("Ameen - original X:", hx, "Y:", hy);
+                    if ('rot' in elem && elem.rot != null) {
+                        console.log("Ameen - rot:", elem.rot);
+                        var rot = parseInt(elem.rot.replace(/\D+/i,''));
+                        console.log("Ameen - rot:", rot);
+                        if (rot > 0) {
+                            var r = (Math.PI / 180) * rot;
+                            var sin = Math.sin(r);
+                            var cos = Math.cos(r);
+                            var nx = (cos * (hx)) - (sin * (hy));
+                            var ny = (sin * (hx)) + (cos * (hy));
+                            hx = nx; hy = ny;
+                            console.log("Ameen - rotated X:", hx, "Y:", hy);
+                        }
+                    }
+                    console.log("Ameen - Element X:", elem.x, "Y:", elem.y);
+                    console.log("Ameen - Fina X:", elem.x + hx, "Y:", elem.y + hy);
+                    if(elem.mirror) hx = - hx;
+                    hx = that.flipX(cx + hx);
+                    hy = that.flipY(cy + hy);
                     if(!that.addHole(hole.drill, hx, hy)) colorHole = that.colorHoleUnhandled; //If hole cannot be drilled or milled change color to red
                     var line = that.drawCircle(hx, hy, hole.drill/2, colorHole);
                     line.rotateZ(Math.PI / 8);
-                    
+    
                     bigSceneGroup.add (line);
                 });
             }
             that.sceneAdd(bigSceneGroup);
+            if(this.holesUnhandledCount==0)//V5.2D20170105 Added
+                $('.eagle-holes-alert').addClass("hidden");
+            else
+                $('.eagle-holes-alert').removeClass("hidden");
         },
         draw3dVias: function (layersName) {
             if (!layersName) return;
@@ -5021,7 +5044,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     // save all drills for vias                  
                     // Most exists only drills with diameter 1.0 0.9 0.8 ...
                     var drill = via.drill.toFixed(1);
-                    //V5.2D201701XX Commented 
+                    //V5.2D20170105 Commented 
                     /*if(that.drillVias[drill] === undefined)
                         that.drillVias[drill] = [];
                     that.drillVias[drill].push({
@@ -5030,8 +5053,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         D: via.drill.toFixed(4)
                     });*/
                     
-                    var colorHole = this.colorHole; //V5.2D201701XX Aded
-                    if(!this.addHole(via.drill, via.x, via.y)) colorHole = this.colorHoleUnhandled; //V5.2D201701XX Added if hole cannot be drilled or milled change color to red
+                    var colorHole = this.colorHole; //V5.2D20170105 Aded
+                    if(!this.addHole(via.drill, via.x, via.y)) colorHole = this.colorHoleUnhandled; //V5.2D20170105 Added if hole cannot be drilled or milled change color to red
 
                     //1:Draw outter via shape
                     var viashape = "round";
@@ -5047,7 +5070,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     viaGeo.vertices.shift();
                     //viaGeo.vertices.pop();
                     //2:Draw circle around the drill hole
-                    var line = that.drawCircle(that.flipX(via.x), that.flipY(via.y), via.drill/2, colorHole);//V5.1D20161229 - flipX/flipY added //V5.2D201701XXchanged this.colorHole to colorHole
+                    var line = that.drawCircle(that.flipX(via.x), that.flipY(via.y), via.drill/2, colorHole);//V5.1D20161229 - flipX/flipY added //V5.2D20170105changed this.colorHole to colorHole
                     line.rotateZ(Math.PI / 8);
                     
                     bigSceneGroup.add (line);
@@ -5462,13 +5485,13 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         clipperPads: [], // subset of elements (pads)
         clipperSmds: [], // subset of elements (smds)
         clipperVias: [], // subset of elements (vias)
-        //drillPads: {}, // save all pad drill vectors //V5.2D201701XX Commented replaced by holesToDrill/holesToMill
-        //drillVias: {}, // save all via drill vectors //V5.2D201701XX Commented replaced by holesToDrill/holesToMill
-        holesToDrill: {}, //V5.2D201701XX Added should replace drillPads/drillVias
-        holesToMill: [],  //V5.2D201701XX Added should replace drillPads/drillVias
-        holesUnhandledCount: 0, //V5.2D201701XX Count number of holes that cannot be drilled/milled 
+        //drillPads: {}, // save all pad drill vectors //V5.2D20170105 Commented replaced by holesToDrill/holesToMill
+        //drillVias: {}, // save all via drill vectors //V5.2D20170105 Commented replaced by holesToDrill/holesToMill
+        holesToDrill: {}, //V5.2D20170105 Added to replace drillPads/drillVias
+        holesToMill: [],  //V5.2D20170105 Added to replace drillPads/drillVias
+        holesUnhandledCount: 0, //V5.2D20170105 Count number of holes that cannot be drilled/milled 
                                 //(drill diameter > drillMaxDiameter and <= millDiameter)
-        addHole(drill, x, y){//V5.2D201701XX Added
+        addHole: function(drill, x, y){//V5.2D20170105 Added
             if(drill > this.drillMaxDiameter && drill <= this.millDiameter){
                 this.holesUnhandledCount++
                 return false; //We don't have tool suitable for this hole.
@@ -6059,7 +6082,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
                         // Get absolute coordinates from drill hole
                         // in an element
-                        //V5.2D201701XX commented
+                        //V5.2D20170105 commented
                         // if( line.position.x == 0 ){ // only middle point holes
                         //   var vector = new THREE.Vector3();
                         //   vector.setFromMatrixPosition( line.matrixWorld  );
@@ -6079,7 +6102,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
                         //   // drill hole --> end
                         //  }
-                         //V5.2D201701XX holes handling --> replace above code
+                         //V5.2D20170105 holes handling --> replace above code
                          if( line.position.x == 0 ){ // only middle point holes
                            var vector = new THREE.Vector3();
                            vector.setFromMatrixPosition( line.matrixWorld  );
@@ -7064,7 +7087,7 @@ EagleCanvas.prototype.parse = function () {
             var text = texts[textIdx];
             packageTexts.push(this.parseText(text));
         }
-        //V5.2D201701XX Added
+        //V5.2D20170105 Added
         var holes = pkg.getElementsByTagName('hole');
         for (var holeIdx = 0; holeIdx < holes.length; holeIdx++) {
             var holeDict = this.parseHole(holes[holeIdx]);
@@ -7083,7 +7106,7 @@ EagleCanvas.prototype.parse = function () {
     }
 
     this.plainWires = {};
-    this.plainHoles = []; //V5.2D201701XX Added
+    this.plainHoles = []; //V5.2D20170105 Added
     var plains = this.boardXML.getElementsByTagName('plain'); //Usually only one
     for (var plainIdx = 0; plainIdx < plains.length; plainIdx++) {
         var plain = plains[plainIdx],
@@ -7095,7 +7118,7 @@ EagleCanvas.prototype.parse = function () {
             if (!this.plainWires[layer]) this.plainWires[layer] = [];
             this.plainWires[layer].push(wireDict);
         }
-        //V5.2D201701XX Added
+        //V5.2D20170105 Added
         var holes = plain.getElementsByTagName('hole');
         for (var holeIdx = 0; holeIdx < holes.length; holeIdx++) {
             var holeDict = this.parseHole(holes[holeIdx]);
@@ -7128,7 +7151,7 @@ EagleCanvas.prototype.parseSmd = function (smd) {
     };
 }
 
-//V5.2D201701XX Added
+//V5.2D20170105 Added
 EagleCanvas.prototype.parseHole = function (hole) {
     return {
         'x': parseFloat(hole.getAttribute('x')),
@@ -7183,8 +7206,8 @@ EagleCanvas.prototype.parsePad = function (pad) {
 EagleCanvas.prototype.parseWire = function (wire) {
     var width = parseFloat(wire.getAttribute('width'));
     if (width <= 0.0) width = this.minLineWidth;
-    var curve = parseInt(wire.getAttribute('curve'));  //V5.2D201701XX Added
-    if(!curve) curve = 0;                        //V5.2D201701XX Added
+    var curve = parseInt(wire.getAttribute('curve'));  //V5.2D20170105 Added
+    if(!curve) curve = 0;                        //V5.2D20170105 Added
     return {
         'x1': parseFloat(wire.getAttribute('x1')),
             'y1': parseFloat(wire.getAttribute('y1')),
@@ -7192,7 +7215,7 @@ EagleCanvas.prototype.parseWire = function (wire) {
             'y2': parseFloat(wire.getAttribute('y2')),
             'width': width,
             'layer': parseInt(wire.getAttribute('layer')),
-            'curve': curve  //V5.2D201701XX Added
+            'curve': curve  //V5.2D20170105 Added
     };
 }
 

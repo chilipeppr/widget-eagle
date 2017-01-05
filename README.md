@@ -263,7 +263,7 @@ this.draw3dSignalWires(this.eagle.eagleLayersByName[this.activeLayer]);
 this.draw3dSignalPolygons(this.eagle.eagleLayersByName[this.activeLayer]);
 this.draw3dElements(this.eagle.eagleLayersByName[this.activeLayer]);
 this.draw3dVias('1-16');
-this.draw3dHoles(); //V5.2D201701XX Added
+this.draw3dHoles(); //V5.2D20170105 Added
 this.threeDimensions = this.draw3dDimension(this.endmillSize);
 //this.obj3d.children = [];<br><br>// obj3d is the original THREE.Object3D() for the 3d
 // viewer. the extents x/y/z vals are calculated off of
@@ -287,8 +287,7 @@ chilipeppr.publish('/com-chilipeppr-widget-3dviewer/viewextents' );
 $(window).trigger('resize');
 if (this.obj3dmeta && this.obj3dmeta.widget) {
 this.obj3dmeta.widget.wakeAnimate();
-}<br><br>
-},<br><br>// Section on exporting Gcode
+}<br><br>},<br><br>// Section on exporting Gcode
 //TODO: I think following variables should be initialized from HTML values or the other way around
 clearanceHeight: 1.0, // move z to clearance
 // 1 oz = 0.035mm, 2 oz = 0.07mm, 3 oz = 0.105mm
@@ -297,14 +296,14 @@ feedRatePlunge: 30, // plunging into FR4 copper
 feedRateSignals: 80, // feedrate for milling signals,pads,smds,vias
 feedRateDimensions: 100,
 drillFeedrate: 100.0, // mm/min
-drillMaxDiameter: 2.00, //mm/min //V5.2D201701XX changed to 2.00 to match default value on widget.html
+drillMaxDiameter: 2.00, //mm/min //V5.2D20170105 changed to 2.00 to match default value on widget.html
 drillDepth: -1.7, // std thickness
 depthOfDimensions: -1.7, // std thickness
 millDiameter: 2,
 stepDownDimensions: -0.5,
 stepDownPasses: 3, // use passes or dimension
 spindleRPM: 12000, // spindle rotation speed (rpm)
-//V5.2D201701XX Commented Replaced by exportGcodeMillHoles
+//V5.2D20170105 Commented Replaced by exportGcodeMillHoles
 /*generateGcodeHole:function(diameter, x, y){
 var radius = diameter/2;
 var gdiameter = radius-(this.millDiameter/2); // inside milling 
@@ -346,7 +345,7 @@ this.draw3dSignalWires(this.eagle.eagleLayersByName[this.activeLayer]);
 this.draw3dSignalPolygons(this.eagle.eagleLayersByName[this.activeLayer]);
 this.draw3dElements(this.eagle.eagleLayersByName[this.activeLayer]);
 this.draw3dVias('1-16');
-this.draw3dHoles(); //V5.2D201701XX Added
+this.draw3dHoles(); //V5.2D20170105 Added
 this.threeDimensions = this.draw3dDimension(this.endmillSize);
 //this.obj3d.children = [];<br><br>// obj3d is the original THREE.Object3D() for the 3d
 // viewer. the extents x/y/z vals are calculated off of
@@ -370,8 +369,7 @@ chilipeppr.publish('/com-chilipeppr-widget-3dviewer/viewextents' );
 $(window).trigger('resize');
 if (this.obj3dmeta && this.obj3dmeta.widget) {
 this.obj3dmeta.widget.wakeAnimate();
-}<br><br>
-},<br><br>// Section on exporting Gcode
+}<br><br>},<br><br>// Section on exporting Gcode
 //TODO: I think following variables should be initialized from HTML values or the other way around
 clearanceHeight: 1.0, // move z to clearance
 // 1 oz = 0.035mm, 2 oz = 0.07mm, 3 oz = 0.105mm
@@ -380,14 +378,14 @@ feedRatePlunge: 30, // plunging into FR4 copper
 feedRateSignals: 80, // feedrate for milling signals,pads,smds,vias
 feedRateDimensions: 100,
 drillFeedrate: 100.0, // mm/min
-drillMaxDiameter: 2.00, //mm/min //V5.2D201701XX changed to 2.00 to match default value on widget.html
+drillMaxDiameter: 2.00, //mm/min //V5.2D20170105 changed to 2.00 to match default value on widget.html
 drillDepth: -1.7, // std thickness
 depthOfDimensions: -1.7, // std thickness
 millDiameter: 2,
 stepDownDimensions: -0.5,
 stepDownPasses: 3, // use passes or dimension
 spindleRPM: 12000, // spindle rotation speed (rpm)
-//V5.2D201701XX Commented Replaced by exportGcodeMillHoles
+//V5.2D20170105 Commented Replaced by exportGcodeMillHoles
 /*generateGcodeHole:function(diameter, x, y){
 var radius = diameter/2;
 var gdiameter = radius-(this.millDiameter/2); // inside milling 
@@ -453,7 +451,7 @@ g += "G1 X" + path[2].X + " Y" + path[2].Y + "\n";
 }<br><br>// done with signal, go to z clearance<br><br>
 }, this);<br><br>return g;
 },
-//V5.2D201701XX Commented Replaced by exportGcodeMarkHoles
+//V5.2D20170105 Commented Replaced by exportGcodeMarkHoles
 /*exportGcodeMarkVias:function(){
 var g = '';
 var that = this;<br><br>if(! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked'))
@@ -470,7 +468,7 @@ g += "G0 Z" + that.clearanceHeight + "\n";
 }
 return g;
 },*/
-//V5.2D201701XX Commented Replaced by exportGcodeMarkHoles
+//V5.2D20170105 Commented Replaced by exportGcodeMarkHoles
 /*exportGcodeMarkPads:function(){
 var g = '';
 var that = this;<br><br>if(! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked'))
@@ -487,7 +485,7 @@ g += "G0 Z" + that.clearanceHeight + "\n";
 }
 return g;
 },*/
-//V5.2D201701XX Added
+//V5.2D20170105 Added
 exportGcodeMarkHoles:function(){
 var g = '';
 var that = this;<br><br>if((! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked')) ||
@@ -505,7 +503,7 @@ g += "G0 Z" + that.clearanceHeight + "\n";
 }
 return g;
 },
-//V5.2D201701XX Added
+//V5.2D20170105 Added
 exportGcodeDrillHoles:function(){
 var g = '';
 var that = this;<br><br>if((! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked')) ||
@@ -527,7 +525,7 @@ g += "G0 Z" + that.clearanceHeight + "\n";
 }
 return g;
 },
-//V5.2D201701XX Added
+//V5.2D20170105 Added
 exportGcodeMillHoles:function(){
 var g = '';
 var that = this;<br><br>if((! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked')) ||
@@ -554,7 +552,7 @@ g += "G0 Z" + that.clearanceHeight + "\n";
 });
 return g;
 },
-//V5.2D201701XX Commented Replaced by exportGcodeDrillHoles
+//V5.2D20170105 Commented Replaced by exportGcodeDrillHoles
 /*exportGcodeDrillVias:function(){
 var g = '';
 var that = this;<br><br>if(! $('#com-chilipeppr-widget-eagle .use-drilling').is(':checked'))
@@ -575,7 +573,7 @@ g += "G0 Z" + that.clearanceHeight + "\n";
 }
 return g;
 },*/
-//V5.2D201701XX Commented Replaced by exportGcodeDrillHoles
+//V5.2D20170105 Commented Replaced by exportGcodeDrillHoles
 /*exportGcodeDrillPads:function(){
 var g = '';<br><br>if(! $('#com-chilipeppr-widget-eagle .use-drilling').is(':checked'))
 return g;<br><br>var that = this;
@@ -613,7 +611,7 @@ in a pos/neg number for how much to inflate or deflate by. So to inflate by
 0.5mm then pass in 0.5. To deflate 0.8mm pass in -0.8. For joinType the
 default is ClipperLib.JoinType.jtRound. See ClipperLib docs for joinType or
 leave empty.</td></tr><tr valign="top"><td>createThermalCutoutsFromSmd</td><td>function</td><td>function (smd, poly, myInflateBy) </td></tr><tr valign="top"><td>sortObjByKey</td><td>function</td><td>function (obj)</td></tr><tr valign="top"><td>clipperDimension</td><td>object</td><td></td></tr><tr valign="top"><td>getDimensionWires</td><td>function</td><td>function () </td></tr><tr valign="top"><td>getBoardBoundaries</td><td>function</td><td>function () <br><br>This function calculates board boundaries (minimum and maximum values of X & Y from dimensions layer)
-board boundaries will be used to mirror board components (wires, pads, vias, holes ... etc)</td></tr><tr valign="top"><td>draw3dDimension</td><td>function</td><td>function (endmillSize) </td></tr><tr valign="top"><td>addStrokeCapsToLine</td><td>function</td><td>function (x1, y1, x2, y2, width, capType) </td></tr><tr valign="top"><td>clipperBySignalKey</td><td>object</td><td></td></tr><tr valign="top"><td>clipperBySignalKeyItem</td><td>object</td><td></td></tr><tr valign="top"><td>clipperSignalWires</td><td>object</td><td></td></tr><tr valign="top"><td>clipperSignalPolys</td><td>object</td><td></td></tr><tr valign="top"><td>draw3dHoles</td><td>function</td><td>function ()//V5.2D201701XX Added</td></tr><tr valign="top"><td>draw3dVias</td><td>function</td><td>function (layersName) </td></tr><tr valign="top"><td>draw3dSignalWires</td><td>function</td><td>function (layer) </td></tr><tr valign="top"><td>draw3dSignalPolygons</td><td>function</td><td>function (layer) </td></tr><tr valign="top"><td>clipperElements</td><td>object</td><td></td></tr><tr valign="top"><td>clipperPads</td><td>object</td><td></td></tr><tr valign="top"><td>clipperSmds</td><td>object</td><td></td></tr><tr valign="top"><td>clipperVias</td><td>object</td><td></td></tr><tr valign="top"><td>holesToDrill</td><td>object</td><td></td></tr><tr valign="top"><td>holesToMill</td><td>object</td><td></td></tr><tr valign="top"><td>holesUnhandledCount</td><td>number</td><td></td></tr><tr valign="top"><td>addHole</td><td>function</td><td>addHole(drill, x, y)//V5.2D201701XX Added</td></tr><tr valign="top"><td>draw3dElements</td><td>function</td><td>function (layer) </td></tr><tr valign="top"><td>rotObjectMatrix</td><td>object</td><td></td></tr><tr valign="top"><td>rotateAroundObjectAxis</td><td>function</td><td>function (object, axis, radians) </td></tr><tr valign="top"><td>rotWorldMatrix</td><td>object</td><td></td></tr><tr valign="top"><td>rotateAroundWorldAxis</td><td>function</td><td>function (object, axis, radians) </td></tr><tr valign="top"><td>flipX</td><td>function</td><td>function (x)<br><br>Recalculate value of X if board is being mirrored</td></tr><tr valign="top"><td>flipY</td><td>function</td><td>function (y)<br><br>Recalculate value of Y if board is being mirrored</td></tr><tr valign="top"><td>flipObject3D</td><td>function</td><td>function (o)<br><br>Mirror Object3D (smdgroups and padgroups) if board is being mirrored
+board boundaries will be used to mirror board components (wires, pads, vias, holes ... etc)</td></tr><tr valign="top"><td>draw3dDimension</td><td>function</td><td>function (endmillSize) </td></tr><tr valign="top"><td>addStrokeCapsToLine</td><td>function</td><td>function (x1, y1, x2, y2, width, capType) </td></tr><tr valign="top"><td>clipperBySignalKey</td><td>object</td><td></td></tr><tr valign="top"><td>clipperBySignalKeyItem</td><td>object</td><td></td></tr><tr valign="top"><td>clipperSignalWires</td><td>object</td><td></td></tr><tr valign="top"><td>clipperSignalPolys</td><td>object</td><td></td></tr><tr valign="top"><td>draw3dHoles</td><td>function</td><td>function ()//V5.2D20170105 Added</td></tr><tr valign="top"><td>draw3dVias</td><td>function</td><td>function (layersName) </td></tr><tr valign="top"><td>draw3dSignalWires</td><td>function</td><td>function (layer) </td></tr><tr valign="top"><td>draw3dSignalPolygons</td><td>function</td><td>function (layer) </td></tr><tr valign="top"><td>clipperElements</td><td>object</td><td></td></tr><tr valign="top"><td>clipperPads</td><td>object</td><td></td></tr><tr valign="top"><td>clipperSmds</td><td>object</td><td></td></tr><tr valign="top"><td>clipperVias</td><td>object</td><td></td></tr><tr valign="top"><td>holesToDrill</td><td>object</td><td></td></tr><tr valign="top"><td>holesToMill</td><td>object</td><td></td></tr><tr valign="top"><td>holesUnhandledCount</td><td>number</td><td></td></tr><tr valign="top"><td>addHole</td><td>function</td><td>function (drill, x, y)//V5.2D20170105 Added</td></tr><tr valign="top"><td>draw3dElements</td><td>function</td><td>function (layer) </td></tr><tr valign="top"><td>rotObjectMatrix</td><td>object</td><td></td></tr><tr valign="top"><td>rotateAroundObjectAxis</td><td>function</td><td>function (object, axis, radians) </td></tr><tr valign="top"><td>rotWorldMatrix</td><td>object</td><td></td></tr><tr valign="top"><td>rotateAroundWorldAxis</td><td>function</td><td>function (object, axis, radians) </td></tr><tr valign="top"><td>flipX</td><td>function</td><td>function (x)<br><br>Recalculate value of X if board is being mirrored</td></tr><tr valign="top"><td>flipY</td><td>function</td><td>function (y)<br><br>Recalculate value of Y if board is being mirrored</td></tr><tr valign="top"><td>flipObject3D</td><td>function</td><td>function (o)<br><br>Mirror Object3D (smdgroups and padgroups) if board is being mirrored
 this function must be called before setting the position of the group</td></tr><tr valign="top"><td>drawCircle</td><td>function</td><td>function (x, y, radius, color)</td></tr><tr valign="top"><td>drawArc</td><td>function</td><td>function (x1, y1, x2, y2, curve, color)</td></tr><tr valign="top"><td>drawSphere</td><td>function</td><td>function (x, y, radius, color)</td></tr><tr valign="top"><td>drawSquare</td><td>function</td><td>function (x1, y1, x2, y2) </td></tr><tr valign="top"><td>mySceneGroup</td><td>object</td><td></td></tr><tr valign="top"><td>sceneReAddMySceneGroup</td><td>function</td><td>function () </td></tr><tr valign="top"><td>sceneRemoveMySceneGroup</td><td>function</td><td>function () </td></tr><tr valign="top"><td>sceneAdd</td><td>function</td><td>function (obj) </td></tr><tr valign="top"><td>sceneRemove</td><td>function</td><td>function (obj) </td></tr><tr valign="top"><td>draw</td><td>function</td><td>function (e) </td></tr><tr valign="top"><td>onDropped</td><td>function</td><td>function (data, info) </td></tr><tr valign="top"><td>onDragOver</td><td>function</td><td>function () </td></tr><tr valign="top"><td>onDragLeave</td><td>function</td><td>function () </td></tr><tr valign="top"><td>isVidLoaded</td><td>boolean</td><td></td></tr><tr valign="top"><td>lazyLoadTutorial</td><td>function</td><td>function () </td></tr><tr valign="top"><td>options</td><td>object</td><td></td></tr><tr valign="top"><td>setupUiFromLocalStorage</td><td>function</td><td>function () </td></tr><tr valign="top"><td>saveOptionsLocalStorage</td><td>function</td><td>function () </td></tr><tr valign="top"><td>showBody</td><td>function</td><td>function (evt) </td></tr><tr valign="top"><td>hideBody</td><td>function</td><td>function (evt) </td></tr><tr valign="top"><td>btnSetup</td><td>function</td><td>function () </td></tr><tr valign="top"><td>statusEl</td><td>object</td><td></td></tr><tr valign="top"><td>status</td><td>function</td><td>function (txt) </td></tr><tr valign="top"><td>forkSetup</td><td>function</td><td>function () </td></tr>
       </tbody>
   </table>
