@@ -125,7 +125,7 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
          * The ID of the widget. You must define this and make it unique.
          */
         id: "com-chilipeppr-widget-eagle",
-        name: "Widget / Eagle BRD v5.1",
+        name: "Widget / Eagle BRD v5.2",
         desc: "This widget lets you drag in an Eagle PCB \".brd\" file to mill.",
         url: "(auto fill by runme.js)",       // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
         fiddleurl: "(auto fill by runme.js)", // The edit URL. This can be auto-filled by runme.js in Cloud9 if you'd like, or just define it on your own to help people know where they can edit/fork your widget
@@ -1426,7 +1426,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 Send user a message and prevent a change here
                 */
                 var choosedDiameter = evt.currentTarget.valueAsNumber;
-                for ( var diameter in that.sortObjByKey(that.drillPads) ){
+                for ( var diameter in that.sortObjByKey(that.holesToDrill) ){////V5.2D20170105 replaced drillPads with holesToDrill
                   if(diameter > that.drillMaxDiameter && diameter < choosedDiameter){
                      evt.currentTarget.style.color = "#ff0000";
                      chilipeppr.publish("/com-chilipeppr-elem-flashmsg/flashmsg", 
@@ -1658,8 +1658,11 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.clipperPads = [];
             this.clipperSmds = [];
             this.clipperVias = [];
-            this.drillPads = {};
-            this.drillVias = {};
+            //this.drillPads = {};  //V5.2D20170105 Commented replaced by holsToDrill/holesTolMill
+            //this.drillVias = {};  //V5.2D20170105 Commented replaced by holsToDrill/holesTolMill
+            this.holesToDrill = {}; //V5.2D20170105
+            this.holesToMill = [];  //V5.2D20170105
+            this.holesUnhandledCount = 0;   //V5.2D20170105
             this.paths = null; // final paths generated from onRefresh() used to export gcode
             this.pathsUnion = null;
             this.pathsUnionHoles = null;
@@ -1824,6 +1827,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         colorPad: 2329891, // pads are green
         colorMill: 255, // match color ChiliPeppr shows for milling
         colorHole: 9276813, // light gray
+        colorHoleUnhandled: 9046024,
         colorsDrop: [2722312, 8817160, 9046024] , // green, yellow, red
         colorDimension: 9276813, // light gray
         opacitySignal: 0.1,
@@ -1873,8 +1877,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.draw3dSignalWires(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dSignalPolygons(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dElements(this.eagle.eagleLayersByName[this.activeLayer]);
-            
             this.draw3dVias('1-16');
+            this.draw3dHoles(); //V5.2D20170105 Added
             this.threeDimensions = this.draw3dDimension(this.endmillSize);
             //this.obj3d.children = [];
             
@@ -1912,11 +1916,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 this.obj3dmeta.widget.wakeAnimate();
             }
             
-            
         },
 
         // Section on exporting Gcode
-        
+        //TODO: I think following variables should be initialized from HTML values or the other way around
         clearanceHeight: 1.0, // move z to clearance
         // 1 oz = 0.035mm, 2 oz = 0.07mm, 3 oz = 0.105mm
         depthOfSignalMilling: -0.1, // cutting how deep?
@@ -1924,38 +1927,39 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         feedRateSignals: 80, // feedrate for milling signals,pads,smds,vias
         feedRateDimensions: 100,
         drillFeedrate: 100.0, // mm/min
-        drillMaxDiameter: 3.00, //mm/min
+        drillMaxDiameter: 2.00, //mm/min //V5.2D20170105 changed to 2.00 to match default value on widget.html
         drillDepth: -1.7, // std thickness
         depthOfDimensions: -1.7, // std thickness
         millDiameter: 2,
         stepDownDimensions: -0.5,
         stepDownPasses: 3, // use passes or dimension
         spindleRPM: 12000, // spindle rotation speed (rpm)
-        generateGcodeHole:function(diameter, x, y){
-            var radius = diameter/2;
-            var gdiameter = radius-(this.millDiameter/2); // inside milling 
-            var passesDeep = this.depthOfDimensions/this.stepDownPasses; // TODO: calculate my own passes
+        //V5.2D20170105 Commented Replaced by exportGcodeMillHoles
+        // generateGcodeHole:function(diameter, x, y){
+        //     var radius = diameter/2;
+        //     var gdiameter = radius-(this.millDiameter/2); // inside milling 
+        //     var passesDeep = this.depthOfDimensions/this.stepDownPasses; // TODO: calculate my own passes
          
-            var result = '(generate hole at x:' + x + ' y:' + y + ' with dia:'+ diameter +' in ' + this.stepDownPasses + ' passes)' + "\n";
-            result += "F" + this.feedRateDimensions + "\n";
-            // Lift off
-            result += "G00 Z" + this.clearanceHeight + "\n";
-            // Go to outside from circle
-            result += "G00 X" + (x - gdiameter) + " Y" + y + "\n";
-            // check passes            
-            for(var i=0; i<this.stepDownPasses;i++){
-               var deep = passesDeep*(i+1);
-               // plunge in material
-               result += "G00 Z" + deep.toFixed(4) + "\n";
-               // mill circle
-               result += "G02 I" + gdiameter.toFixed(4) + "\n";
-            }
+        //     var result = '(generate hole at x:' + x + ' y:' + y + ' with dia:'+ diameter +' in ' + this.stepDownPasses + ' passes)' + "\n";
+        //     result += "F" + this.feedRateDimensions + "\n";
+        //     // Lift off
+        //     result += "G00 Z" + this.clearanceHeight + "\n";
+        //     // Go to outside from circle
+        //     result += "G00 X" + (x - gdiameter) + " Y" + y + "\n";
+        //     // check passes            
+        //     for(var i=0; i<this.stepDownPasses;i++){
+        //       var deep = passesDeep*(i+1);
+        //       // plunge in material
+        //       result += "G00 Z" + deep.toFixed(4) + "\n";
+        //       // mill circle
+        //       result += "G02 I" + gdiameter.toFixed(4) + "\n";
+        //     }
 
-            // Lift off
-            result += "G00 Z" + this.clearanceHeight + "\n";
+        //     // Lift off
+        //     result += "G00 Z" + this.clearanceHeight + "\n";
          
-            return result;
-        },
+        //     return result;
+        // },
         exportGcodeHeader:function(){
             var g = '';
             g += "(Gcode generated by ChiliPeppr Eagle PCB Widget " + (new Date()).toLocaleString() + ")\n";
@@ -2008,17 +2012,61 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
             return g;
         },
-        exportGcodeMarkVias:function(){
+        //V5.2D20170105 Commented Replaced by exportGcodeMarkHoles
+        // exportGcodeMarkVias:function(){
+        //     var g = '';
+        //     var that = this;
+
+        //     if(! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked'))
+        //       return g;
+
+        //     // Drilling, first sort to drill diameter and change tool to first diameter
+        //     g += "(------ MARK VIAS -------)\n";
+        //     for ( diameter in this.sortObjByKey(this.drillVias) ){
+        //         this.drillVias[diameter].forEach(function(dvector){
+        //              g += "G0 Z" + that.clearanceHeight + "\n";
+        //              g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+        //              g += "G0 Z0.1\n";
+        //              g += "G1 Z" + that.depthOfSignalMilling  + "\n";
+        //         });
+        //         g += "G0 Z" + that.clearanceHeight + "\n";
+        //     }
+        //     return g;
+        // },
+        //V5.2D20170105 Commented Replaced by exportGcodeMarkHoles
+        // exportGcodeMarkPads:function(){
+        //     var g = '';
+        //     var that = this;
+
+        //     if(! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked'))
+        //       return g;
+
+        //     // Drilling, first sort to drill diameter and change tool to first diameter
+        //     g += "(------ MARK PADS -------)\n";
+        //     for ( diameter in this.sortObjByKey(this.drillPads) ){
+        //       this.drillPads[diameter].forEach(function(dvector){
+        //              g += "G0 Z" + that.clearanceHeight + "\n";
+        //              g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+        //              g += "G0 Z0.1\n";
+        //              g += "G1 Z" + that.depthOfSignalMilling  + "\n";
+        //         });
+        //         g += "G0 Z" + that.clearanceHeight + "\n";
+        //     }
+        //     return g;
+        // },
+        //V5.2D20170105 Added
+        exportGcodeMarkHoles:function(){
             var g = '';
             var that = this;
 
-            if(! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked'))
+            if((! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked')) ||
+                this.holesToDrill.lenght == 0)
                return g;
 
             // Drilling, first sort to drill diameter and change tool to first diameter
-            g += "(------ MARK VIAS -------)\n";
-            for ( diameter in this.sortObjByKey(this.drillVias) ){
-                this.drillVias[diameter].forEach(function(dvector){
+            g += "(------ MARK HOLES -------)\n";
+            for ( var diameter in this.sortObjByKey(this.holesToDrill) ){
+               this.holesToDrill[diameter].forEach(function(dvector){
                      g += "G0 Z" + that.clearanceHeight + "\n";
                      g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
                      g += "G0 Z0.1\n";
@@ -2028,41 +2076,21 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             return g;
         },
-        exportGcodeMarkPads:function(){
+        //V5.2D20170105 Added
+        exportGcodeDrillHoles:function(){
             var g = '';
             var that = this;
-
-            if(! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked'))
+            
+            if((! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked')) ||
+                this.holesToDrill.lenght == 0)
                return g;
-
-            // Drilling, first sort to drill diameter and change tool to first diameter
-            g += "(------ MARK PADS -------)\n";
-            for ( diameter in this.sortObjByKey(this.drillPads) ){
-               this.drillPads[diameter].forEach(function(dvector){
-                     g += "G0 Z" + that.clearanceHeight + "\n";
-                     g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
-                     g += "G0 Z0.1\n";
-                     g += "G1 Z" + that.depthOfSignalMilling  + "\n";
-                });
-                g += "G0 Z" + that.clearanceHeight + "\n";
-            }
-            return g;
-        },
-        exportGcodeDrillVias:function(){
-            var g = '';
-            var that = this;
-
-            if(! $('#com-chilipeppr-widget-eagle .use-drilling').is(':checked'))
-               return g;
-
-            // Drilling, first sort to drill diameter and change tool to first diameter
-            g += "(------ DRILLING VIAS -------)\n";
-            for ( diameter in this.sortObjByKey(this.drillVias) ){
+            g += "(------ DRILLING HOLES -------)\n";
+            for ( var diameter in this.sortObjByKey(this.holesToDrill) ){
                g += "M5 (spindle off)\n";
                g += "T" + this.toolCount++ + " M6 (set tool to drill with diameter " + diameter + ")\n";
                g += "M3 S" + this.spindleRPM + " (spindle on)\n";
                g += "F" + this.drillFeedrate + "\n"; 
-               this.drillVias[diameter].forEach(function(dvector){
+               this.holesToDrill[diameter].forEach(function(dvector){
                      g += "G0 Z" + that.clearanceHeight + "\n";
                      g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
                      g += "G0 Z" + that.clearanceHeight/10 + "\n";
@@ -2072,32 +2100,87 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             return g;
         },
-        exportGcodeDrillPads:function(){
+        //V5.2D20170105 Added
+        exportGcodeMillHoles:function(){
             var g = '';
-
-            if(! $('#com-chilipeppr-widget-eagle .use-drilling').is(':checked'))
-               return g;
-
             var that = this;
-            g += "(------ DRILLING PADS -------)\n";
-            for ( diameter in this.sortObjByKey(this.drillPads)){
-               // don't drill holes bigger as max diameter
-               if(diameter > that.drillMaxDiameter)
-                  break;
-               g += "M5 (spindle off)\n";
-               g += "T" + this.toolCount++ + " M6 (set tool to drill with diameter " + diameter + ")\n";
-               g += "M3 S" + this.spindleRPM + " (spindle on)\n";
-               g += "F" + this.drillFeedrate + "\n"; 
-               this.drillPads[diameter].forEach(function(dvector){
-                     g += "G0 Z" + that.clearanceHeight + "\n";
-                     g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
-                     g += "G0 Z" + that.clearanceHeight/10 + "\n";
-                     g += "G1 Z" + that.drillDepth  + "\n";
-                });
+            
+            if((! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked')) ||
+                this.holesToMill.lenght == 0)
+               return g;
+            g += "(------ MILLING HOLES -------)\n";
+            this.holesToMill.forEach(function(hole) {
+                //g += that.generateGcodeHole(hole.D, hole.X, hole.Y)
+                var radius = hole.D/2;
+                var gdiameter = radius-(that.millDiameter/2); // inside milling 
+                var stepDownPasses = Math.round(that.depthOfDimensions/that.stepDownDimensions + .5);
+                g += '(generate hole at x:' + hole.X + ' y:' + hole.Y + ' with dia:'+ hole.D +' in ' + stepDownPasses + ' passes)' + "\n";
+                g += "F" + that.feedRateDimensions + "\n";
                 g += "G0 Z" + that.clearanceHeight + "\n";
-            }
+                g += "G0 X" + (hole.X - gdiameter) + " Y" + hole.Y + "\n";
+                for(var i=0; i<stepDownPasses;i++){
+                    var z = that.stepDownDimensions*(i+1);
+                    if(z < that.depthOfDimensions)
+                        z = that.depthOfDimensions;
+                    g += "G0 Z" + z.toFixed(4) + "\n";
+                    g += "G2 I" + gdiameter.toFixed(4) + "\n";
+                }
+                g += "G0 Z" + that.clearanceHeight + "\n";
+            });
             return g;
         },
+        //V5.2D20170105 Commented Replaced by exportGcodeDrillHoles
+        // exportGcodeDrillVias:function(){
+        //     var g = '';
+        //     var that = this;
+
+        //     if(! $('#com-chilipeppr-widget-eagle .use-drilling').is(':checked'))
+        //       return g;
+
+        //     // Drilling, first sort to drill diameter and change tool to first diameter
+        //     g += "(------ DRILLING VIAS -------)\n";
+        //     for ( diameter in this.sortObjByKey(this.drillVias) ){
+        //       g += "M5 (spindle off)\n";
+        //       g += "T" + this.toolCount++ + " M6 (set tool to drill with diameter " + diameter + ")\n";
+        //       g += "M3 S" + this.spindleRPM + " (spindle on)\n";
+        //       g += "F" + this.drillFeedrate + "\n"; 
+        //       this.drillVias[diameter].forEach(function(dvector){
+        //              g += "G0 Z" + that.clearanceHeight + "\n";
+        //              g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+        //              g += "G0 Z" + that.clearanceHeight/10 + "\n";
+        //              g += "G1 Z" + that.drillDepth  + "\n";
+        //         });
+        //         g += "G0 Z" + that.clearanceHeight + "\n";
+        //     }
+        //     return g;
+        // },
+        //V5.2D20170105 Commented Replaced by exportGcodeDrillHoles
+        // exportGcodeDrillPads:function(){
+        //     var g = '';
+
+        //     if(! $('#com-chilipeppr-widget-eagle .use-drilling').is(':checked'))
+        //       return g;
+
+        //     var that = this;
+        //     g += "(------ DRILLING PADS -------)\n";
+        //     for ( diameter in this.sortObjByKey(this.drillPads)){
+        //       // don't drill holes bigger as max diameter
+        //       if(diameter > that.drillMaxDiameter)
+        //           break;
+        //       g += "M5 (spindle off)\n";
+        //       g += "T" + this.toolCount++ + " M6 (set tool to drill with diameter " + diameter + ")\n";
+        //       g += "M3 S" + this.spindleRPM + " (spindle on)\n";
+        //       g += "F" + this.drillFeedrate + "\n"; 
+        //       this.drillPads[diameter].forEach(function(dvector){
+        //              g += "G0 Z" + that.clearanceHeight + "\n";
+        //              g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+        //              g += "G0 Z" + that.clearanceHeight/10 + "\n";
+        //              g += "G1 Z" + that.drillDepth  + "\n";
+        //         });
+        //         g += "G0 Z" + that.clearanceHeight + "\n";
+        //     }
+        //     return g;
+        // },
         exportGcodeDimensions:function(){
             
             var g = '';
@@ -2113,14 +2196,15 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             g += "F" + this.feedRateDimensions + "\n";
 
 
+            //V5.2D20170105 Commented now handled in exportGcodeDrillHoles
             // generate holes are bigger as this.drillMaxDiameter
-            for ( diameter in this.sortObjByKey(this.drillPads)){
-                // only holes bigger as max diameter
-                if (diameter < that.drillMaxDiameter) continue;
-                this.drillPads[diameter].forEach(function(dvector) {
-                    g += that.generateGcodeHole(diameter, dvector.X, dvector.Y)
-                });
-            }
+            // for ( diameter in this.sortObjByKey(this.drillPads)){
+            //     // only holes bigger as max diameter
+            //     if (diameter < that.drillMaxDiameter) continue;
+            //     this.drillPads[diameter].forEach(function(dvector) {
+            //         g += that.generateGcodeHole(diameter, dvector.X, dvector.Y)
+            //     });
+            // }
 
             
             // generate dimensions
@@ -2278,13 +2362,16 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             i += 100;
             this.addGcode(i, this.exportGcodeMilling()    );
             i += 100;
-            this.addGcode(i, this.exportGcodeMarkVias()   );
+            //this.addGcode(i, this.exportGcodeMarkVias()   );  //V5.2D20170105 Commented
+            //i += 100;                                         //V5.2D20170105 Commented
+            this.addGcode(i, this.exportGcodeMarkHoles()   );   //V5.2D20170105 added
+            // this.addGcode(i, this.exportGcodeMarkPads()   ); //V5.2D20170105 Commented
             i += 100;
-            this.addGcode(i, this.exportGcodeMarkPads()   );
+            this.addGcode(i, this.exportGcodeDrillHoles()  );   //V5.2D20170105 added
+            // this.addGcode(i, this.exportGcodeDrillVias()  ); //V5.2D20170105 Commented
             i += 100;
-            this.addGcode(i, this.exportGcodeDrillVias()  );
-            i += 100;
-            this.addGcode(i, this.exportGcodeDrillPads()  );
+            this.addGcode(i, this.exportGcodeMillHoles()  );    //V5.2D20170105 added
+            // this.addGcode(i, this.exportGcodeDrillPads()  ); //V5.2D20170105 Commented
             i += 100;
             this.addGcode(i, this.exportGcodeDimensions() );
             i = 2000;
@@ -4544,8 +4631,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
           return sorted_obj;
         },
 
-
-
         // THIS SECTION IS FOR WORKING ON THE DIMENSION OF THE BOARD
         
         clipperDimension: [], // holds clipper formatted dimension
@@ -4580,20 +4665,77 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     }
                 }
             }
-
+            //console.log("Ameen", "Wires unsorted \\n", JSON.stringify(wires));
+            //V5.2D20170105 Added: Sort wires to make sure consecutive wires end and start at same point.
+            for(i = 0; i < wires.length-1; i++){
+                var j = i + 1;
+                var h = i + 1;
+                //if no common piont between current and next wire, search for correct wire and swap it with next one.
+                if(!((wires[i].x2 == wires[j].x1) && (wires[i].y2 == wires[j].y1) ||
+                     (wires[i].x2 == wires[j].x2) && (wires[i].y2 == wires[j].y2))){
+                    //console.log("Ameen", "Wire ", j, "in wrong position");
+                    var found = false;
+                    while(!found && j < wires.length){
+                        found = (wires[i].x2 == wires[j].x1) && (wires[i].y2 == wires[j].y1) ||
+                                (wires[i].x2 == wires[j].x2) && (wires[i].y2 == wires[j].y2);
+                        if(found){
+                            //console.log("Ameen", "Wire ", j, "found");
+                            var tWire = wires[h];
+                            wires[h] = wires[j];
+                            wires[j] = tWire;
+                            //console.log("Ameen", "Wire ", j, "swapped with wire", h);
+                        }
+                        j++;
+                    }
+                }
+                //if second point of next wire matchs second point of current wire, we need to revers direction of next wire
+                if(((wires[i].x2 == wires[h].x2) && (wires[i].y2 == wires[h].y2))){
+                    var t = wires[h].x1;
+                    wires[h].x1 = wires[h].x2;
+                    wires[h].x2 = t;
+                    t = wires[h].y1;
+                    wires[h].y1 = wires[h].y2;
+                    wires[h].y2 = t;
+                    wires[h].curve = -wires[h].curve;
+                    //console.log("Ameen", "Wire ", h, "flipped");
+                }
+            }
+            //console.log("Ameen", "Wires sorted \\n", JSON.stringify(wires));
+            
             // build clipper dimension format
             this.clipperDimension = [];
             for (var i = 0; i < wires.length; i++) {
                 var wire = wires[i];
                 //console.log("clipper appending wire:", wire);
-                this.clipperDimension.push({
-                    X: this.flipX(wire.x1), //V5.1D20161229 - flipX/flipY added
-                    Y: this.flipY(wire.y1)  //V5.1D20161229 - flipX/flipY added
-                });
-                this.clipperDimension.push({
-                    X: this.flipX(wire.x2), //V5.1D20161229 - flipX/flipY added
-                    Y: this.flipY(wire.y2)  //V5.1D20161229 - flipX/flipY added
-                });
+                if(wire.curve == 0){//V5.2D20170105 if statement added to support curved dimensions
+                    this.clipperDimension.push({
+                        X: this.flipX(wire.x1), //V5.1D20161229 - flipX/flipY added
+                        Y: this.flipY(wire.y1)  //V5.1D20161229 - flipX/flipY added
+                    });
+                    this.clipperDimension.push({
+                        X: this.flipX(wire.x2), //V5.1D20161229 - flipX/flipY added
+                        Y: this.flipY(wire.y2)  //V5.1D20161229 - flipX/flipY added
+                    });
+                }
+                else {//V5.2D20170105 following code added to support curved dimensions, curvers will be rendered as lines not arcs
+                    var arc = this.drawArc(wire.x1, wire.y1, wire.x2, wire.y2, wire.curve, 0);
+                    arc.updateMatrixWorld();
+                    for(var j = 0; j < arc.geometry.vertices.length - 1; j++){
+                        var v = arc.geometry.vertices[j].clone();
+                        var vec = arc.localToWorld(v);
+                        //lineGeo.vertices.push(new THREE.Vector3(that.flipX(vec.x), that.flipY(vec.y), 0));
+                        this.clipperDimension.push({
+                            X: this.flipX(vec.x),
+                            Y: this.flipY(vec.y)
+                        });
+                        v = arc.geometry.vertices[j+1].clone();
+                        vec = arc.localToWorld(v);
+                        this.clipperDimension.push({
+                            X: this.flipX(vec.x),
+                            Y: this.flipY(vec.y)
+                        });
+                    }
+                }
             }
 
             //for (var signalKey in this.eagle.signalItems) {
@@ -4680,15 +4822,27 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             for (var i = 0; i < wires.length; i++) {
                 var wire = wires[i];
                 //console.log("working on wire:", wire);
-
-                lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x1), that.flipY(wire.y1), 0));//V5.1D20161229 - flipX/flipY added
-                lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x2), that.flipY(wire.y2), 0));//V5.1D20161229 - flipX/flipY added
-
+                if(wire.curve == 0){//V5.2D20170105 If statement added to support cured wires
+                    lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x1), that.flipY(wire.y1), 0));//V5.1D20161229 - flipX/flipY added
+                    //V5.2D20170105 if statement added, We only need to add second vertex of last line 
+                    if(i == (wires.length - 1))
+                        lineGeo.vertices.push(new THREE.Vector3(that.flipX(wire.x2), that.flipY(wire.y2), 0));//V5.1D20161229 - flipX/flipY added
+                }
+                else {//V5.2D20170105 following code added to support cured wires
+                    var arc = this.drawArc(wire.x1, wire.y1, wire.x2, wire.y2, wire.curve, 0);
+                    arc.updateMatrixWorld();
+                    for(var j = 0; j < arc.geometry.vertices.length; j++){
+                        var v = arc.geometry.vertices[j].clone();
+                        var vec = arc.localToWorld(v);
+                        lineGeo.vertices.push(new THREE.Vector3(that.flipX(vec.x), that.flipY(vec.y), 0));
+                    }
+                }
             }
+            //V5.2D20170105 Comented because lineGeo already closed with above code
             // now close the line by pushing first vertices
-            if (wires.length > 0) {
-                lineGeo.vertices.push(new THREE.Vector3(wires[0].x1, wires[0].y1, 0));
-            }
+            // if (wires.length > 0) {
+            //     lineGeo.vertices.push(new THREE.Vector3(that.flipX(wires[0].x1), that.flipY(wires[0].y1, 0)));
+            // }
 
             var line = new THREE.Line(lineGeo, lineMat);
             /*
@@ -4858,6 +5012,66 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         clipperSignalWires: [], // holds clipper formatted paths
         clipperSignalPolys: [], // holds clipper formatted polygons
+        draw3dHoles: function(){//V5.2D20170105 Added
+            var that = this;
+            console.group("draw3dHoles");
+            //Add Plain holes
+            var bigSceneGroup = new THREE.Group();
+            this.eagle.plainHoles.forEach(function(hole){
+                var colorHole = that.colorHole;
+                var hx = that.flipX(hole.x);
+                var hy = that.flipY(hole.y);
+                if(!that.addHole(hole.drill, hx, hy)) colorHole = that.colorHoleUnhandled; //If hole cannot be drilled or milled change color to red
+                var line = that.drawCircle(hx, hy, hole.drill/2, colorHole);
+                line.rotateZ(Math.PI / 8);
+                
+                bigSceneGroup.add (line);
+            });
+            
+            //Add Package holes
+            for (var elemKey in this.eagle.elements) {
+                var elem = this.eagle.elements[elemKey];
+                
+                var pkg = this.eagle.packagesByName[elem.pkg];
+                
+                pkg.holes.forEach(function(hole){
+                    var colorHole = that.colorHole;
+                    var hx = hole.x, hy = hole.y;
+                    var cx = elem.x, cy = elem.y;
+                    console.log("Ameen - mirror:", elem.mirror);
+                    console.log("Ameen - original X:", hx, "Y:", hy);
+                    if ('rot' in elem && elem.rot != null) {
+                        console.log("Ameen - rot:", elem.rot);
+                        var rot = parseInt(elem.rot.replace(/\D+/i,''));
+                        console.log("Ameen - rot:", rot);
+                        if (rot > 0) {
+                            var r = (Math.PI / 180) * rot;
+                            var sin = Math.sin(r);
+                            var cos = Math.cos(r);
+                            var nx = (cos * (hx)) - (sin * (hy));
+                            var ny = (sin * (hx)) + (cos * (hy));
+                            hx = nx; hy = ny;
+                            console.log("Ameen - rotated X:", hx, "Y:", hy);
+                        }
+                    }
+                    console.log("Ameen - Element X:", elem.x, "Y:", elem.y);
+                    console.log("Ameen - Fina X:", elem.x + hx, "Y:", elem.y + hy);
+                    if(elem.mirror) hx = - hx;
+                    hx = that.flipX(cx + hx);
+                    hy = that.flipY(cy + hy);
+                    if(!that.addHole(hole.drill, hx, hy)) colorHole = that.colorHoleUnhandled; //If hole cannot be drilled or milled change color to red
+                    var line = that.drawCircle(hx, hy, hole.drill/2, colorHole);
+                    line.rotateZ(Math.PI / 8);
+    
+                    bigSceneGroup.add (line);
+                });
+            }
+            that.sceneAdd(bigSceneGroup);
+            if(this.holesUnhandledCount==0)//V5.2D20170105 Added
+                $('.eagle-holes-alert').addClass("hidden");
+            else
+                $('.eagle-holes-alert').removeClass("hidden");
+        },
         draw3dVias: function (layersName) {
             if (!layersName) return;
             var that = this;
@@ -4901,14 +5115,18 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     // save all drills for vias                  
                     // Most exists only drills with diameter 1.0 0.9 0.8 ...
                     var drill = via.drill.toFixed(1);
-                    if(that.drillVias[drill] === undefined)
-                        that.drillVias[drill] = [];
-                    that.drillVias[drill].push({
-                        X: via.x.toFixed(4),
-                        Y: via.y.toFixed(4),
-                        D: via.drill.toFixed(4)
-                    });
+                    //V5.2D20170105 Commented 
+                    // if(that.drillVias[drill] === undefined)
+                    //     that.drillVias[drill] = [];
+                    // that.drillVias[drill].push({
+                    //     X: via.x.toFixed(4),
+                    //     Y: via.y.toFixed(4),
+                    //     D: via.drill.toFixed(4)
+                    // });
                     
+                    var colorHole = this.colorHole; //V5.2D20170105 Aded
+                    if(!this.addHole(via.drill, via.x, via.y)) colorHole = this.colorHoleUnhandled; //V5.2D20170105 Added if hole cannot be drilled or milled change color to red
+
                     //1:Draw outter via shape
                     var viashape = "round";
                     if ('shape' in via) viashape = via.shape;
@@ -4923,7 +5141,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     viaGeo.vertices.shift();
                     //viaGeo.vertices.pop();
                     //2:Draw circle around the drill hole
-                    var line = that.drawCircle(that.flipX(via.x), that.flipY(via.y), via.drill/2, that.colorHole);//V5.1D20161229 - flipX/flipY added
+                    var line = that.drawCircle(that.flipX(via.x), that.flipY(via.y), via.drill/2, colorHole);//V5.1D20161229 - flipX/flipY added //V5.2D20170105changed this.colorHole to colorHole
                     line.rotateZ(Math.PI / 8);
                     
                     bigSceneGroup.add (line);
@@ -5338,8 +5556,36 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         clipperPads: [], // subset of elements (pads)
         clipperSmds: [], // subset of elements (smds)
         clipperVias: [], // subset of elements (vias)
-        drillPads: {}, // save all pad drill vectors
-        drillVias: {}, // save all via drill vectors
+        //drillPads: {}, // save all pad drill vectors //V5.2D20170105 Commented replaced by holesToDrill/holesToMill
+        //drillVias: {}, // save all via drill vectors //V5.2D20170105 Commented replaced by holesToDrill/holesToMill
+        holesToDrill: {}, //V5.2D20170105 Added to replace drillPads/drillVias
+        holesToMill: [],  //V5.2D20170105 Added to replace drillPads/drillVias
+        holesUnhandledCount: 0, //V5.2D20170105 Count number of holes that cannot be drilled/milled 
+                                //(drill diameter > drillMaxDiameter and <= millDiameter)
+        addHole: function(drill, x, y){//V5.2D20170105 Added
+            if(drill > this.drillMaxDiameter && drill <= this.millDiameter){
+                this.holesUnhandledCount++
+                return false; //We don't have tool suitable for this hole.
+            }
+            if(drill > this.drillMaxDiameter) {//Hole diameter bigger tham drillMaxDiameter, mill it
+                this.holesToMill.push({
+                   X: x.toFixed(4),
+                   Y: y.toFixed(4),
+                   D: drill.toFixed(4)
+                });
+            }
+            else {//Hole diameter smaller or equel to drillMaxDiameter, drill it
+                if(this.holesToDrill[drill.toFixed(1)] === undefined)
+                   this.holesToDrill[drill.toFixed(1)] = [];
+                this.holesToDrill[drill.toFixed(1)].push({
+                   X: x.toFixed(4),
+                   Y: y.toFixed(4),
+                   D: drill.toFixed(4)
+                });
+            }
+            return true;
+        },
+        
         draw3dElements: function (layer) {
 
             if (!layer) return;
@@ -5907,26 +6153,41 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
                         // Get absolute coordinates from drill hole
                         // in an element
-                        if( line.position.x == 0 ){ // only middle point holes
+                        //V5.2D20170105 commented
+                        // if( line.position.x == 0 ){ // only middle point holes
+                        //   var vector = new THREE.Vector3();
+                        //   vector.setFromMatrixPosition( line.matrixWorld  );
+                        //   // Most exists only drills with diameter 1.0 0.9 0.8 ...
+                        //   var drill = line.parent.userData.pad.drill;
+                        //   var shape = line.parent.userData.pad.shape;
+                        //   if(this.drillPads[drill.toFixed(1)] === undefined)
+                        //       this.drillPads[drill.toFixed(1)] = [];
+                        //   this.drillPads[drill.toFixed(1)].push({
+                        //       X: vector.x.toFixed(4),
+                        //       Y: vector.y.toFixed(4),
+                        //       D: drill.toFixed(4)
+                        //   });
+                        //   // New routine to draw a cirlce in threed
+                        //   //this.sceneAdd( this.drawCircle(vector.x, vector.y, drill/2, this.colorHole ) );
+                        //   //bigSceneGroup.add (this.drawCircle(vector.x, vector.y, drill / 2, this.colorHole));
+
+                        //   // drill hole --> end
+                        //  }
+                         //V5.2D20170105 holes handling --> replace above code
+                         if( line.position.x == 0 ){ // only middle point holes
                            var vector = new THREE.Vector3();
                            vector.setFromMatrixPosition( line.matrixWorld  );
-                           // Most exists only drills with diameter 1.0 0.9 0.8 ...
                            var drill = line.parent.userData.pad.drill;
                            var shape = line.parent.userData.pad.shape;
-                           if(this.drillPads[drill.toFixed(1)] === undefined)
-                               this.drillPads[drill.toFixed(1)] = [];
-                           this.drillPads[drill.toFixed(1)].push({
-                               X: vector.x.toFixed(4),
-                               Y: vector.y.toFixed(4),
-                               D: drill.toFixed(4)
-                           });
+                           var colorHole = this.colorHole;
+                           if(!this.addHole(drill, vector.x, vector.y)) colorHole = this.colorHoleUnhandled; //Red
                            // New routine to draw a cirlce in threed
                            //this.sceneAdd( this.drawCircle(vector.x, vector.y, drill/2, this.colorHole ) );
-                           bigSceneGroup.add (this.drawCircle(vector.x, vector.y, drill / 2, this.colorHole));
+                           bigSceneGroup.add (this.drawCircle(vector.x, vector.y, drill / 2, colorHole));
 
-                           // drill hole --> end
+                           // holes handling --> end
+                             
                          }
-                        
                         line.geometry.vertices.forEach(function (v) {
                             //console.log("pushing v onto clipper:", v);
                             var vector = v.clone();
@@ -6278,6 +6539,37 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             circle.position.set(x, y, 0);
 
             return circle;
+        },
+        //V5.2D20170105 Added to support curved wires (TODO: Ameen to be simplified)
+        drawArc: function (x1, y1, x2, y2, curve, color){
+            var xRadius = Math.abs(x2 - x1),
+                yRadius = Math.abs(y2 - y1),
+                cu = (x1-x2)*(y1-y2) > 0,   //curve up 1
+                cx = x1 < x2, cy = y1 < y2,
+                cc = curve > 0,             //counter clockwise 1
+                aStartAngle =   (cc?
+                                (((cx && cy)?-90:(!cx && !cy)?90:(cx && !cy)?180:0)):
+                                (((cx && cy)?180:(!cx && !cy)?00:(cx && !cy)?90:-90))) *
+                                Math.PI/180,
+                aEndAngle = aStartAngle+curve * Math.PI / 180,
+                segments = 8,
+                ax = cc? (cu? x1 : x2) : (cu? x2 : x1),
+                ay = cc? (cu? y2 : y1) : (cu? y1 : y2),
+                arcCurve = new THREE.EllipseCurve(
+                    ax, ay,
+                    xRadius, yRadius,
+                    aStartAngle, aEndAngle,
+                    !cc
+                );
+                var points = arcCurve.getSpacedPoints( segments );
+                
+                var path = new THREE.Path();
+                var geometry = path.createGeometry( points );
+                
+                var material = new THREE.LineBasicMaterial( { color : color } );
+                
+                var arc = new THREE.Line( geometry, material );
+            return arc;
         },
         drawSphere: function (x, y, radius, color){
             console.log("Sqhere position and color: ", x, y, color);
@@ -6823,6 +7115,7 @@ EagleCanvas.prototype.parse = function () {
         // need to add rectangles as well
 
         var packageWires = [];
+        var packageHoles = [];
         var bbox = [EagleCanvas.LARGE_NUMBER, EagleCanvas.LARGE_NUMBER, -EagleCanvas.LARGE_NUMBER, -EagleCanvas.LARGE_NUMBER];
         var wires = pkg.getElementsByTagName('wire');
         for (var wireIdx = 0; wireIdx < wires.length; wireIdx++) {
@@ -6863,11 +7156,17 @@ EagleCanvas.prototype.parse = function () {
             var text = texts[textIdx];
             packageTexts.push(this.parseText(text));
         }
-
+        //V5.2D20170105 Added
+        var holes = pkg.getElementsByTagName('hole');
+        for (var holeIdx = 0; holeIdx < holes.length; holeIdx++) {
+            var holeDict = this.parseHole(holes[holeIdx]);
+            packageHoles.push(holeDict);
+        }
         var packageDict = {
             'pads': packagePads,
             'smds': packageSmds,
             'wires': packageWires,
+            'holes': packageHoles, //V5.2D20170105 Added
             'texts': packageTexts,
             'bbox': bbox,
             'name' : packageName
@@ -6876,6 +7175,7 @@ EagleCanvas.prototype.parse = function () {
     }
 
     this.plainWires = {};
+    this.plainHoles = []; //V5.2D20170105 Added
     var plains = this.boardXML.getElementsByTagName('plain'); //Usually only one
     for (var plainIdx = 0; plainIdx < plains.length; plainIdx++) {
         var plain = plains[plainIdx],
@@ -6886,6 +7186,12 @@ EagleCanvas.prototype.parse = function () {
                 layer = wireDict.layer;
             if (!this.plainWires[layer]) this.plainWires[layer] = [];
             this.plainWires[layer].push(wireDict);
+        }
+        //V5.2D20170105 Added
+        var holes = plain.getElementsByTagName('hole');
+        for (var holeIdx = 0; holeIdx < holes.length; holeIdx++) {
+            var holeDict = this.parseHole(holes[holeIdx]);
+            this.plainHoles.push(holeDict);
         }
     }
 
@@ -6911,6 +7217,15 @@ EagleCanvas.prototype.parseSmd = function (smd) {
         'rot': smd.getAttribute('rot'),
         'name': smd.getAttribute('name'),
         'layer': smd.getAttribute('layer')
+    };
+}
+
+//V5.2D20170105 Added
+EagleCanvas.prototype.parseHole = function (hole) {
+    return {
+        'x': parseFloat(hole.getAttribute('x')),
+        'y': parseFloat(hole.getAttribute('y')),
+        'drill': parseFloat(hole.getAttribute('drill'))
     };
 }
 
@@ -6960,14 +7275,16 @@ EagleCanvas.prototype.parsePad = function (pad) {
 EagleCanvas.prototype.parseWire = function (wire) {
     var width = parseFloat(wire.getAttribute('width'));
     if (width <= 0.0) width = this.minLineWidth;
-
+    var curve = parseInt(wire.getAttribute('curve'));  //V5.2D20170105 Added
+    if(!curve) curve = 0;                        //V5.2D20170105 Added
     return {
         'x1': parseFloat(wire.getAttribute('x1')),
             'y1': parseFloat(wire.getAttribute('y1')),
             'x2': parseFloat(wire.getAttribute('x2')),
             'y2': parseFloat(wire.getAttribute('y2')),
             'width': width,
-            'layer': parseInt(wire.getAttribute('layer'))
+            'layer': parseInt(wire.getAttribute('layer')),
+            'curve': curve  //V5.2D20170105 Added
     };
 }
 

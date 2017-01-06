@@ -62,9 +62,10 @@
                     </div>
                 </div>
             </div> <span class="panel-title" data-toggle="popover">Eagle BRD</span> <span 
-            style="font-size:9px;" class="fb-build">v5.1</span>
+            style="font-size:9px;" class="fb-build">v5.2</span>
 
         </div>
+        <div class="alert alert-danger hidden eagle-holes-alert" style="margin-bottom:5px;">Gcode could not be generated for some of the holes (the ones highlighted in red), check tool sized in the Gcode tab.</div>
         <div class="panel-body">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
@@ -262,7 +263,6 @@
                     </div>
                     <p class="descriptive-text">Spindle speed (rpm) value will be used for a whole job. If you need various speeds for different parts of the job e.g. milling traces, drilling, milling board outline, please edit the gcode file manually and replace S12000 with Sxxxx, where xxxx = your new spindle speed value.
                     </p>
-
                     <h2>Clearance Height</h2> Clearance for Z Axis Moves
                     <div class="input-group">
                         <input class="form-control clearance-height" type="number" placeholder="Clearance" value="1" />

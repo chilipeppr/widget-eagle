@@ -1,3 +1,17 @@
+Versoin 5.2
+**************************************************
+Auther: Ameen Nihad
+
+- Changed how holes are handled, now holes for Pads, Vias, packages and Plains are treated exactly the same.
+- Now holes are either drilled or milled, that depending on diameter of tools used, i.e. values of:
+    - Maximum hole diameter to drill
+    - Diameter of tool for cutting dimension
+- Fix the bug of "Board dimensions rendered incorrectly", Eagle don't care about order of wires and previous code assumes they are in right order,
+  bug fixed by sorting the wires and correct their direction.
+- Support for Curves in board dimensions is added.
+
+Update stamp: V5.2D20170105 (this can be used to locate the updated/added code)
+
 Versoin 5.1
 **************************************************
 Auther: Ameen Nihad
