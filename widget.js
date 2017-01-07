@@ -2122,7 +2122,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var z = that.stepDownDimensions*(i+1);
                     if(z < that.depthOfDimensions)
                         z = that.depthOfDimensions;
-                    g += "G0 Z" + z.toFixed(4) + "\n";
+                    g += "G1 Z" + z.toFixed(4) + "\n"; //V5.2QUICKFIX
                     g += "G2 I" + gdiameter.toFixed(4) + "\n";
                 }
                 g += "G0 Z" + that.clearanceHeight + "\n";

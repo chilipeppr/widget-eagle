@@ -1,3 +1,10 @@
+Version 5.2 Quick Fix
+**************************************************
+Auther: Ameen Nihad
+
+In exportGcodeMillHoles function, G0 is used by mistake to plunge the cutting tool, G0 changed to G1.
+Update stamp: V5.2QUICKFIX
+
 Versoin 5.2
 **************************************************
 Auther: Ameen Nihad
