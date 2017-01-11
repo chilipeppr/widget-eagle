@@ -1,3 +1,14 @@
+Version 5.3
+**************************************************
+Auther: Ameen Nihad
+
+- Support for Curves in boarder dimension and signal wires is added, in V5.2 this feature was limited board dimension and to +/-90 degrees.
+- TODO: Slots and inner dimensions
+- TODO: Tabs (boarder holders)
+- TODO: Gcode comments above M6 - Issue #17
+- TODO: Expose curve resolution to UI
+Update stamp: V5.3D201701XX
+
 Version 5.2 Quick Fix
 **************************************************
 Auther: Ameen Nihad
