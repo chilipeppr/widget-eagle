@@ -2384,7 +2384,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         //console.log("dimension mill: skipping pt:", pt);
                     } else {
                         //console.log("dimension mill: adding pt:", pt);
-                        g += that.exportPCBDimensionHolder(pt, lastPt, newZ, diaOfEndmill/2);
+                        g += "G1 X" + pt.X + " Y" + pt.Y + "\n";
+                        //V5.3D201701XX disable Dimension Holder since it has some bugs
+                        //g += that.exportPCBDimensionHolder(pt, lastPt, newZ, diaOfEndmill/2);
                     }
                     lastPt = pt;
                 });                // move to first point
@@ -5438,25 +5440,40 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
                 layerWires.forEach(function (wire) {
                     //console.log("drawing wires. wire:", wire);
-
-                    // use new util function
-                    var sol_paths = that.addStrokeCapsToLine(
-                        that.flipX(wire.x1), that.flipY(wire.y1), //V5.1D20161229 - flipX/flipY added
-                        that.flipX(wire.x2), that.flipY(wire.y2), //V5.1D20161229 - flipX/flipY added
-                        wire.width);
-                    //that.drawClipperPaths(sol_paths, that.colorSignal, 0.2);
-
-                    //console.log("about to add sol_paths to centipede:", sol_paths);
-                    centipede.push(sol_paths[0]);
-                    wire.clipper = sol_paths[0];
-
+                    if(wire.curve == 0){//V5.3D201701XX if statement added to support curved signal wire
+                        // use new util function
+                        var sol_paths = that.addStrokeCapsToLine(
+                            that.flipX(wire.x1), that.flipY(wire.y1), //V5.1D20161229 - flipX/flipY added
+                            that.flipX(wire.x2), that.flipY(wire.y2), //V5.1D20161229 - flipX/flipY added
+                            wire.width);
+                        //that.drawClipperPaths(sol_paths, that.colorSignal, 0.2);
+    
+                        //console.log("about to add sol_paths to centipede:", sol_paths);
+                        centipede.push(sol_paths[0]);
+                        wire.clipper = sol_paths[0];
+                    }
+                    else {//V5.3D201701XX Following code added to support curved wires
+                        var arc = that.drawArc(wire.x1, wire.y1, wire.x2, wire.y2, wire.curve, 0);
+                        arc.updateMatrixWorld();
+                        for(var j = 0; j < arc.geometry.vertices.length - 1; j++){
+                            var v1 = arc.geometry.vertices[j].clone();
+                            var ver1 = arc.localToWorld(v1);
+                            var v2 = arc.geometry.vertices[j+1].clone();
+                            var ver2 = arc.localToWorld(v2);
+                            var sol_paths = that.addStrokeCapsToLine(
+                                that.flipX(ver1.x), that.flipY(ver1.y),
+                                that.flipX(ver2.x), that.flipY(ver2.y),
+                                wire.width);
+                            centipede.push(sol_paths[0]);
+                            wire.clipper = sol_paths[0];
+                        } 
+                    }
                 });
 
                 // merge centipede array of signals into single object
                 // do a union with Clipper.js
                 var sol_paths = this.getUnionOfClipperPaths(centipede);
                 //this.drawClipperPaths(sol_paths, this.colorSignal, 0.2);
-                
                 // we can get holes in sol_paths. it's rare but if a user created
                 // their board in such a way that they created a circle with their
                 // wires, we get a hole here. that means we need to separate those
@@ -6665,35 +6682,38 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
             return circle;
         },
-        //V5.2D20170105 Added to support curved wires (TODO: Ameen to be simplified)
+        //V5.2D20170105 Added to support curved wires
+        //V5.3D201701XX Updated to support any value of "curve", previous version supported only 90/-90
+        //Check this page for math: http://mathforum.org/library/drmath/view/53027.html
         drawArc: function (x1, y1, x2, y2, curve, color){
-            var xRadius = Math.abs(x2 - x1),
-                yRadius = Math.abs(y2 - y1),
-                cu = (x1-x2)*(y1-y2) > 0,   //curve up 1
-                cx = x1 < x2, cy = y1 < y2,
-                cc = curve > 0,             //counter clockwise 1
-                aStartAngle =   (cc?
-                                (((cx && cy)?-90:(!cx && !cy)?90:(cx && !cy)?180:0)):
-                                (((cx && cy)?180:(!cx && !cy)?00:(cx && !cy)?90:-90))) *
-                                Math.PI/180,
-                aEndAngle = aStartAngle+curve * Math.PI / 180,
-                segments = 8,
-                ax = cc? (cu? x1 : x2) : (cu? x2 : x1),
-                ay = cc? (cu? y2 : y1) : (cu? y1 : y2),
-                arcCurve = new THREE.EllipseCurve(
-                    ax, ay,
-                    xRadius, yRadius,
-                    aStartAngle, aEndAngle,
-                    !cc
+            var radian = curve * Math.PI / 180,
+                ql = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)), //distance between points 1 and 2
+                rd = Math.abs((ql/2)/Math.sin(radian/2)),
+                x3 = (x1+x2)/2, y3 = (y1+y2)/2, //the point halfway between points 1 and 2
+                dx = (y1-y2)/ql, dy = (x2-x1)/ql, //direction of mirror line (normalized) that passing through (x, y) an between points 1 and 2
+                ax = x3 + Math.sign(curve) * Math.sqrt(rd*rd - (ql/2)*(ql/2))*dx, //X coordinate of arc center
+                ay = y3 + Math.sign(curve) * Math.sqrt(rd*rd - (ql/2)*(ql/2))*dy, //Y coordinate of arc center
+                aStartAngle = Math.atan2(y1-ay, x1-ax),
+                aEndAngle = Math.atan2(y2-ay, x2-ax);
+                
+            aStartAngle = aStartAngle<0? 2 * Math.PI + aStartAngle: aStartAngle;
+            aEndAngle = aEndAngle<0? 2 * Math.PI + aEndAngle: aEndAngle;
+            var segments = Math.max(rd * Math.abs(radian)*2, 8); // Segment every 0.5mm, minimum 8 segments TODO: Expose to UI
+            
+            var arcCurve = new THREE.EllipseCurve(
+                ax, ay,
+                rd, rd,
+                aStartAngle, aEndAngle,
+                curve < 0
                 );
-                var points = arcCurve.getSpacedPoints( segments );
-                
-                var path = new THREE.Path();
-                var geometry = path.createGeometry( points );
-                
-                var material = new THREE.LineBasicMaterial( { color : color } );
-                
-                var arc = new THREE.Line( geometry, material );
+            var points = arcCurve.getSpacedPoints( segments );
+            
+            var path = new THREE.Path();
+            var geometry = path.createGeometry( points );
+            
+            var material = new THREE.LineBasicMaterial( { color : color } );
+            
+            var arc = new THREE.Line( geometry, material );
             return arc;
         },
         drawSphere: function (x, y, radius, color){
@@ -7400,7 +7420,7 @@ EagleCanvas.prototype.parsePad = function (pad) {
 EagleCanvas.prototype.parseWire = function (wire) {
     var width = parseFloat(wire.getAttribute('width'));
     if (width <= 0.0) width = this.minLineWidth;
-    var curve = parseInt(wire.getAttribute('curve'));  //V5.2D20170105 Added
+    var curve = parseFloat(wire.getAttribute('curve'));  //V5.2D20170105 Added
     if(!curve) curve = 0;                        //V5.2D20170105 Added
     return {
         'x1': parseFloat(wire.getAttribute('x1')),

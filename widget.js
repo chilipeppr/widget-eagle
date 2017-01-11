@@ -6573,10 +6573,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
             aStartAngle = aStartAngle<0? 2 * Math.PI + aStartAngle: aStartAngle;
             aEndAngle = aEndAngle<0? 2 * Math.PI + aEndAngle: aEndAngle;
-            var segments = Math.max(rd * Math.abs(radian)*10, 8); // Segment every 0.2mm, minimum 8 segments
-            //console.log("Ameen: X1:", x1, "Y1:", y1, "X2:", x2, "Y2:", y2, "Curve:", curve
-            // "R:", rd, "QL:", ql, "X3:", x3, "Y3:", y3, 
-            // "Start:", aStartAngle*180/Math.PI, "End:", aEndAngle*180/Math.PI, "X:", ax, "Y:", ay);
+            var segments = Math.max(rd * Math.abs(radian)*2, 8); // Segment every 0.5mm, minimum 8 segments TODO: Expose to UI
             
             var arcCurve = new THREE.EllipseCurve(
                 ax, ay,
