@@ -2955,6 +2955,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
             // Step 2.5: Also clip polys by the dimenions, meaning, don't let any poly
             // go beyond the dimensions of the board.
+            console.group("cutPolyByDimensions")
             for (var i = 0; i < keys.length; i++) {
                 var key = keys[i];
                 var signal = this.clipperBySignalKey[key];
@@ -2963,18 +2964,28 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     
                     signal.poly.polys.forEach(function(poly) {
                         
-                        console.log("doing dimension clip. poly:", poly, "signal:", signal);
-                        var regionOutside = this.getDiffOfClipperPaths(poly.clipperWithOtherSignalsRemoved, [this.clipperDimension]);
+                        console.log("Ameen - doing dimension clip. poly:", poly, "signal:", signal);
+                        var cdp = [];
+                        for(var n=0; n<this.clipperDimensionInfo.length; n++){
+                            var cdi = this.clipperDimensionInfo[n];
+                            if(cdi.type != 0) continue;
+                            console.log("Ameen - cdi path", cdi.start, cdi.end);
+                            cdp.push(this.clipperDimension.slice(cdi.start, cdi.end));
+                        }
+                        var regionOutside = this.getDiffOfClipperPaths(poly.clipperWithOtherSignalsRemoved, cdp);
+                        console.log("Ameen - regionOutside", regionOutside);
                         if (regionOutside != null && regionOutside.length > 0) {
+                            console.log("Ameen - we found a region outside dimensions, clip it off");
                             // we found a region outside dimensions, clip it off
                             poly.clipperWithOtherSignalsRemoved = this.getDiffOfClipperPaths(poly.clipperWithOtherSignalsRemoved, regionOutside);
                         }
+                        
                         //this.drawClipperPaths(poly.clipperWithOtherSignalsRemoved, 0xff0000, 0.99, debugZ);
                         //debugZ += 5;
                     }, this);
                 }
             }
-            
+            console.groupEnd()
             // Step 3. Now deal with removing smds/pads from the polys
             console.log("doing step 3");
             for (var i = 0; i < keys.length; i++) {
@@ -4817,6 +4828,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     }
                 }
             }
+            //Sort the array desending based on value of (type), so that gcode for deflated paths is generated first.
+            this.clipperDimensionInfo.sort(function(a, b){return b.type - a.type});
+            
             console.log("Ameen", "C Dimension Info: ", JSON.stringify(this.clipperDimensionInfo));
             return wires;
         },
@@ -5501,10 +5515,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
 
             console.group("draw3dSignalPolygons");
-            console.log("layer:", layer);
+            console.log("Ameen layer:", layer);
             
             var layerNumber = layer.number;
-
+            console.log("Ameen-layerItems:", layerItems);
             // contains all paths for each individual polygon
             // so we can join them at the end
             var polyArr = [];
@@ -5519,7 +5533,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var layerPolys = layerItems['polygons'] || [];
                 
                 if (layerPolys.length == 0) continue;
-                console.log("layerPolys:", layerPolys);
+                console.log("Ameen layerPolys:", layerPolys);
                 
                 // create mondo storage
                 if (this.clipperBySignalKey[signalKey] === undefined)
@@ -5536,9 +5550,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var centipede = [];
                 
                 if (layerPolys.length > 1) {
-                    //console.error("have more than one polygon in a signal. need to test this. layerPolys:", layerPolys);
+                    console.error("Ameen have more than one polygon in a signal. need to test this. layerPolys:", layerPolys);
                 }
-                console.log("layerPolys=", layerPolys.length);
+                console.log("Ameen layerPolys=", layerPolys.length);
                 layerPolys.forEach(function (poly) {
 
                     var clipperPoly = [];
@@ -5557,7 +5571,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     centipede.push(clipperPoly);                   
 
                 });
-                console.log("poly centipede:", centipede);
+                console.log("Ameen poly centipede:", centipede);
                 
                 // merge centipede array of signals into single object
                 // do a union with Clipper.js
@@ -5600,7 +5614,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     that.clipperSignalPolys[signalKey + "-" + ctr] = path;
                     ctr++;
                 });
-                console.log("Ameen clipperSignalPolys:", that.clipperSignalPolys);
                 // add to mondo object
                 this.clipperBySignalKey[signalKey].poly = {
                     clipper: sol_paths,
@@ -5609,8 +5622,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 };
 
             }
-            console.log("final list of clipper signal polys:", this.clipperSignalPolys);
-            console.log("clipperBySignalKey:", this.clipperBySignalKey);
+            console.log("Ameen final list of clipper signal polys:", this.clipperSignalPolys);
+            console.log("Ameen clipperBySignalKey:", this.clipperBySignalKey);
             console.groupEnd();
         },
         clipperElements: [], // holds clipper formatted paths
