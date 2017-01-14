@@ -2238,7 +2238,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // move to last position of path
                 // last position because the inflated path does not start and end at same position
                 // previously first position was used and that left a gap between plunge and retract positions
-                var l = this.clipperDimension.lenght - 1;
+                var l = this.clipperDimension.length - 1;
+                console.log("Ameen CP Length", l, this.clipperDimension[l])
                 if (this.clipperDimension[l] !== undefined)
                     g += "G0 X" + this.clipperDimension[l].X + " Y" + this.clipperDimension[l].Y + "\n";
                 // move down
