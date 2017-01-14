@@ -5,6 +5,7 @@ Auther: Ameen Nihad
 - Support for Curves in boarder dimension and signal wires is added, in V5.2 this feature was limited board dimension and to +/-90 degrees.
 - Support for slots and inner dimensions is added.
 - Support for Panelizing is added, multiple boards or multiple copies of same board can be placed in single .brd file then imported to widget.
+- Fixed a bug in dimension milling which caused a gap between plung and retract positions.
 - TODO: Tabs (boarder holders)
 - TODO: Gcode comments above M6 - Issue #17
 - TODO: Expose curve resolution to UI
