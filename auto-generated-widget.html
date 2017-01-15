@@ -6732,25 +6732,28 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         //V5.3D201701XX Updated to support any value of "curve", previous version supported only 90/-90
         //Check this page for math: http://mathforum.org/library/drmath/view/53027.html
         drawArc: function (x1, y1, x2, y2, curve, color){
+            console.log("Ameen Arc: x1", x1, "y1", y1, "x2", x2, "y2", y2, "curve", curve );
             var radian = curve * Math.PI / 180,
+                sn = (curve > 0 && curve < 180) || (curve <-180 && curve > -360)?1:-1,
                 ql = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)), //distance between points 1 and 2
                 rd = Math.abs((ql/2)/Math.sin(radian/2)),
                 x3 = (x1+x2)/2, y3 = (y1+y2)/2, //the point halfway between points 1 and 2
                 dx = (y1-y2)/ql, dy = (x2-x1)/ql, //direction of mirror line (normalized) that passing through (x, y) an between points 1 and 2
-                ax = x3 + Math.sign(curve) * Math.sqrt(rd*rd - (ql/2)*(ql/2))*dx, //X coordinate of arc center
-                ay = y3 + Math.sign(curve) * Math.sqrt(rd*rd - (ql/2)*(ql/2))*dy, //Y coordinate of arc center
+                ax = x3 + sn * Math.sqrt(rd*rd - (ql/2)*(ql/2))*dx, //X coordinate of arc center
+                ay = y3 + sn * Math.sqrt(rd*rd - (ql/2)*(ql/2))*dy, //Y coordinate of arc center
                 aStartAngle = Math.atan2(y1-ay, x1-ax),
-                aEndAngle = Math.atan2(y2-ay, x2-ax);
+                aEndAngle = Math.atan2(y2-ay, x2-ax),
+                cw = curve < 0;
                 
-            aStartAngle = aStartAngle<0? 2 * Math.PI + aStartAngle: aStartAngle;
-            aEndAngle = aEndAngle<0? 2 * Math.PI + aEndAngle: aEndAngle;
+            //aStartAngle = aStartAngle<0? 2 * Math.PI + aStartAngle: aStartAngle;
+            //aEndAngle = aEndAngle<0? 2 * Math.PI + aEndAngle: aEndAngle;
             var segments = Math.max(rd * Math.abs(radian)*2, 8); // Segment every 0.5mm, minimum 8 segments TODO: Expose to UI
-            
+            console.log("Ameen Arc: X", ax, "Y", ay, "R", Math.round(rd*100)/100, "S",aStartAngle*180/Math.PI, "E", aEndAngle*180/Math.PI,"CW",cw);
             var arcCurve = new THREE.EllipseCurve(
                 ax, ay,
                 rd, rd,
                 aStartAngle, aEndAngle,
-                curve < 0
+                cw
                 );
             var points = arcCurve.getSpacedPoints( segments );
             
