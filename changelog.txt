@@ -12,9 +12,13 @@ Auther: Ameen Nihad
 - Optimized how board boundries are caclulated
 - Optimized draw3dDimension function - use clipDimensions not wires
 - Gcode comments with M6 - Issue #17
-- TODO: draw3dSinalPoly - Support curved polygons
+- Function draw3dSignalPoly updated to support curved polygons
+- A new feature added to avoid tracing board dimensions, this will eliminate job time.
+- TODO: Expose curve resolution to UI - Done but require auto refresh
 - TODO: Tabs (boarder holders)
-- TODO: Expose curve resolution to UI
+- TODO: Fix a bug in render buttom
+- TODO: Slots with areas smaller than the end mill.
+- TODO: Mill empty areas
 
 
 Version 5.2 Quick Fix

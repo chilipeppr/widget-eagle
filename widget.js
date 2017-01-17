@@ -2841,7 +2841,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 }
             }
 
-            // Step 2.5: Also clip polys by the dimenions, meaning, don't let any poly
+            // Step 2.5: Also clip polys by the dimensions, meaning, don't let any poly
             // go beyond the dimensions of the board.
             console.group("cutPolyByDimensions")
             for (var i = 0; i < keys.length; i++) {
@@ -3144,6 +3144,20 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             console.log("removed all null pts. removedPtsCtr:", removedPtsCtr, "removedFromMarked:", removedFromMarked);
             } // end redundant path removal
             
+            if($('#com-chilipeppr-widget-eagle .AvoidTraceBoardDimensions').prop ("checked")){
+                for(var i=0; i<this.clipperDimensionInfo.length;i++){
+                    var cdi = this.clipperDimensionInfo[i];
+                    if(cdi.type != 0) continue;
+                    var p = 0;
+                    while(p<paths.length) {
+                        var dp = this.getDiffOfClipperPaths(
+                        [this.clipperDimension.slice(cdi.start, cdi.end)], [paths[p]]);
+                        if(dp.length == 0) paths.splice(p,1);
+                        p++;
+                    }
+                }
+            }
+
             // remove redundant paths
             this.debugZ = 2;
             //paths = this.redundantPathRemoval(paths);
@@ -5470,9 +5484,27 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
                     var clipperPoly = [];
                     
-                    poly.vertices.forEach(function(v) {
-                        clipperPoly.push({X:that.flipX(v.x), Y:that.flipY(v.y)}); //V5.1D20161229 - flipX/flipY added
-                    });
+                    //V5.3 Updated to support curved ploygons
+                    var l = poly.vertices.length;
+                    for(var i=0; i<l;i++){
+                        if(poly.vertices[i].curve == 0)
+                            clipperPoly.push({
+                                X:that.flipX(poly.vertices[i].x), 
+                                Y:that.flipY(poly.vertices[i].y)}); //V5.1D20161229 - flipX/flipY added
+                        else {
+                            var j = i == l-1 ? 0 : i+1;
+                            var arc = that.drawArc(
+                                poly.vertices[i].x, poly.vertices[i].y, 
+                                poly.vertices[j].x, poly.vertices[j].y,
+                                poly.vertices[i].curve, 0);
+                            arc.updateMatrixWorld();
+                            for(var n = 0; n < arc.geometry.vertices.length - 1; n++){
+                                var v = arc.geometry.vertices[n].clone();
+                                var ver = arc.localToWorld(v);
+                                clipperPoly.push({X:that.flipX(ver.x), Y:that.flipY(ver.y)});
+                            }
+                        }
+                    }
                     
                     // store in eagle obj for retrieval from mondo object
                     // later
@@ -6532,6 +6564,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         //Check this page for math: http://mathforum.org/library/drmath/view/53027.html
         drawArc: function (x1, y1, x2, y2, curve, color){
             //console.log("Ameen Arc: x1", x1, "y1", y1, "x2", x2, "y2", y2, "curve", curve );
+            var segmentLength = parseFloat($('#com-chilipeppr-widget-eagle .curve-resolution').val());
+            segmentLength = Math.min(segmentLength, 1.0);
+            segmentLength = Math.max(segmentLength, 0.1);
             var radian = curve * Math.PI / 180,
                 sn = (curve > 0 && curve < 180) || (curve <-180 && curve > -360)?1:-1,
                 ql = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)), //distance between points 1 and 2
@@ -6543,7 +6578,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 aStartAngle = Math.atan2(y1-ay, x1-ax),
                 aEndAngle = Math.atan2(y2-ay, x2-ax),
                 cw = curve < 0;
-            var segments = Math.max(rd * Math.abs(radian)*2, 8); // Segment every 0.5mm, minimum 8 segments TODO: Expose to UI
+            var segments = Math.max(rd * Math.abs(radian)/segmentLength, 8); // Segment every [segmentLength] mm, minimum 8 segments
             //console.log("Ameen Arc: X", ax, "Y", ay, "R", Math.round(rd*100)/100, "S",aStartAngle*180/Math.PI, "E", aEndAngle*180/Math.PI,"CW",cw);
             var arcCurve = new THREE.EllipseCurve(
                 ax, ay,
@@ -7281,7 +7316,6 @@ EagleCanvas.prototype.parseWire = function (wire) {
 EagleCanvas.prototype.parsePoly = function (poly) {
     var width = parseFloat(poly.getAttribute('width'));
     if (width <= 0.0) width = this.minLineWidth;
-
     // Polygons look like this
     /*
     <polygon width="0.254" layer="16" rank="2">
@@ -7295,10 +7329,12 @@ EagleCanvas.prototype.parsePoly = function (poly) {
     var vertexElems = poly.getElementsByTagName('vertex');
     for (var vertIdx = 0; vertIdx < vertexElems.length; vertIdx++) {
         var vertexElem = vertexElems[vertIdx];
+        var curve = parseFloat(vertexElem.getAttribute('curve'));
+        if(!curve) curve = 0;
         var vertex = {
             x: parseFloat(vertexElem.getAttribute('x')),
             y: parseFloat(vertexElem.getAttribute('y')),
-            curve: parseFloat(vertexElem.getAttribute('curve'))
+            curve: curve
         };
         vertices.push(vertex);
     }
