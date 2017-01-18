@@ -385,7 +385,28 @@
                     </div>
                     <p class="descriptive-text">The feedrate used for cutting out your dimensions. Default value is 100mm/min.
                     </p>
-
+                    
+                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
+                        <h2>Milling Direction</h2>
+                        <p class="descriptive-text">Following selections will adjust the orientation of tool paths, if left to default, orientation of paths is unpredectible and depends on how traces and wire are drawen in Eagle.Hit Render button after changing these values.
+                        </p>
+                        <div class="form-group">
+                            Milling Traces
+                            <select class="selectMillTraces form-control" id="DirectionMilling">
+                                <option value='0'>Don't Care</option>
+                                <option value='1'>Conventional Milling</option>
+                                <option value='2'>Climb milling</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            Cutting Dimensions/Milling Holes
+                            <select class="selectMillTraces form-control" id="DirectionCutting">
+                                <option value='0'>Don't Care</option>
+                                <option value='1'>Conventional Milling</option>
+                                <option value='2'>Climb milling</option>
+                            </select>
+                        </div>
+                    </div>
                     Generated Gcode
                     <textarea class="com-chilipeppr-widget-eagle-gcode"></textarea>
                 </div>

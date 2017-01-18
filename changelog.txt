@@ -14,10 +14,11 @@ Auther: Ameen Nihad
 - Gcode comments with M6 - Issue #17
 - Function draw3dSignalPoly updated to support curved polygons
 - A new feature added to avoid tracing board dimensions, this will eliminate job time.
+- A new feature added to correct paths orientation, to give the user a choice to do coventional or climb milling.
 - TODO: Expose curve resolution to UI - Done but require auto refresh
+- TODO: Warning about unmilled slots.
 - TODO: Tabs (boarder holders)
 - TODO: Fix a bug in render buttom
-- TODO: Slots with areas smaller than the end mill.
 - TODO: Mill empty areas
 
 

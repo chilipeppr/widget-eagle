@@ -1951,7 +1951,12 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         exportGcodeMilling:function(){
             var g = '';
+            var dir = $('#DirectionMilling').val();
             this.paths.forEach(function(path) {
+                if(dir>0){
+                    var o = ClipperLib.Clipper.Orientation(path);
+                    if(o != (dir==1)) path.reverse();//True=Convientional (CCW), False=Climb (CW)
+                }
                 // move to clearance
                 g += "G0 Z" + this.clearanceHeight + "\n";
                 // move to first position of path
@@ -2044,6 +2049,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         exportGcodeMillHoles:function(){
             var g = '';
             var that = this;
+            var dir = $('#DirectionCutting').val();
             var diaOfEndmill = $('.dimension-mill-diameter').val();
             if((! $('#com-chilipeppr-widget-eagle .use-drilling').is(':checked')) ||
                 this.holesToMill.lenght == 0)
@@ -2068,10 +2074,12 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     if(z < that.depthOfDimensions)
                         z = that.depthOfDimensions;
                     g += "G1 Z" + z.toFixed(4) + "\n"; //V5.2QUICKFIX
-                    g += "G2 I" + gdiameter.toFixed(4) + "\n";
+                    g += (dir==2)?"G2 I":"G3 I";
+                    g += gdiameter.toFixed(4) + "\n";
                 }
                 g += "G0 Z" + that.clearanceHeight + "\n";
             });
+            console.log("Ameen", g);
             return g;
         },
         exportGcodeDimensions:function(){
@@ -2080,7 +2088,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var that = this;
             
             var diaOfEndmill = $('.dimension-mill-diameter').val();
-            
+            var dir = $('#DirectionCutting').val();
             // DIMENSION Milling
             g += "(------ DIMENSION Milling -------)\n";
             if(this.holesToMill.lenght == 0){//if we already milled some holes, there is no need to do tool change
@@ -2121,7 +2129,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 console.log("inflated dimension:", millDim);
                 var origClipperDimensions = this.clipperDimension;
                 this.clipperDimension = millDim;
-                
+                if(dir>0){
+                    //Here we are correcting orientation of board dimension path
+                    //True orientation means Convientional milling (CCW directions),
+                    //False orientation means Climb (CW direction)
+                    var o = ClipperLib.Clipper.Orientation(this.clipperDimension);
+                    if(o != (dir==1)) 
+                    this.clipperDimension.reverse();
+                }
                 // TODO: please check if exists holes in eagle board
                 // move to clearance
                 g += "G0 Z" + this.clearanceHeight + "\n";
