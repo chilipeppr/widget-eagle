@@ -62,10 +62,11 @@
                     </div>
                 </div>
             </div> <span class="panel-title" data-toggle="popover">Eagle BRD</span> <span 
-            style="font-size:9px;" class="fb-build">v5.2</span>
+            style="font-size:9px;" class="fb-build">v5.3</span>
 
         </div>
-        <div class="alert alert-danger hidden eagle-holes-alert" style="margin-bottom:5px;">Gcode could not be generated for some of the holes (the ones highlighted in red), check tool sized in the Gcode tab.</div>
+        <div class="alert alert-danger hidden eagle-holes-alert" style="margin-bottom:5px;">Gcode could not be generated for some of the holes (the ones highlighted in red), check tool size in the Gcode tab.</div>
+        <div class="alert alert-danger hidden eagle-slots-alert" style="margin-bottom:5px;">Gcode could not be generated for some of the slots (the ones highlighted in red), check tool size in the Gcode tab or correct any mistakes in your .brd file.</div>
         <div class="panel-body">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
@@ -106,18 +107,9 @@
                             <input type="checkbox" class="mirrorAxisX" checked /> Mirror vertically - X Axis
                             </label>
                         </div> 
+                        <p class="descriptive-text">Hit Render button after changing mirror option.</p>
                     </div>
-                    <!--<div>//V5.1D20161229 - Commented
-                        Mirror This Layer: 
-                        
-                    </div>
-                    
-                    <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="mirrorLayerY" checked />Mirror this layer (Bottom only, highly experimental) 
-                            </label>
-                        </div>-->
-
+    
                     <div class="form-group">
                         Inflate Milling Path By
                         <div class="input-group">
@@ -206,6 +198,15 @@
                     </div>
 
                     <div class="form-group">
+                        Curve Resolution (Segment Length)
+                        <div class="input-group">
+                            <input class="form-control curve-resolution" type="number" placeholder="" value="0.5" />
+                            <div class="input-group-addon">mm</div>
+                        </div>
+                        <p class="descriptive-text">Curved board dimensions, curved polygond or curved wires will be converted to line segments and executed as G01 gcode commands, this value is the length of each line segment, smaller value means higher curve accuracy and larget gcode file, please input value between 0.1 - 1.00 mm</p>
+                    </div>
+                    
+                    <div class="form-group">
 
                         Toggle Signal/Pad/Via Popup Windows
                         <div class="checkbox">
@@ -239,7 +240,17 @@
                             <li>3 oz copper : <b>-0.15</b>mm depth (0.105mm is typical thickness)</li>
                         </ul>
                     </p>
-
+                    
+                    Tracing Board Dimensions
+                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
+                        <div class="checkbox">
+                            <label>
+                            <input type="checkbox" class="AvoidTraceBoardDimensions" checked /> Avoid Tracing Board Dimensions
+                            </label>
+                        </div>
+                        <p class="descriptive-text">Experimental - This feature will eliminate tracing any path(s) that matches board dimensions, hit Render button after changing this checkbox to see the results.</p>
+                    </div>
+                    
                     Feedrate for Milling Traces
                     <div class="input-group">
                         <input class="form-control trace-fr" type="number" placeholder="Feedrate" value="80" />
@@ -329,7 +340,7 @@
                     </div>
                     <p class="descriptive-text">Please input the diameter of your endmill for cutting the dimension. If you want to mill some holes, then the tool diameter has to be smaller than the smallest hole.
                     </p>
-
+                    
                     Depth of Cutting Out Dimensions (Board Depth)
                     <div class="input-group">
                         <input class="form-control dimension-depth" type="number" placeholder="Size" value="-1.7" />
@@ -346,6 +357,7 @@
                     <p style="margin-bottom:0px;">Passes <code><span class="dimension-passes  highlight"><i>4</i></span></code> Last Pass <code><span class="dimension-lastpass highlight"><i>-0.2</i>mm</span></code></p>
                     <p class="descriptive-text">The amount to step down in the Z axis for each pass of cutting out your board dimensions. Default value is -0.5mm. </p>
 
+                    <!--
                     Create PCB Holders
                     <div class="input-group">
                         <input class="form-control pcbholder-length" type="number" placeholder="Pcbholder length in mm" value="1" />
@@ -356,7 +368,7 @@
                         <div class="input-group-addon">pcs</div>
                     </div>
                     <p class="descriptive-text">Count of pcb holder on every side.</p>
-
+                    -->
 
                     Feedrate for Cutting Dimensions
                     <div class="input-group">
@@ -365,7 +377,71 @@
                     </div>
                     <p class="descriptive-text">The feedrate used for cutting out your dimensions. Default value is 100mm/min.
                     </p>
+                    
+                    <!--  ----------------------- TABS --------------------------->
+                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" class="use-tabs" checked>
+                                <h2>Tabs (Board Holders)</h2></input>
+                            </label>
+                        </div>
+                        <p class="descriptive-text">Add tabs to board dimensions toolpaths to provide fixture of your PCB. <code>Work in progress, to be implemented in V5.4</code></p>
+                        
+                        Tab Count
+                        <div class="input-group">
+                            <input class="form-control tab-count" type="number" placeholder="Feedrate" value="4" />
+                            <div class="input-group-addon">mm</div>
+                        </div>
+                        <p class="descriptive-text">Number of tabs per each board dimension toolpath.</p>
+                        
+                        Tab Width
+                        <div class="input-group">
+                            <input class="form-control tab-width" type="number" placeholder="Feedrate" value="1" />
+                            <div class="input-group-addon">mm</div>
+                        </div>
+                        <p class="descriptive-text">Tab width, value between 0.5mm to 3.0mm, take in consideration tool radius</p>
+                        
+                        Tab Height
+                        <div class="input-group">
+                            <input class="form-control tab-height" type="number" placeholder="Feedrate" value="0.8" />
+                            <div class="input-group-addon">mm</div>
+                        </div>
+                        <p class="descriptive-text">Tab height from bottom of board, value between 0.5mm to 1.7mm (board thinkness)</p>
 
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" class="tabs-4-slots">
+                                Tabs for slots and holes</input>
+                            </label>
+                        </div>
+                        <p class="descriptive-text">Add tabs to inner board dimensions like slots and large holes, no tabs will be added to small slots or holes (less the 6x of tool diameter)</p>
+                        
+                    </div>
+                    <!--  ----------------------- TABS END ----------------------->
+                    
+                    <!--  ----------------- Milling Direction--------------------->
+                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
+                        <h2>Milling Direction</h2>
+                        <p class="descriptive-text">Following selections will adjust the orientation of tool paths, if left to default, orientation of paths is unpredectible and depends on how traces and wire are drawen in Eagle. Hit Render button after changing these values.
+                        </p>
+                        <div class="form-group">
+                            Milling Traces
+                            <select class="selectMillTraces form-control" id="DirectionMilling">
+                                <option value='0'>Don't Care</option>
+                                <option value='1'>Conventional Milling</option>
+                                <option value='2'>Climb milling</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            Cutting Dimensions/Milling Holes
+                            <select class="selectMillTraces form-control" id="DirectionCutting">
+                                <option value='0'>Don't Care</option>
+                                <option value='1'>Conventional Milling</option>
+                                <option value='2'>Climb milling</option>
+                            </select>
+                        </div>
+                    </div>
                     Generated Gcode
                     <textarea class="com-chilipeppr-widget-eagle-gcode"></textarea>
                 </div>
