@@ -65,7 +65,8 @@
             style="font-size:9px;" class="fb-build">v5.2</span>
 
         </div>
-        <div class="alert alert-danger hidden eagle-holes-alert" style="margin-bottom:5px;">Gcode could not be generated for some of the holes (the ones highlighted in red), check tool sized in the Gcode tab.</div>
+        <div class="alert alert-danger hidden eagle-holes-alert" style="margin-bottom:5px;">Gcode could not be generated for some of the holes (the ones highlighted in red), check tool size in the Gcode tab.</div>
+        <div class="alert alert-danger hidden eagle-slots-alert" style="margin-bottom:5px;">Gcode could not be generated for some of the slots (the ones highlighted in red), check tool size in the Gcode tab or correct any mistakes in your .brd file.</div>
         <div class="panel-body">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
@@ -106,18 +107,9 @@
                             <input type="checkbox" class="mirrorAxisX" checked /> Mirror vertically - X Axis
                             </label>
                         </div> 
+                        <p class="descriptive-text">Hit Render button after changing mirror option.</p>
                     </div>
-                    <!--<div>//V5.1D20161229 - Commented
-                        Mirror This Layer: 
-                        
-                    </div>
-                    
-                    <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="mirrorLayerY" checked />Mirror this layer (Bottom only, highly experimental) 
-                            </label>
-                        </div>-->
-
+    
                     <div class="form-group">
                         Inflate Milling Path By
                         <div class="input-group">
@@ -385,6 +377,48 @@
                     </div>
                     <p class="descriptive-text">The feedrate used for cutting out your dimensions. Default value is 100mm/min.
                     </p>
+                    
+                    <!--  ----------------------- TABS --------------------------->
+                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" class="use-tabs" checked>
+                                <h2>Tabs (Board Holders)</h2></input>
+                            </label>
+                        </div>
+                        <p class="descriptive-text">Add tabs to board dimensions toolpaths to provide fixture of your PCB. <code><span ><i>Work in progress, to be implemented in V5.4</i>mm</span></code></p>
+                        
+                        Tab Count
+                        <div class="input-group">
+                            <input class="form-control tab-count" type="number" placeholder="Feedrate" value="4" />
+                            <div class="input-group-addon">mm</div>
+                        </div>
+                        <p class="descriptive-text">Number of tabs per each board dimension toolpath.</p>
+                        
+                        Tab Width
+                        <div class="input-group">
+                            <input class="form-control tab-width" type="number" placeholder="Feedrate" value="1" />
+                            <div class="input-group-addon">mm</div>
+                        </div>
+                        <p class="descriptive-text">Tab width, value between 0.5mm to 3.0mm, take in consideration tool radius</p>
+                        
+                        Tab Height
+                        <div class="input-group">
+                            <input class="form-control tab-height" type="number" placeholder="Feedrate" value="0.8" />
+                            <div class="input-group-addon">mm</div>
+                        </div>
+                        <p class="descriptive-text">Tab height from bottom of board, value between 0.5mm to 1.7mm (board thinkness)</p>
+
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" class="tabs-4-slots">
+                                Tabs for slots and holes</input>
+                            </label>
+                        </div>
+                        <p class="descriptive-text">Add tabs to inner board dimensions like slots and large holes, no tabs will be added to small slots or holes (less the 6x of tool diameter)</p>
+                        
+                    </div>
+                    <!--  ----------------------- TABS END ----------------------->
                     
                     <div class="panel eagle-advanced" style="margin-bottom:10px;">
                         <h2>Milling Direction</h2>

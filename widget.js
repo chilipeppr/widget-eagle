@@ -1212,8 +1212,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.mirrorX = $('#com-chilipeppr-widget-eagle .mirrorAxisX').prop ("checked");
             this.mirrorY = $('#com-chilipeppr-widget-eagle .mirrorAxisY').prop ("checked");
             
-            this.clearEagleBrd();
-            this.draw3d();
+            //this.clearEagleBrd();
+            //this.draw3d();
         },
         
         //V5.1D20161229 - Added
@@ -2079,7 +2079,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 }
                 g += "G0 Z" + that.clearanceHeight + "\n";
             });
-            console.log("Ameen", g);
+            //console.log("Ameen", g);
             return g;
         },
         exportGcodeDimensions:function(){
@@ -2372,6 +2372,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     that.onRefresh(evt);
                 }
             });
+        },
+        onFullRefresh: function(event, callback) {
+            if (event) {
+                // this was from a button click. hide popover
+                $('#com-chilipeppr-widget-eagle .btn-refresh').popover('hide');
+            }
+            this.clearEagleBrd();
+            this.draw3d();
         },
         onRefresh: function(event, callback) {
             
@@ -4586,11 +4594,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var pkg = this.eagle.packagesByName[elem.pkg];
                 pkg.wires.forEach(function(wire){
                     if (wire.layer == layerNumber) {
-                        // wire.x1 += elem.x;
-                        // wire.x2 += elem.x;
-                        // wire.y1 += elem.y;
-                        // wire.y2 += elem.y;
-                        // wires.push(wire);
                         wires.push({
                             "curve": wire.curve,
                             "layer": wire.layer,
@@ -4683,16 +4686,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var wire = wires[i];
                     //console.log("clipper appending wire:", wire);
                     if(wire.curve == 0){//V5.2D20170105 if statement added to support curved dimensions
-                        this.clipperDimension.push({
-                            // X: this.flipX(wire.x1), //V5.1D20161229 - flipX/flipY added
-                            // Y: this.flipY(wire.y1)  //V5.1D20161229 - flipX/flipY added
-                            X: wire.x1, Y: wire.y1
-                        });
-                        this.clipperDimension.push({
-                            // X: this.flipX(wire.x2), //V5.1D20161229 - flipX/flipY added
-                            // Y: this.flipY(wire.y2)  //V5.1D20161229 - flipX/flipY added
-                            X: wire.x2, Y: wire.y2
-                        });
+                        this.clipperDimension.push({X: wire.x1, Y: wire.y1});
+                        this.clipperDimension.push({X: wire.x2, Y: wire.y2});
                         cdiEndIndex+=2;
                     }
                     else {//V5.2D20170105 following code added to support curved dimensions, curvers will be rendered as lines not arcs
@@ -4702,18 +4697,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                             var v = arc.geometry.vertices[j].clone();
                             var vec = arc.localToWorld(v);
                             //lineGeo.vertices.push(new THREE.Vector3(that.flipX(vec.x), that.flipY(vec.y), 0));
-                            this.clipperDimension.push({
-                                // X: this.flipX(vec.x),
-                                // Y: this.flipY(vec.y)
-                                X: vec.x, Y: vec.y
-                            });
+                            this.clipperDimension.push({X: vec.x, Y: vec.y});
                             v = arc.geometry.vertices[j+1].clone();
                             vec = arc.localToWorld(v);
-                            this.clipperDimension.push({
-                                // X: this.flipX(vec.x),
-                                // Y: this.flipY(vec.y)
-                                X: vec.x, Y: vec.y
-                            });
+                            this.clipperDimension.push({X: vec.x, Y: vec.y});
                             cdiEndIndex+=2;
                         }
                     }
@@ -4773,63 +4760,16 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.clipperDimensionInfo.sort(function(a, b){return b.type - a.type});
             
             //console.log("Ameen", "C Dimension Info: ", JSON.stringify(this.clipperDimensionInfo));
-            return wires;
+            //No need to return wires any more, clipperDimension and clipperDimensionInfo will be used instead
+            //return wires;
         },
-        
-        //V5.1D20161229 - Added
-        //boardBoundaries:{},// holds minimum X, Maximum X, Minimum Y, Maximum Y respectively
-        // /**This function calculates board boundaries (minimum and maximum values of X & Y from dimensions layer)
-        // * board boundaries will be used to mirror board components (wires, pads, vias, holes ... etc)
-        // */
-        // getBoardBoundaries: function () {
-        //     var minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
-        //     var layerNumber = this.eagle.eagleLayersByName['Dimension'].number;
-
-        //     // dimension is wires on layer 20
-        //     var wires = [];
-        //     for (var elemKey in this.eagle.elements) {
-        //         var elem = this.eagle.elements[elemKey];
-        //         var pkg = this.eagle.packagesByName[elem.pkg];
-        //         pkg.wires.forEach(function(wire){
-        //             if (wire.layer == layerNumber) {
-        //                 minX = Math.min(wire.x1 + elem.x, wire.x2 + elem.x, minX);
-        //                 minY = Math.min(wire.y1 + elem.y, wire.y2 + elem.y, minY);
-        //                 maxX = Math.max(wire.x1 + elem.x, wire.x2 + elem.x, maxX);
-        //                 maxY = Math.max(wire.y1 + elem.y, wire.y2 + elem.y, maxY);
-        //             }
-        //         });
-        //     }
-        //     for (var plainWireKey in this.eagle.plainWires) {
-        //         if (this.eagle.plainWires[plainWireKey].length > 0) {
-        //             // yes, there's wires in this array
-        //             for (var i = 0; i < this.eagle.plainWires[plainWireKey].length; i++) {
-        //                 var wire = this.eagle.plainWires[plainWireKey][i];
-        //                 if (wire.layer == layerNumber) {
-        //                     minX = Math.min(wire.x1, wire.x2, minX);
-        //                     minY = Math.min(wire.y1, wire.y2, minY);
-        //                     maxX = Math.max(wire.x1, wire.x2, maxX);
-        //                     maxY = Math.max(wire.y1, wire.y2, maxY);
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     var bDimensions = {
-        //         MinimumX: minX,
-        //         MinimumY: minY,
-        //         MaximumX: maxX,
-        //         MaximumY: maxY
-                
-        //     };
-                
-        //     return bDimensions;
-        // },
-        
         
         draw3dDimension: function (endmillSize) {
             var that = this;
             
             console.log("draw3dDimension", this.eagle);
-            var wires = this.getDimensionWires();
+            //var wires = this.getDimensionWires();
+            this.getDimensionWires();
             var color = this.colorDimension;
 
             var lineMat = new THREE.LineBasicMaterial({
@@ -4843,8 +4783,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 opacity: this.opacityDimension
             });
             //V5.3 New code
+            var SlotsUnhandledCount = 0;
             for(var n=0; n<that.clipperDimensionInfo.length; n++){
                 var cdi = that.clipperDimensionInfo[n];
+                if(cdi.type < 0) SlotsUnhandledCount++;
                 var lineGeo = new THREE.Geometry();
                 for (var i = cdi.start; i < cdi.end; i++) {
                     var cd = that.clipperDimension[i];
@@ -4854,6 +4796,11 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var line = new THREE.Line(lineGeo, cdi.type < 0?lineMatFailed:lineMat);
                 this.sceneAdd(line);
             }
+            if(SlotsUnhandledCount==0)
+                $('.eagle-slots-alert').addClass("hidden");
+            else
+                $('.eagle-slots-alert').removeClass("hidden");
+                
             //V5.3D201701XX dimensionInfo loop added to support multiple shapes or slots
             // for(var n=0; n<that.dimensionInfo.length; n++){
             //     var di = that.dimensionInfo[n];
@@ -6837,7 +6784,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             });
 
             // refresh btn
-            $('#com-chilipeppr-widget-eagle .btn-refresh').click(this.onRefresh.bind(this));
+            $('#com-chilipeppr-widget-eagle .btn-refresh').click(this.onFullRefresh.bind(this));
             
         },
         statusEl: null, // cache the status element in DOM

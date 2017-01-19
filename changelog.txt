@@ -2,24 +2,28 @@ Version 5.3
 **************************************************
 Auther: Ameen Nihad
 
-- Support for Curves in boarder dimension and signal wires is added, in V5.2 this feature was limited board dimension and to +/-90 degrees.
+New features:
+- Support for Curves in boarder dimension and signal wires is added, in V5.2 this feature was limited to board dimension only and to +/-90 degrees.
 - Support for slots and inner dimensions is added.
-- Support for Panelizing is added, multiple boards or multiple copies of same board can be placed in single .brd file then imported to widget.
-- Fixed a bug in curves with angle > 180
-- Fixed a bug in dimension milling which caused a gap between plung and retract positions.
-- Fixed a bug in drill holes of vias not being mirrored correctly.
-- Fixed a bug in posision of dimensions within an elements, previously dimensions were taken from packages without considering element location.
-- Optimized how board boundries are caclulated
-- Optimized draw3dDimension function - use clipDimensions not wires
-- Gcode comments with M6 - Issue #17
-- Function draw3dSignalPoly updated to support curved polygons
+- Support for Panelizing is added, multiple boards or multiple copies of same board can be placed in single .brd file then imported to the widget.
 - A new feature added to avoid tracing board dimensions, this will eliminate job time.
-- A new feature added to correct paths orientation, to give the user a choice to do coventional or climb milling.
-- TODO: Expose curve resolution to UI - Done but require auto refresh
-- TODO: Warning about unmilled slots.
-- TODO: Tabs (boarder holders)
-- TODO: Fix a bug in render buttom
-- TODO: Mill empty areas
+- A new feature added to correct paths orientation, to give the user a choice to do conventional or climb milling.
+- Curves resolution can now be adjusted by the user for the UI (Under Render tab).
+- Tab settings added to UI (under Gcode tab), implementation to be done in Version 5.4
+
+Enhancements
+- Optimized how board boundaries are calculated.
+- Optimized draw3dDimension function - use clipDimensions not wires.
+- Render button changed to refresh all board data, this is important for new added features.
+- Gcode comments with M6 (Tool change) - Issue #17.
+- Function draw3dSignalPoly updated to support curved polygons.
+- Removed auto refresh form Mirror settings, refresh to be done manually by user by hitting Render button.
+
+Bus fixed:
+- Fixed a bug in curves with angle > 180
+- Fixed a bug in dimension milling which caused a gap between plunge and retract positions.
+- Fixed a bug in drill holes, vias holes were not mirrored correctly.
+- Fixed a bug in position of dimensions within an element, previously dimensions were taken from packages without considering element location.
 
 
 Version 5.2 Quick Fix
