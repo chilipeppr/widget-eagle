@@ -7413,10 +7413,11 @@ EagleCanvas.prototype.parseVia = function (via) {
     var diameter = parseFloat(via.getAttribute('diameter'));
     var diameterInner = drill + 2 * Math.min(Math.max(drill*v.inner.size, v.inner.min), v.inner.max);
     var diameterOuter = drill + 2 * Math.min(Math.max(drill*v.outer.size, v.outer.min), v.outer.max);
-    if(!diameter || diameter <= drill){
+    if(diameter){
         var size = diameter - drill; //width of copper ring predifined by user
         if(size > v.outer.size) diameterOuter = diameter;
         if(size > v.inner.size && v.useDiameter) diameterInner = diameter;
+        console.log("Ameen - diameter exists");
     }
     console.log("Ameen - ", drill, diameter, diameterOuter, diameterInner);
     return {
@@ -7439,7 +7440,7 @@ EagleCanvas.prototype.parsePad = function (pad) {
     var diameterTop = drill + 2 * Math.min(Math.max(drill*p.top.size, p.top.min), p.top.max);
     var diameterInner = drill + 2 * Math.min(Math.max(drill*p.inner.size, p.inner.min), p.inner.max);
     var diameterBottom = drill + 2 * Math.min(Math.max(drill*p.bottom.size, p.bottom.min), p.bottom.max);
-    if(!diameter || diameter <= drill){
+    if(diameter){
         var size = diameter - drill; //width of copper ring predifined by user
         if(size > p.top.size) diameterTop = diameter;
         if(size > p.inner.size && p.useDiameter) diameterInner = diameter;
