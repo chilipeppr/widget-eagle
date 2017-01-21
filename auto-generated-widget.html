@@ -1313,30 +1313,12 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         
         },
         
-        //V5.1D20161229 - commented (incomplete experimental mirror code)
-        /*
-        setupBoardMirrorCheckboxes: function() {
-            $('#com-chilipeppr-widget-eagle .mirrorLayerY').change(this.onChangeMirrorLayerYCheckbox.bind(this));
-            $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked", false);
-            
-        },
-        onChangeMirrorLayerYCheckbox: function() {
-            this.flipTheBoard = $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked");
-            
-            //console.log ("Flip Bottom Layer About Y Axis: " + $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked") );
-            console.log ("Flip Bottom Layer About Y Axis: " + this.flipTheBoard );
-            
-            this.clearEagleBrd();
-            this.draw3d();
-            
-        },
-        */
-        
+        mirrorX: false,
+        mirrorY: false,
         //V5.1D20161229 - Added
         onChangeMirrorAxis: function() {
             this.mirrorX = $('#com-chilipeppr-widget-eagle .mirrorAxisX').prop ("checked");
             this.mirrorY = $('#com-chilipeppr-widget-eagle .mirrorAxisY').prop ("checked");
-            
             //this.clearEagleBrd();
             //this.draw3d();
         },
@@ -1353,44 +1335,52 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         	$('#com-chilipeppr-widget-eagle .selectLayer').change(this.onChangeLayerToggleDropdown.bind(this));
           //console.log("r0:  ");
         },
-        populateLayerToggleDropdown: function(){
-        	var selectLayerDropdown = $('#com-chilipeppr-widget-eagle .selectLayer');
-          var actionableLayers = [];
-          //var allSignals = Object.keys(this.eagle.signalItems);
-          var allSignals = this.eagle.signalItems;
-          console.log ("allSignals:  ", allSignals);
-          //alert(allSignals[0]);
-          
-          for (var signalKey in this.eagle.signalItems) {
-          	var signalLayers = this.eagle.signalItems[signalKey];
-            var sigKey = Object.keys(signalLayers);
-            
-            for (var i=0; i<sigKey.length; i++) {
-            var sigKeyAsInt = sigKey[i];
-    				console.log ("r2:  ", signalLayers, "keys:", sigKey, "int:  ", sigKeyAsInt);
-            if (sigKeyAsInt > 0 && sigKeyAsInt <= 16) {  //brd layer is 1-16
-            	actionableLayers[sigKeyAsInt-1] = true;		 //-1 for array index
-              console.log ("layer true:  ", sigKeyAsInt);
+        populateLayerToggleDropdown: function() {
+            var selectLayerDropdown = $('#com-chilipeppr-widget-eagle .selectLayer');
+            var actionableLayers = [];
+            //var allSignals = Object.keys(this.eagle.signalItems);
+            var allSignals = this.eagle.signalItems;
+            console.log("allSignals:  ", allSignals);
+            //alert(allSignals[0]);
+
+            for (var signalKey in this.eagle.signalItems) {
+                var signalLayers = this.eagle.signalItems[signalKey];
+                var sigKey = Object.keys(signalLayers);
+
+                for (var i = 0; i < sigKey.length; i++) {
+                    var sigKeyAsInt = sigKey[i];
+                    console.log("r2:  ", signalLayers, "keys:", sigKey, "int:  ", sigKeyAsInt);
+                    if (sigKeyAsInt > 0 && sigKeyAsInt <= 16) { //brd layer is 1-16
+                        actionableLayers[sigKeyAsInt - 1] = true; //-1 for array index
+                        console.log("layer true:  ", sigKeyAsInt);
+                    }
+                    else {
+                        actionableLayers[sigKeyAsInt - 1] = false;
+                        console.log("layer false:  ", sigKeyAsInt);
+                    }
+                }
+            } //this function returns the layer # of each signal!!!
+            for (var elemKey in this.eagle.elements) {
+                var elem = this.eagle.elements[elemKey];
+                if(elem.mirror)//unmirrored elements are on top layer (index 0), mirrored elements are on bottom layer (index 15)
+                    actionableLayers[0] = true;
+                else
+                    actionableLayers[15] = true;
             }
-            else {
-            	actionableLayers[sigKeyAsInt-1] = false;
-              console.log ("layer false:  ", sigKeyAsInt);
+            selectLayerDropdown.empty();
+            for (i = 0; i < 16; i++) {
+                var loopingLayer = i + 1; //brd layer # is 1 greater than index
+                if (actionableLayers[i] == true) {
+                    selectLayerDropdown.append($("<option />").text(this.eagle.layersByNumber[loopingLayer].name));
+
+                    console.log("r3:  sent layer to dropdown:", this.eagle.layersByNumber[loopingLayer].name);
+                }
+                console.log("r3.5:  activeLayer:", this.activeLayer);
+
             }
-            }
-          }   //this function returns the layer # of each signal!!!
-          selectLayerDropdown.empty();
-          for (i = 0; i < 16; i++) {
-          	var loopingLayer = i+1; //brd layer # is 1 greater than index
-            if (actionableLayers[i] == true) {
-            	selectLayerDropdown.append($("<option />").text(this.eagle.layersByNumber[loopingLayer].name));
-              
-            console.log ("r3:  sent layer to dropdown:", this.eagle.layersByNumber[loopingLayer].name);
-            }
-            console.log("r3.5:  activeLayer:", this.activeLayer);
+            console.log("Ameen - Eagle:  ", this.eagle);
             selectLayerDropdown.val(this.activeLayer);
-            
-          	
-          }
+
         },
         onChangeLayerToggleDropdown: function() {
             
@@ -1994,6 +1984,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.populateLayerToggleDropdown();
             console.log("iterating Eagle Brd and drawing into 3d viewer");
             console.log("eagle obj we will draw:", this.eagle);
+            
             this.clear3dViewer();
             
             //var activeLayer = 'Top';
@@ -2002,13 +1993,13 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // these methods will draw all Eagle objects into several global
             // properties, the most important of which is this.clipperBySignalKey
             // which holds a structured object of each signal, i.e. +3V, GND, etc.
-            //this.boardBoundaries = this.getBoardBoundaries(); //V5.1D20161229
+            this.threeDimensions = this.draw3dDimension(this.endmillSize);//V5.4 This line moved to top of list because mirror feature rely on dimensions
             this.draw3dSignalWires(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dSignalPolygons(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dElements(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dVias('1-16');
             this.draw3dHoles(); //V5.2D20170105 Added
-            this.threeDimensions = this.draw3dDimension(this.endmillSize);
+            
             //this.obj3d.children = [];
             
             // obj3d is the original THREE.Object3D() for the 3d
@@ -5220,21 +5211,33 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var viashape = "round";
                     if ('shape' in via) viashape = via.shape;
                     
-                    var radius = via.diameter/2;//V5.1D20161227
+                    var diameter = (this.activeLayer == "top" || this.activeLayer == "bottom")?
+                        via.diameterOuter: via.diameterInner;
+                    var radius = diameter/2;//V5.1D20161227
                     var segments = 32;
                     if (viashape == "octagon") segments = 8;
                     
                     //maybe add var in front of viaGeo    
-                    viaGeo = new THREE.CircleGeometry(radius, segments);                    
-                    // Remove center vertex
-                    viaGeo.vertices.shift();
-                    //viaGeo.vertices.pop();
+                    var viaGeo;
+                    if (viashape == "square") {
+                        viaGeo = new THREE.Geometry();
+                        viaGeo.vertices.push(new THREE.Vector3(-radius,  -radius, 0.0));
+                        viaGeo.vertices.push(new THREE.Vector3(-radius,  radius, 0.0)); 
+                        viaGeo.vertices.push(new THREE.Vector3(radius,  radius, 0.0)); 
+                        viaGeo.vertices.push(new THREE.Vector3(radius,  -radius, 0.0)); 
+                        viaGeo.rotateZ(3*Math.PI / 8);
+                    }
+                    else {
+                        viaGeo = new THREE.CircleGeometry(radius, segments);
+                        // Remove center vertex
+                        viaGeo.vertices.shift();
+                    }
                     //2:Draw circle around the drill hole
                     var line = that.drawCircle(that.flipX(via.x), that.flipY(via.y), via.drill/2, colorHole);//V5.1D20161229 - flipX/flipY added //V5.2D20170105changed this.colorHole to colorHole
                     line.rotateZ(Math.PI / 8);
                     
                     bigSceneGroup.add (line);
-                    //this.sceneAdd(line);
+                    
                     
                     // Create shape with hole
                     var shape = new THREE.Shape();
@@ -5248,31 +5251,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         else shape.lineTo(pt.x, pt.y);
                         ptCtr++;
                     }, this);
-                    //console.log("shape", shape);
-                    //var pt = viaGeo.vertices[0];
-                    //shape.lineTo(pt.X, pt.y);
-                    
-                    //V5.1D20161227, code commented, no need to remove inner hole
-                    /*
-                    // Create hole inside
-                    radius = via.drill / 2;
-                    segments = 32;
-                    
-                    holeGeo = new THREE.CircleGeometry(radius, segments);                    
-                    // Remove center vertex
-                    holeGeo.vertices.shift();
 
-                    var hole = new THREE.Path();
-                    
-                    var ptCtr = 0;
-                    holeGeo.vertices.forEach(function (pt) {
-                        if (ptCtr == 0) hole.moveTo(pt.x, pt.y);
-                        else hole.lineTo(pt.x, pt.y);
-                        ptCtr++;
-                    }, this);
-                    shape.holes.push(hole);
-                    */
-                    
                     // create mesh for the via
                     var geometry = new THREE.ShapeGeometry( shape );
                     var mesh = new THREE.Mesh(geometry, viaMat );
@@ -5296,10 +5275,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     // add to via object
                     via["threeObj"] = mesh;
                     
-                    //V5.1D20161227 - previously line varibale is used is below code to created clipperPath, line uses drill hole diameter which is not right, I created new lineV for via outter circle
-                    //TODO-AMEEN: This code draws via milling path as circle regardless the shape, we need to adjust the code to drew octagons and squares
-                    var lineV = that.drawCircle(via.x, via.y, via.diameter/2, that.colorHole);//V5.1D20161227
-                    lineV.rotateZ(Math.PI / 8);//V5.1D20161227
+                    var lineV;
+                    if(viashape=="square"){
+                        lineV = that.drawSquare2(via.x, via.y, diameter/2, that.colorHole);
+                    } 
+                    else {
+                        lineV = that.drawCircle(via.x, via.y, diameter/2, that.colorHole, viashape=="octagon"?8:0);//V5.1D20161227
+                        lineV.rotateZ(Math.PI / 8);//V5.1D20161227
+                    }
                     // add clipper path
                     var clipperPath = [];
                     lineV.updateMatrixWorld();                      //V5.1D20161227 - line changed to LineV
@@ -5989,22 +5972,31 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
                     elem["threeObj"]["padsAsMesh"][pad.name] = null;
 
+                    var diameter;
+                    if (this.activeLayer == "top")
+                        diameter = pad.diameterTop;
+                    else if (this.activeLayer == "bottom")
+                        diameter = pad.diameterbottom;
+                    else
+                        diameter = pad.diameterInner;
+                        
                     if (pad.shape == "square") {
                         
-                        // check if diameter is there. if not create assumption
-                        if (pad.diameter == null || isNaN(pad.diameter)) {
-                            //console.warn("found pad without diameter. pad:", pad);
-                            // base assumption on drill width
-                            if (pad.drill && pad.drill > 0) {
-                                // we have something to base our size on
-                                pad.diameter = pad.drill * 2;
-                            } else {
-                                console.error("no way to determine pad size for pad:", pad);
-                            }
-                        }
+                        // // check if diameter is there. if not create assumption
+                        // if (pad.diameter == null || isNaN(pad.diameter)) {
+                        //     //console.warn("found pad without diameter. pad:", pad);
+                        //     // base assumption on drill width
+                        //     if (pad.drill && pad.drill > 0) {
+                        //         // we have something to base our size on
+                        //         pad.diameter = pad.drill * 2;
+                        //     } else {
+                        //         console.error("no way to determine pad size for pad:", pad);
+                        //     }
+                        // }
                         
                         var lineGeo = new THREE.Geometry();
-                        var w = pad.diameter / 2;
+                        // var w = pad.diameter / 2;
+                        var w = diameter / 2;
 
                         lineGeo.vertices.push(new THREE.Vector3(0 - w, 0 - w, 0));
                         lineGeo.vertices.push(new THREE.Vector3(0 + w, 0 - w, 0));
@@ -6028,18 +6020,19 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         //console.log("generating octagon via circle. pad:", pad);
 
                         // check if diameter is there. if not create assumption
-                        if (pad.diameter == null || isNaN(pad.diameter)) {
-                            //console.warn("found pad without diameter. pad:", pad);
-                            // base assumption on drill width
-                            if (pad.drill && pad.drill > 0) {
-                                // we have something to base our size on
-                                pad.diameter = pad.drill * 2;
-                            } else {
-                                console.error("no way to determine pad size for pad:", pad);
-                            }
-                        }
+                        // if (pad.diameter == null || isNaN(pad.diameter)) {
+                        //     //console.warn("found pad without diameter. pad:", pad);
+                        //     // base assumption on drill width
+                        //     if (pad.drill && pad.drill > 0) {
+                        //         // we have something to base our size on
+                        //         pad.diameter = pad.drill * 2;
+                        //     } else {
+                        //         console.error("no way to determine pad size for pad:", pad);
+                        //     }
+                        // }
                         
-                        var radius = pad.diameter / 2;
+                        // var radius = pad.diameter / 2;
+                        var radius = diameter / 2;
                         var segments = 8; // not 1 extra for center vertex
                         var material = new THREE.LineBasicMaterial({
                             color: that.colorPad,
@@ -6056,7 +6049,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         group.add(lineCircle);
 
 
-                    } else if (pad.shape == "long") {
+                    } else if (pad.shape == "long" || pad.shape == "offset") {
 
                         //debugger;
                         // the long pad height is 3x diameter of drill
@@ -6070,15 +6063,17 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                             opacity: 0.2
                         });
 
-                        var dia = pad.diameter;
-                        if (!dia > 0) {
-                            // no diam. using auto
-                            dia = pad.drill * 1.5;
-                        }
-                        var w = dia; // width of square and circles
-
+                        // var dia = pad.diameter;
+                        // if (!dia > 0) {
+                        //     // no diam. using auto
+                        //     dia = pad.drill * 1.5;
+                        // }
+                        // var w = dia; // width of square and circles
+                        
                         // could draw circle top, circle bottom, then square, then do union
-                        var radius = dia / 2;
+                        // var radius = dia / 2;
+                        var psLong = pad.shape == "long";
+                        var radius = diameter / 2;
                         var segments = 24;
                         var circleGeo = new THREE.CircleGeometry(radius, segments);
                         // Remove center vertex
@@ -6089,14 +6084,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         var circle2 = circle.clone();
 
                         // shift left (rotate 0 is left/right)
-                        var shiftX = radius * -1;
+                        var shiftX = psLong? radius * -1: radius * 0;
                         //shiftX = shiftX + pad.x;
                         var shiftY = 0;
                         //shiftY = shiftY + pad.y;
                         circle.position.set(shiftX, shiftY, 0);
                         group.add(circle);
                         // shift right
-                        var shiftX = radius * 1;
+                        var shiftX = psLong? radius * 1: radius * 2;
                         //shiftX = shiftX + pad.x;
                         var shiftY = 0;
                         //shiftY = shiftY + pad.y;
@@ -6105,13 +6100,16 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
                         // add a square to middle
                         var lineGeo = new THREE.Geometry();
-                        w = w / 2;
-                        lineGeo.vertices.push(new THREE.Vector3(0 - w, 0 - w, 0));
-                        lineGeo.vertices.push(new THREE.Vector3(0 + w, 0 - w, 0));
-                        lineGeo.vertices.push(new THREE.Vector3(0 + w, 0 + w, 0));
-                        lineGeo.vertices.push(new THREE.Vector3(0 - w, 0 + w, 0));
+                        // w = w / 2;
+                        var w = diameter / 2;
+                        var a = psLong? w: 0;
+                        var b = psLong? w: w * 2;
+                        lineGeo.vertices.push(new THREE.Vector3(0 - a, 0 - w, 0));
+                        lineGeo.vertices.push(new THREE.Vector3(0 + b, 0 - w, 0));
+                        lineGeo.vertices.push(new THREE.Vector3(0 + b, 0 + w, 0));
+                        lineGeo.vertices.push(new THREE.Vector3(0 - a, 0 + w, 0));
                         // close it by connecting last point to 1st point
-                        lineGeo.vertices.push(new THREE.Vector3(0 - w, 0 - w, 0));
+                        lineGeo.vertices.push(new THREE.Vector3(0 - a, 0 - w, 0));
                         var line = new THREE.Line(lineGeo, lineMat);
                         //group.position.set(pad.x, pad.y, 0);
                         group.add(line);
@@ -6119,11 +6117,12 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     } else {
                         //console.log("generating circle. pad:", pad);
 
-                        if (isNaN(pad.diameter)) {
-                            //console.log("no diam specified. use auto formula");
-                            pad.diameter = pad.drill * 2;
-                        }
-                        var radius = pad.diameter / 2,
+                        // if (isNaN(pad.diameter)) {
+                        //     //console.log("no diam specified. use auto formula");
+                        //     pad.diameter = pad.drill * 2;
+                        // }
+                        // var radius = pad.diameter / 2,
+                        var radius = diameter / 2;
                             segments = 32,
                             material = new THREE.LineBasicMaterial({
                                 color: that.colorPad,
@@ -6633,9 +6632,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 o.applyMatrix(mS);
             }
         },
-        drawCircle: function (x, y, radius, color){
+        drawCircle: function (x, y, radius, color, seg){
             // draw a hole
-            var segments = Math.max(Math.round(2 * Math.PI * radius) * 10, 32), //V5.3D201701XX changed from fixed 32 segments to dynamic 10 segments per mm
+            seg = seg || 0;
+            var segments = seg>0? seg: Math.max(Math.round(2 * Math.PI * radius) * 10, 32), //V5.3D201701XX changed from fixed 32 segments to dynamic 10 segments per mm
                 material = new THREE.LineBasicMaterial( { color: color } ),
                 geometry = new THREE.CircleGeometry( radius, segments );
             // Remove center vertex
@@ -6645,6 +6645,19 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             circle.position.set(x, y, 0);
 
             return circle;
+        },
+        drawSquare2: function (x, y, w, color){
+            var material = new THREE.LineBasicMaterial( { color: color } ),
+                geometry = new THREE.Geometry();
+            geometry.vertices.push(new THREE.Vector3(0 - w,  0 - w, 0.0));
+            geometry.vertices.push(new THREE.Vector3(0 - w,  0 + w, 0.0));
+            geometry.vertices.push(new THREE.Vector3(0 + w,  0 + w, 0.0));
+            geometry.vertices.push(new THREE.Vector3(0 + w,  0 - w, 0.0));
+            geometry.vertices.push(new THREE.Vector3(0 - w,  0 - w, 0.0));
+            var square = new THREE.Line( geometry, material );
+            square.position.set(x, y, 0);
+
+            return square;
         },
         //V5.2D20170105 Added to support curved wires
         //V5.3D201701XX Updated to support any value of "curve", previous version supported only 90/-90
@@ -7119,6 +7132,51 @@ EagleCanvas.prototype.parse = function () {
     // store by eagle number
     this.layersByNumber = {};
 
+    this.restring = {
+        pads:{top:{min:0, max:0, size:0},inner:{min:0, max:0, size:0},bottom:{min:0, max:0, size:0}, useDiameter:false},
+        vias:{outer:{min:0, max:0, size:0},inner:{min:0, max:0, size:0}, useDiameter:false},
+        microVias:{outer:{min:0, max:0, size:0},inner:{min:0, max:0, size:0}}
+    }
+    var param = this.boardXML.getElementsByTagName('param');
+    for (var paramIdx = 0; paramIdx < param.length; paramIdx++){
+        var p = param[paramIdx];
+        var name = p.getAttribute("name");
+        if(name == "useDiameter"){
+            var n = parseInt(p.getAttribute("value"));
+            this.restring.pads.useDiameter = ((n & 0x02) != 0);
+            this.restring.vias.useDiameter = ((n & 0x10) != 0);
+        }
+        if(!name.startsWith("r")) continue;//we are only concenred about parameters start with rv or rl, nothing else starts with r
+        var sVal = p.getAttribute("value");
+        var v = sVal.includes("mil")?
+            parseFloat(sVal.replace("mil", ""))*0.0254:
+            sVal.includes("mm")?
+                parseInt(sVal.replace("mm", "")):
+                parseFloat(sVal);
+                
+        if(name == "rvPadTop") this.restring.pads.top.size = v;
+        if(name == "rvPadInner") this.restring.pads.inner.size = v;
+        if(name == "rvPadBottom") this.restring.pads.bottom.size = v;
+        if(name == "rvViaOuter") this.restring.vias.outer.size = v;
+        if(name == "rvViaInner") this.restring.vias.inner.size = v;
+        if(name == "rvMicroViaOuter") this.restring.microVias.outer.size = v;
+        if(name == "rvMicroViaInner") this.restring.microVias.inner.size = v;
+        if(name == "rlMinPadTop") this.restring.pads.top.min = v;
+        if(name == "rlMaxPadTop") this.restring.pads.top.max = v;
+        if(name == "rlMinPadInner") this.restring.pads.inner.min = v;
+        if(name == "rlMaxPadInner") this.restring.pads.inner.max = v;
+        if(name == "rlMinPadBottom") this.restring.pads.bottom.min = v;
+        if(name == "rlMaxPadBottom") this.restring.pads.bottom.max = v;
+        if(name == "rlMinViaOuter") this.restring.vias.outer.min = v;
+        if(name == "rlMaxViaOuter") this.restring.vias.outer.max = v;
+        if(name == "rlMinViaInner") this.restring.vias.inner.min = v;
+        if(name == "rlMaxViaInner") this.restring.vias.inner.max = v;
+        if(name == "rlMinMicroViaOuter") this.restring.microVias.outer.min = v;
+        if(name == "rlMaxMicroViaOuter") this.restring.microVias.outer.max = v;
+        if(name == "rlMinMicroViaInner") this.restring.microVias.inner.min = v;
+        if(name == "rlMaxMicroViaInner") this.restring.microVias.inner.max = v;
+    }
+
     var layers = this.boardXML.getElementsByTagName('layer');
     for (var layerIdx = 0; layerIdx < layers.length; layerIdx++) {
         var layerDict = this.parseLayer(layers[layerIdx]);
@@ -7343,29 +7401,31 @@ EagleCanvas.prototype.parseHole = function (hole) {
 
 //V5.1D20161227 this function is updated to calculate and return via diameter
 /**Parse via attributes from .brd file
- * When via diameter is set to auto in Eagle, via is stores without diameter attribute
+ * When via diameter is set to auto in Eagle, via is stored without diameter attribute
  * in this case we need to calculate diameter size the same way eagle does it and based on drill size
  * Vias with drill size smaller than 0.9mm get auto diameter of (drill size + 0.4064mm)
  * Vias with drill size larger than 2.1mm get auto diameter of (drill size + 1.016mm)
  * In between auto diameter is (drill x 1.5
  */
 EagleCanvas.prototype.parseVia = function (via) {
-    var diameter = parseFloat(via.getAttribute('diameter'));
+    var v = this.restring.vias;
     var drill = parseFloat(via.getAttribute('drill'));
+    var diameter = parseFloat(via.getAttribute('diameter'));
+    var diameterInner = drill + 2 * Math.min(Math.max(drill*v.inner.size, v.inner.min), v.inner.max);
+    var diameterOuter = drill + 2 * Math.min(Math.max(drill*v.outer.size, v.outer.min), v.outer.max);
     if(!diameter || diameter <= drill){
-        if(drill < 0.9) 
-            diameter = drill + 0.4064;
-        else
-            if (drill > 2.1) 
-                diameter = drill + 1.016;
-            else 
-                diameter = drill * 1.5;
+        var size = diameter - drill; //width of copper ring predifined by user
+        if(size > v.outer.size) diameterOuter = diameter;
+        if(size > v.inner.size && v.useDiameter) diameterInner = diameter;
     }
+    console.log("Ameen - ", drill, diameter, diameterOuter, diameterInner);
     return {
         'x': parseFloat(via.getAttribute('x')),
         'y': parseFloat(via.getAttribute('y')),
         'drill': parseFloat(via.getAttribute('drill')),
         'diameter': diameter,
+        'diameterInner': diameterInner,
+        'diameterOuter': diameterOuter,
         'layers': via.getAttribute('extent'),
         'shape': via.getAttribute('shape')
     };
@@ -7373,11 +7433,27 @@ EagleCanvas.prototype.parseVia = function (via) {
 
 EagleCanvas.prototype.parsePad = function (pad) {
     // put pads in Top and Bottom layer artificially
+    var p = this.restring.pads;
+    var drill = parseFloat(pad.getAttribute('drill'));
+    var diameter = parseFloat(pad.getAttribute('diameter'));
+    var diameterTop = drill + 2 * Math.min(Math.max(drill*p.top.size, p.top.min), p.top.max);
+    var diameterInner = drill + 2 * Math.min(Math.max(drill*p.inner.size, p.inner.min), p.inner.max);
+    var diameterBottom = drill + 2 * Math.min(Math.max(drill*p.bottom.size, p.bottom.min), p.bottom.max);
+    if(!diameter || diameter <= drill){
+        var size = diameter - drill; //width of copper ring predifined by user
+        if(size > p.top.size) diameterTop = diameter;
+        if(size > p.inner.size && p.useDiameter) diameterInner = diameter;
+        if(size > p.bottom.size) diameterBottom = diameter;
+    }
+    console.log("Ameen - ", drill, diameterTop, diameterInner, diameterBottom);
     return {
         'x': parseFloat(pad.getAttribute('x')),
         'y': parseFloat(pad.getAttribute('y')),
         'drill': parseFloat(pad.getAttribute('drill')),
-        'diameter': parseFloat(pad.getAttribute('diameter')),
+        'diameter': diameter,
+        'diameterTop': diameterTop,
+        'diameterInner': diameterInner,
+        'diameterBottom': diameterBottom,
         'shape': pad.getAttribute('shape'),
         'rot': pad.getAttribute('rot'),
         'name': pad.getAttribute('name')
@@ -7618,8 +7694,8 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
             style="font-size:9px;" class="fb-build">v5.3</span>
 
         </div>
-        <div class="alert alert-danger hidden eagle-holes-alert" style="margin-bottom:5px;">Gcode could not be generated for some of the holes (the ones highlighted in red), check tool size in the Gcode tab.</div>
-        <div class="alert alert-danger hidden eagle-slots-alert" style="margin-bottom:5px;">Gcode could not be generated for some of the slots (the ones highlighted in red), check tool size in the Gcode tab or correct any mistakes in your .brd file.</div>
+        <div class="alert alert-danger hidden eagle-holes-alert" style="margin-bottom:5px;padding:5px;font-size:80%;">Gcode could not be generated for some of the holes (the ones highlighted in red), check tool size in the Gcode tab.</div>
+        <div class="alert alert-danger hidden eagle-slots-alert" style="margin-bottom:5px;padding:5px;font-size:80%;">Gcode could not be generated for some of the slots (the ones highlighted in red), check tool size in the Gcode tab or correct any mistakes in your .brd file.</div>
         <div class="panel-body">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">

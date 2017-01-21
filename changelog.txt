@@ -1,6 +1,24 @@
+Version 5.4
+**************************************************
+Auther: Ameen Nihad
+Release date: ?? JAN 2017
+
+- Bug: Board renders incorrectly if mirror option is checked before drag/drop new board file.
+  fixed by rendering board dimensions first becasue mirror feature currently rely on dimension boundries.
+- Bug: If a layer has no signals it will not be populated in (Board Layer) drop down list, even if layer has elements.
+  Example of that is Adafruit PCB Reference Ruler.brd which has no signals on top layer.
+  fixed by looping through elements and check if they are on Top or Bottom layer based on mirror value.
+
+TODO: Implement functionality of Tabs Feature.
+TODO: Pads and Vias sizes.
+TODO: Square and octagon vias
+TODO: Mill empty areas.
+TODO: Keep 3dview angle after Render button is pressed.
+
 Version 5.3
 **************************************************
 Auther: Ameen Nihad
+Release date: 19 JAN 2017
 
 New features:
 - Support for Curves in boarder dimension and signal wires is added, in V5.2 this feature was limited to board dimension only and to +/-90 degrees.
@@ -29,6 +47,7 @@ Bus fixed:
 Version 5.2 Quick Fix
 **************************************************
 Auther: Ameen Nihad
+Release date: 19 JAN 2017
 
 In exportGcodeMillHoles function, G0 is used by mistake to plunge the cutting tool, G0 changed to G1.
 Update stamp: V5.2QUICKFIX
@@ -36,6 +55,7 @@ Update stamp: V5.2QUICKFIX
 Versoin 5.2
 **************************************************
 Auther: Ameen Nihad
+Release date: 05 JAN 2017
 
 - Changed how holes are handled, now holes for Pads, Vias, packages and Plains are treated exactly the same.
 - Now holes are either drilled or milled, that depending on diameter of tools used, i.e. values of:
@@ -50,6 +70,7 @@ Update stamp: V5.2D20170105 (this can be used to locate the updated/added code)
 Versoin 5.1
 **************************************************
 Auther: Ameen Nihad
+Release date: 29 DEC 2016
 
 - Fix a bug in rendering Vias
 Bug: Previous code uses Via Drill Size to render the via, which causes vias to render smaller than actual size.
