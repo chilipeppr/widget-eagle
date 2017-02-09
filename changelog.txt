@@ -1,19 +1,24 @@
 Version 5.4
 **************************************************
 Auther: Ameen Nihad
-Release date: ?? JAN 2017
+Release date: 09 FEB 2017
 
 - Bug: Board renders incorrectly if mirror option is checked before drag/drop new board file.
   fixed by rendering board dimensions first becasue mirror feature currently rely on dimension boundries.
 - Bug: If a layer has no signals it will not be populated in (Board Layer) drop down list, even if layer has elements.
   Example of that is Adafruit PCB Reference Ruler.brd which has no signals on top layer.
   fixed by looping through elements and check if they are on Top or Bottom layer based on mirror value.
-
+- All via Shapes are now supported, previously all vias were assumed to be round.
+- Pad "Offset" shape is now supported, previously it was rendered as round pad.
+- Resting paramenters are now used to caclulate vias & pads diameters, previously vias were caclculates using default hadrcoded values, and pads were assumed to be twice the drill size.
+- Support layer 46-Milling.
+- Curved board dimensions are rendered as G2/G3 commands.
+- Tabs functionality is fully impelmented.
 TODO: Implement functionality of Tabs Feature.
-TODO: Pads and Vias sizes.
-TODO: Square and octagon vias
 TODO: Mill empty areas.
 TODO: Keep 3dview angle after Render button is pressed.
+TODO: Registration holes feature.
+TODO: Smash (give z hight to board parts)
 
 Version 5.3
 **************************************************

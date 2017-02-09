@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
-    <title>Widget / Eagle BRD v5.3</title>
+    <title>Widget / Eagle BRD v5.4 beta</title>
 
     <!-- ChiliPeppr is based on bootstrap CSS. -->
     <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
@@ -55,7 +55,7 @@
 #com-chilipeppr-widget-eagle .com-chilipeppr-widget-eagle-gcode {
     width: 100%;
     height: 100%;
-    min-height: 100px;
+    min-height: 150px;
     margin: 0;
 }
 
@@ -86,6 +86,12 @@
 #com-chilipeppr-widget-eagle .tab-pane {
     padding: 10px 16px 20px 16px;
     overflow: auto;
+    max-height: 240px;
+}
+
+#com-chilipeppr-widget-eagle .tab-pane-container {
+    padding: 0px 0px 0px 0px;
+    overflow: visible;
     max-height: 240px;
 }
 
@@ -250,7 +256,7 @@ cpdefine("inline:com-chilipeppr-widget-eagle", ["chilipeppr_ready", "Clipper", "
          * The ID of the widget. You must define this and make it unique.
          */
         id: "com-chilipeppr-widget-eagle",
-        name: "Widget / Eagle BRD v5.3",
+        name: "Widget / Eagle BRD v5.4 beta",
         desc: "This widget lets you drag in an Eagle PCB \".brd\" file to mill.",
         url: "http://raw.githubusercontent.com/ameennihad/widget-eagle/master/auto-generated-widget.html",       // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
         fiddleurl: "http://ide.c9.io/ameennihad/widget-eagle", // The edit URL. This can be auto-filled by runme.js in Cloud9 if you'd like, or just define it on your own to help people know where they can edit/fork your widget
@@ -414,7 +420,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
             }
             
-            this.setupFrequentThreeFeatures();  //global definition of frequently used Three features
+            //this.setupFrequentThreeFeatures();  //global definition of frequently used Three features
             
             this.setupUiFromLocalStorage();
 
@@ -442,6 +448,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             $('#com-chilipeppr-widget-eagle .btn-clear').click(this.clearEagleBrd.bind(this));
             
             this.setupMirrorAxis(); //V5.1D20161229 - Added
+            
+            this.setupTabParameters();
             
             this.setupLayerToggleDropdown();
             
@@ -1316,6 +1324,13 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         mirrorX: false,
         mirrorY: false,
         //V5.1D20161229 - Added
+        setupMirrorAxis: function() {
+            $("#com-chilipeppr-widget-eagle .mirrorAxisX").change(this.onChangeMirrorAxis.bind(this));
+            $("#com-chilipeppr-widget-eagle .mirrorAxisY").change(this.onChangeMirrorAxis.bind(this));
+            $('#com-chilipeppr-widget-eagle .mirrorAxisX').prop ("checked", false);
+            $('#com-chilipeppr-widget-eagle .mirrorAxisY').prop ("checked", false);
+        },
+        //V5.1D20161229 - Added
         onChangeMirrorAxis: function() {
             this.mirrorX = $('#com-chilipeppr-widget-eagle .mirrorAxisX').prop ("checked");
             this.mirrorY = $('#com-chilipeppr-widget-eagle .mirrorAxisY').prop ("checked");
@@ -1323,14 +1338,33 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             //this.draw3d();
         },
         
-        //V5.1D20161229 - Added
-        setupMirrorAxis: function() {
-            $("#com-chilipeppr-widget-eagle .mirrorAxisX").change(this.onChangeMirrorAxis.bind(this));
-            $("#com-chilipeppr-widget-eagle .mirrorAxisY").change(this.onChangeMirrorAxis.bind(this));
-            $('#com-chilipeppr-widget-eagle .mirrorAxisX').prop ("checked", false);
-            $('#com-chilipeppr-widget-eagle .mirrorAxisY').prop ("checked", false);
+        tabs:{
+            useTabs: true,
+            distance: 25,
+            width: 2,
+            height: 0.8,
+            useForSlots: false
         },
-        
+        setupTabParameters: function() {
+            $("#com-chilipeppr-widget-eagle .use-tabs").change(this.onChangeTabParameter.bind(this));
+            $("#com-chilipeppr-widget-eagle .tab-distance").change(this.onChangeTabParameter.bind(this));
+            $("#com-chilipeppr-widget-eagle .tab-width").change(this.onChangeTabParameter.bind(this));
+            $("#com-chilipeppr-widget-eagle .tab-height").change(this.onChangeTabParameter.bind(this));
+            $("#com-chilipeppr-widget-eagle .tabs-4-slots").change(this.onChangeTabParameter.bind(this));
+            $("#com-chilipeppr-widget-eagle .use-tabs").prop("checked", this.tabs.useTabs);
+            $("#com-chilipeppr-widget-eagle .tab-distance").val(this.tabs.distance);
+            $("#com-chilipeppr-widget-eagle .tab-width").val(this.tabs.width);
+            $("#com-chilipeppr-widget-eagle .tab-height").val(this.tabs.height);
+            $("#com-chilipeppr-widget-eagle .tabs-4-slots").prop("checked", this.tabs.useForSlots);
+        },
+        onChangeTabParameter: function(){
+            this.tabs.useTabs = $("#com-chilipeppr-widget-eagle .use-tabs").prop("checked");
+            this.tabs.distance = parseFloat($("#com-chilipeppr-widget-eagle .tab-distance").val());
+            this.tabs.width = parseFloat($("#com-chilipeppr-widget-eagle .tab-width").val());
+            this.tabs.height = parseFloat($("#com-chilipeppr-widget-eagle .tab-height").val());
+            this.tabs.useForSlots = $("#com-chilipeppr-widget-eagle .tabs-4-slots").prop("checked");
+            //console.log("Ameen -", this.tabs);
+        },
         setupLayerToggleDropdown: function() {
         	$('#com-chilipeppr-widget-eagle .selectLayer').change(this.onChangeLayerToggleDropdown.bind(this));
           //console.log("r0:  ");
@@ -1378,7 +1412,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 console.log("r3.5:  activeLayer:", this.activeLayer);
 
             }
-            console.log("Ameen - Eagle:  ", this.eagle);
             selectLayerDropdown.val(this.activeLayer);
 
         },
@@ -1418,8 +1451,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     that.colorSmd = 11403055;
                 }
                 
-                $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked", false);
-                this.flipTheBoard = false;
+                // $('#com-chilipeppr-widget-eagle .mirrorLayerY').prop ("checked", false);
+                // this.flipTheBoard = false;
 
                 this.clearEagleBrd();
                 this.draw3d();
@@ -1443,37 +1476,37 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
           });
           */
         },
-        flipTheBoard: false, //ray temporary hardcode, later bind to user input
+        // flipTheBoard: false, //ray temporary hardcode, later bind to user input
         //placeholder, also need to hold which direction to flip board in.  coming soon.
-        boardFlipAxis: null,
+        //boardFlipAxis: null,
         
         //defining Three features we frequently utilize.  No need to redefine constantly.  
         
-        ThreeAxisX: null,
-        ThreeAxisY: null,
-        ThreeAxisZ: null,
+        // ThreeAxisX: null,
+        // ThreeAxisY: null,
+        // ThreeAxisZ: null,
         
-        deg180toRad: null,
+        // deg180toRad: null,
         
-        //function to setup these properties.  Call this during init.
-        setupFrequentThreeFeatures: function () {
+        // //function to setup these properties.  Call this during init.
+        // setupFrequentThreeFeatures: function () {
             
-            if (!this.ThreeAxisX)
-                this. ThreeAxisX = new THREE.Vector3(1, 0, 0);
+        //     if (!this.ThreeAxisX)
+        //         this. ThreeAxisX = new THREE.Vector3(1, 0, 0);
                 
-            if (!this.ThreeAxisY)
-                this. ThreeAxisY = new THREE.Vector3(0, 1, 0);
+        //     if (!this.ThreeAxisY)
+        //         this. ThreeAxisY = new THREE.Vector3(0, 1, 0);
                 
-            if (!this.ThreeAxisZ)
-                this. ThreeAxisZ = new THREE.Vector3(0, 0, 1);
+        //     if (!this.ThreeAxisZ)
+        //         this. ThreeAxisZ = new THREE.Vector3(0, 0, 1);
                 
             
-            if (!this.deg180toRad)
-                this. deg180toRad = (Math.PI / 180) * 180;
+        //     if (!this.deg180toRad)
+        //         this. deg180toRad = (Math.PI / 180) * 180;
             
-            if (!this.boardFlipAxis)
-                this. boardFlipAxis = this.ThreeAxisY;
-        },
+        //     if (!this.boardFlipAxis)
+        //         this. boardFlipAxis = this.ThreeAxisY;
+        // },
         
         setupFeedsDepths: function() {
             // As user changes vals, just update our global props
@@ -1526,6 +1559,31 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 console.log("evt:", evt);
                 if(evt.currentTarget.valueAsNumber) // arrow buttons send 2 events
                   that.drillDepth = evt.currentTarget.valueAsNumber;
+            });
+            el.find('.dimension-layer-20').change(function(evt) {
+                that.useDimensionLayer = evt.currentTarget.checked;
+            });
+            el.find('.dimension-layer-46').change(function(evt) {
+                that.useMillingLayer = evt.currentTarget.checked;
+            });
+            el.find('.com-chilipeppr-widget-eagle-dimension-tso-wireWidth').change(function(evt) {
+                that.cuttingToolOption = evt.currentTarget.checked?0:1;
+            });
+            el.find('.com-chilipeppr-widget-eagle-dimension-tso-oneTool').change(function(evt) {
+                that.cuttingToolOption = evt.currentTarget.checked?1:0;
+            });
+            el.find('.dimension-minimum-wire-width').change(function(evt) {
+                var item = $(evt.currentTarget);
+                var d = parseFloat(item.val());
+                if (d <= 0) {
+                    d = that.minWireWidthToMill;
+                    item.val(d);
+                }
+                else
+                    that.minWireWidthToMill = d;
+            });
+            el.find('.dimension-ignore-small-wires').change(function(evt) {
+                that.ignoreSmallWires = evt.currentTarget.checked;
             });
             el.find('.dimension-mill-diameter').change(function(evt) {
                 console.log("evt:", evt);
@@ -1734,7 +1792,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             
             //this.sceneRemove(this.threeDimensions);
             
-            this.threeDimensions = null;
+            //this.threeDimensions = null;
 
             // contains the end mill path (blue/gray line)
             /*this.threePathEndMill.forEach(function(threeObj) {
@@ -1769,7 +1827,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.intersectObjects = [];
             this.clipperDimension = [];
             this.clipperDimensionInfo = []; //V5.3D201701XX Added
-            this.dimensionInfo = []; //V5.3D201701XX Added
             this.clipperSignalWires = [];
             this.clipperElements = [];
             this.clipperPads = [];
@@ -1888,6 +1945,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // create board
                 this.eagle = new EagleCanvas('eagle-canvas');
                 this.eagle.loadText(file);
+                this.useDimensionLayer = this.eagle.dimensionLayerUsed;
+                this.useMillingLayer = this.eagle.millingLayerUsed;
+                $('#com-chilipeppr-widget-eagle .dimension-layer-20').prop('checked', this.useDimensionLayer);
+                $('#com-chilipeppr-widget-eagle .dimension-layer-46').prop('checked', this.useMillingLayer);
                 //this.eagle.setScaleToFit('eagle-main');
                 //this.eagle.setScale(this.eagle.getScale() / 2);
                 //this.eagle.draw();
@@ -1947,8 +2008,12 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         colorHoleUnhandled: 9046024,
         colorsDrop: [2722312, 8817160, 9046024] , // green, yellow, red
         colorDimension: 9276813, // light gray
+        colorTabs: 0x4020A0,
+        colorMilling: 0x238d8d,
+        colorFailed: 0xff0000,
         opacitySignal: 0.1,
         opacityDimension: 0.3,
+        opacityTabs: 0.5,
         opacityVia: 0.1,
         opacityPad: 0.1,
         endmillSize: 0.0, // size of endmill that user picks
@@ -1957,12 +2022,12 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         paths: null, // final paths generated from onRefresh() used to export gcode
         pathsUnion: null,
         pathsUnionHoles: null,
-        threeDimensions: null,
+        //threeDimensions: null,
         boardBoundaries: null, //V5.1D20161229
         activeLayer: 'Top',
         clipperDimensions: [], // contains the dimensions of the board as clipper path
         //clipperDimensionsInfo: [], //V5.3D201701XX Added
-        dimensionInfo: [], //V5.3D201701XX Added
+        //dimensionInfo: [], //V5.3D201701XX Added
         /**
          * This is a key method that will actually start the traversal of the
          * entire Eagle BRD and generate Three.js objects for each pad/smd/via/wire, etc.
@@ -1993,13 +2058,20 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // these methods will draw all Eagle objects into several global
             // properties, the most important of which is this.clipperBySignalKey
             // which holds a structured object of each signal, i.e. +3V, GND, etc.
-            this.threeDimensions = this.draw3dDimension(this.endmillSize);//V5.4 This line moved to top of list because mirror feature rely on dimensions
+            this.buildDimensionclipper();
+            //Mirror board dimensions
+            for(var c = 0; c < this.clipperDimension.length; c++){
+                this.clipperDimension[c].X = this.flipX(this.clipperDimension[c].X);
+                this.clipperDimension[c].Y = this.flipY(this.clipperDimension[c].Y);
+            }
             this.draw3dSignalWires(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dSignalPolygons(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dElements(this.eagle.eagleLayersByName[this.activeLayer]);
             this.draw3dVias('1-16');
+            this.draw3dDimension();
             this.draw3dHoles(); //V5.2D20170105 Added
-            
+            this.draw3dTabs();
+            //this.threeDimensions = this.draw3dDimension(this.endmillSize);
             //this.obj3d.children = [];
             
             // obj3d is the original THREE.Object3D() for the 3d
@@ -2050,7 +2122,13 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         drillMaxDiameter: 2.00, //mm/min //V5.2D20170105 changed to 2.00 to match default value on widget.html
         drillDepth: -1.7, // std thickness
         depthOfDimensions: -1.7, // std thickness
-        millDiameter: 2,
+        millDiameter: 1,
+        millDiameterMin: 1,
+        useDimensionLayer: false,
+        useMillingLayer: false,
+        cuttingToolOption: 0,
+        minWireWidthToMill: 1,
+        ignoreSmallWires: false,
         stepDownDimensions: -0.5,
         stepDownPasses: 3, // use passes or dimension
         spindleRPM: 12000, // spindle rotation speed (rpm)
@@ -2067,6 +2145,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         exportGcodeMilling:function(){
             var g = '';
+            if(! $('#com-chilipeppr-widget-eagle .use-traces').is(':checked')) return g;
             var dir = $('#DirectionMilling').val();
             this.paths.forEach(function(path) {
                 if(dir>0){
@@ -2119,7 +2198,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var that = this;
 
             if((! $('#com-chilipeppr-widget-eagle .drill-markholes').is(':checked')) ||
-                this.holesToDrill.lenght == 0)
+                this.holesToDrill.length == 0)
                return g;
 
             // Drilling, first sort to drill diameter and change tool to first diameter
@@ -2141,7 +2220,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var that = this;
             
             if((! $('#com-chilipeppr-widget-eagle .use-drilling').is(':checked')) ||
-                this.holesToDrill.lenght == 0)
+                this.holesToDrill.length == 0)
                return g;
             g += "(------ DRILLING HOLES -------)\n";
             for ( var diameter in this.sortObjByKey(this.holesToDrill) ){
@@ -2164,11 +2243,13 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         //V5.2D20170105 Added
         exportGcodeMillHoles:function(){
             var g = '';
+            if(! $('#com-chilipeppr-widget-eagle .use-milling').is(':checked')) return g;
             var that = this;
             var dir = $('#DirectionCutting').val();
-            var diaOfEndmill = $('.dimension-mill-diameter').val();
+            //var diaOfEndmill = $('.dimension-mill-diameter').val();
+            var diaOfEndmill = that.millDiameterMin;
             if((! $('#com-chilipeppr-widget-eagle .use-drilling').is(':checked')) ||
-                this.holesToMill.lenght == 0)
+                this.holesToMill.length == 0)
                return g;
             g += "(------ MILLING HOLES -------)\n";
             g += "M5 (spindle off)\n";
@@ -2198,7 +2279,389 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             //console.log("Ameen", g);
             return g;
         },
+        getBoardDimensionsToMill:function(){
+            console.log("AmeenX", this.clipperDimensionInfo, this.clipperDimension);
+            var boardDimensionsToMill = [];
+            var dLayerNumber = this.eagle.eagleLayersByName['Dimension'].number;
+            var mLayerNumber = this.eagle.eagleLayersByName['Milling'].number;
+            var fl = ((this.mirrorX && !this.mirrorY) ||(!this.mirrorX & this.mirrorY));
+            
+            for(var n=0; n<this.clipperDimensionInfo.length; n++){
+                var cdi = this.clipperDimensionInfo[n];
+                var or = ClipperLib.Clipper.Orientation(this.clipperDimension.slice(cdi.start, cdi.end+1));
+                if ((cdi.type == -2) ||
+                    (!this.useMillingLayer && cdi.layer == mLayerNumber) ||
+                    (!this.useDimensionLayer && cdi.layer == dLayerNumber)  ||
+                    (cdi.millDiameter == 0)) continue;
+                    
+                var alongPath = cdi.type == -1 || (cdi.type >= 0 && cdi.width >= this.minWireWidthToMill);
+                var hasCurves = cdi.curves.length > 0;
+                var ci = 0; //curve index
+                var dimensionPath = {X:0, Y:0, millDiameter:cdi.millDiameter, lines:[], isOpen:(cdi.type < 0)};
+                for(var j=cdi.start; j<cdi.end; j++){
+                    var v1i, v2i, v3i, isThisLineCurve, isNextLineCurve, thisCurve = {}, nextCurve = {}, thisCurveAngle = 0, nextCurveAngle = 0;
+                    isThisLineCurve = hasCurves && cdi.curves[ci].start == j
+                    if(isThisLineCurve){
+                        v1i = j;
+                        v2i = cdi.curves[ci].end+1;
+                        v3i = cdi.curves[ci].end+2;
+                        thisCurveAngle = cdi.curves[ci].curve;
+                        j=cdi.curves[ci].end;   
+                        if((ci+1) < cdi.curves.length) ci++; else ci=0;
+                    }
+                    else{
+                        v1i = j; v2i = j+1; v3i = j+2;
+                    }
+                        
+                    if(v3i > cdi.end){
+                        if(cdi.type < 0) v3i = cdi.start;
+                        else {v2i =cdi.start; v3i = cdi.start+1;}
+                    }
+                    
+                    isNextLineCurve = hasCurves && cdi.curves[ci].start == v2i;
+                    if(isNextLineCurve){
+                        v3i = cdi.curves[ci].end+1;
+                        nextCurveAngle = cdi.curves[ci].curve;
+                        //if(v3i == cdi.end-1) v3i++;
+                        
+                    }
+                    console.log("AmeenX - v3i", v3i);
+                    var v1 = this.clipperDimension[v1i];
+                    var v2 = this.clipperDimension[v2i];
+                    var v3 = this.clipperDimension[v3i];
+                    console.log("AmeenD", v1, v2, v3);
+                    var angle1 = Math.atan2(v2.Y-v1.Y, v2.X-v1.X) - 3*Math.PI/2;
+                    var angle2 = Math.atan2(v3.Y-v2.Y, v3.X-v2.X) - 3*Math.PI/2;
+                    if(or) {angle1 += Math.PI; angle2 += Math.PI;}
+                    //if(fl) {angle1 = -angle1; angle2 = -angle2;}
+                    
+                    if(fl) {thisCurveAngle=-thisCurveAngle; nextCurveAngle=-nextCurveAngle;}
+                    if(isThisLineCurve) thisCurve = this.getCurveParameters(v1.X, v1.Y, v2.X, v2.Y, thisCurveAngle);
+                    if(isNextLineCurve) nextCurve = this.getCurveParameters(v2.X, v2.Y, v3.X, v3.Y, nextCurveAngle);
+                    // if(isThisLineCurve)
+                    //     thisCurve = fl? this.getCurveParameters(v1.X, v1.Y, v2.X, v2.Y, -thisCurveAngle):
+                    //                     this.getCurveParameters(v1.X, v1.Y, v2.X, v2.Y, thisCurveAngle);
+            
+                    // if(isNextLineCurve)
+                    //     nextCurve = fl? this.getCurveParameters(v2.X, v2.Y, v3.X, v3.Y, -nextCurveAngle):
+                    //                     this.getCurveParameters(v2.X, v2.Y, v3.X, v3.Y, nextCurveAngle);
+                    
+                    if(alongPath){
+                        if(v1i == cdi.start){ dimensionPath.X = v1.X; dimensionPath.Y = v1.Y; }
+                        if(isThisLineCurve){
+                            dimensionPath.lines.push({X:v2.X, Y:v2.Y, isCurve:true,
+                                C:{ X:thisCurve.x, Y:thisCurve.y, radius: thisCurve.radius,
+                                    startAngle:thisCurve.startAngle,
+                                    endAngle:thisCurve.endAngle,
+                                    curve: thisCurveAngle,
+                                    clockWise: thisCurve.clockWise}
+                                });
+                        }
+                        else
+                            dimensionPath.lines.push({X:v2.X, Y:v2.Y, isCurve:false});
+                    }
+                    else{
+                        var dx, dy, rd = cdi.millDiameter/2;
+                        var a1 = this.fixAngle(isThisLineCurve? thisCurve.startAngle : angle1);
+                        var a2 = this.fixAngle(isThisLineCurve? thisCurve.endAngle   : angle1);
+                        var a3 = this.fixAngle(isNextLineCurve? nextCurve.startAngle : angle2);
+                        if(cdi.type == 1){
+                            a1 = Math.PI + a1;
+                            a2 = Math.PI + a2;
+                            a3 = Math.PI + a3;
+                        }
+                        if((or && thisCurveAngle<0) || (!or && thisCurveAngle>0)) {a2 = a2 - Math.PI; a1 = a1 - Math.PI};
+                        if((or && nextCurveAngle<0) || (!or && nextCurveAngle>0)) {a3 = a3 - Math.PI};
+                        var a4 = a3 - a2;
+                        var a5 = (a2 - a3 + Math.PI)/2;
+                        var s4 = Math.sin(a4);
+                        var isCrossing = (!or && (s4 > 0.0001)) || (or && (s4 < -0.0001)); // inflated lines will cross if a4 angle is larger than zero and smaller than 180
+                        if(cdi.type == 1) isCrossing = !isCrossing;
+                        console.log("AmeenD isThisLineCurve=", isThisLineCurve, "thisCurveAngle=", thisCurveAngle, "or=", or, "a2", a2*180/Math.PI);
+
+                        
+                        console.log("AmeenD: a1, a2, a3, a5", a1*180/Math.PI, a2*180/Math.PI, a3*180/Math.PI, a5*180/Math.PI, isThisLineCurve, isNextLineCurve, isCrossing, Math.sin(a4));
+                        dx = rd * Math.cos(a1); dy = rd * Math.sin(a1);
+                        var v4 = {X: v1.X + dx, Y: v1.Y + dy};
+                        dx = rd * Math.cos(a2); dy = rd * Math.sin(a2);
+                        var v5 = {X: v2.X + dx, Y: v2.Y + dy};
+                        dx = rd * Math.cos(a3); dy = rd * Math.sin(a3);
+                        var v6 = {X: v2.X + dx, Y: v2.Y + dy};
+                        if(isCrossing){
+                            var hypotenuse = rd * Math.cos(a5) / Math.sin(a5);
+                            dx = hypotenuse * Math.cos(a2 + 3 * Math.PI/2);
+                            dy = hypotenuse * Math.sin(a2 + 3 * Math.PI/2);
+                            var v7 = {X: v5.X - dx, Y: v5.Y - dy};
+                            v5 = v7;
+                        }
+                        console.log("AmeenD: v4, v5, v6", v4, v5, v6);
+                        //if(v2i == cdi.start){ dimensionPath.X = v5.X; dimensionPath.Y = v5.Y; console.log("AmeenV");}
+                        // if(v1i == cdi.start   && cdi.type == 0){ dimensionPath.X = v4.X; dimensionPath.Y = v4.Y; }
+                        // if(v1i == (cdi.end-1) && cdi.type == 1){ dimensionPath.X = v5.X; dimensionPath.Y = v5.Y; }
+                        if(isThisLineCurve){
+                            dimensionPath.lines.push({X:v5.X, Y:v5.Y, isCurve:true, 
+                                C:{ X: thisCurve.x, Y: thisCurve.y, radius: thisCurve.radius+rd,
+                                    startAngle:thisCurve.startAngle,
+                                    endAngle:thisCurve.endAngle - isCrossing?a5:0,
+                                    curve: thisCurveAngle,
+                                    clockWise: thisCurve.clockWise}
+                                });
+                        }
+                        else
+                            dimensionPath.lines.push({X:v5.X, Y:v5.Y, isCurve:false});
+                            
+                        var isSameAngle = (Math.abs(a3-a2) % (2*Math.PI)) < 0.0001;
+                        console.log("AmeenD: a3-a2", (Math.abs(a3-a2) % (2*Math.PI)), isCrossing);
+                        if(!isSameAngle && !isCrossing){
+                            dimensionPath.lines.push({X:v6.X, Y:v6.Y, isCurve:true, 
+                                C:{ X:v2.X, Y:v2.Y, radius: rd,
+                                    startAngle:a2,
+                                    endAngle:a3,
+                                    curve: a3-a2,
+                                    clockWise: !or}
+                                });
+                            console.log("AmeenD: has connector");
+                        }
+                        var ix = dimensionPath.lines.length - 1;
+                        dimensionPath.X = dimensionPath.lines[ix].X;
+                        dimensionPath.Y = dimensionPath.lines[ix].Y;
+                    }
+                }
+                boardDimensionsToMill.push(dimensionPath);
+            }
+            console.log("AmeenD:", boardDimensionsToMill);
+            return boardDimensionsToMill;
+        },
+        fixAngle: function(angle){
+            var a = angle % (2*Math.PI);
+            return (a<0? 2*Math.PI+a: a);
+        },
         exportGcodeDimensions:function(){
+            var g = '';
+            if(! $('#com-chilipeppr-widget-eagle .use-milling').is(':checked')) return g;
+            
+            var dimensions = this.getBoardDimensionsToMill();
+            var lastToolDia = this.holesToMill.length>0?this.millDiameterMin:-1;
+            var dir = $('#DirectionCutting').val();
+            console.group("Generating Dimension Milling");
+            // // if we have no dimensions, then let's return
+            // if (!millDim || !millDim.length > 0) {
+            //     console.warn("for some reason there's no clipperDimension. huh?. returning.");
+            //     return g;
+            // }
+            for(var i=0; i<dimensions.length; i++){
+                diaOfEndmill = dimensions[i].millDiameter;
+                var isOpen = dimensions[i].isOpen;
+                if(diaOfEndmill != lastToolDia){//if we already milled some holes, there is no need to do tool change
+                    g += "M5 (spindle off)\n";
+                    g += "T" + ++this.toolCount + " M6 (Milling board dimensions)\n";
+                    g += "(T" + this.toolCount++ + " D=" + diaOfEndmill + "mm - PCB End Mill)\n";
+                    g += "M3 S" + this.spindleRPM + " (spindle on)\n";
+                    g += "F" + this.feedRateDimensions + "\n";
+                }
+                var lastPass = false;
+                var newZ = 0;
+                var v1 = {X: dimensions[i].X, Y: dimensions[i].Y};
+                g += "G0 Z" + this.clearanceHeight + "\n";
+                g += "(dimensions)\n";
+                g += "G0 X" + v1.X + " Y" + v1.Y + "\n";
+                g += "G0 Z0\n";
+                while (!lastPass){
+                    newZ += this.stepDownDimensions;
+                    if (newZ <= this.depthOfDimensions) {
+                        newZ = this.depthOfDimensions;
+                        lastPass = true;
+                    }
+                    g += "(step down " + this.stepDownDimensions + " for new z " + newZ + ")\n";
+                    g += "G1 Z" + newZ + " F" + this.feedRatePlunge + "\n";
+                    g += "F" + this.feedRateDimensions + "\n";
+                    for(var j=0; j<dimensions[i].lines.length; j++){
+                        line = dimensions[i].lines[j];
+                        var v2 = {X: line.X, Y: line.Y};
+                        if(line.isCurve){
+                            g += this.getDimensionGcode(v2, v1, newZ, isOpen, line.C);
+                        }
+                        else{
+                            g += this.getDimensionGcode(v2, v1, newZ, isOpen);
+                        }
+                        v1 = v2;
+                    }
+                    v1 = {X: dimensions[i].X, Y: dimensions[i].Y};
+                    if(dimensions[i].isOpen && !lastPass){
+                        g += "G0 Z" + this.clearanceHeight + "\n";
+                        g += "G0 X" + v1.X + " Y" + v1.Y + "\n";
+                        g += "G0 Z0\n";
+                    }
+                }
+            }
+            return g;
+        },
+        getDimensionGcode: function(v2, v1, z, isOpen, curve){
+            var tabMaxZ = this.depthOfDimensions + this.tabs.height;
+            if(curve === undefined){
+                var g = "G1 X" + v2.X + " Y" + v2.Y + "\n";
+                if (!this.tabs.useTabs || isOpen || z > tabMaxZ) return g;
+                
+                //if (t<0) return g;
+                
+                //if (z > tabMaxZ) return g;
+                
+                var length = Math.sqrt((v2.X-v1.X)*(v2.X-v1.X) + (v2.Y-v1.Y)*(v2.Y-v1.Y));
+                var count = Math.round(length/this.tabs.distance - 0.5);
+                //console.log("Ameen -", length, count);
+                if (!(count>0)) return g;
+                
+                var gt = "";
+                var angle = Math.atan2(v2.Y-v1.Y, v2.X-v1.X);
+                for(var n=0; n<count; n++){
+                    var d = (length - this.tabs.distance * (count-1))/2 + n * this.tabs.distance;
+                    var dw = this.tabs.width / 2;
+                    var x1 = v1.X + (d - dw) * Math.cos(angle);
+                    var y1 = v1.Y + (d - dw) * Math.sin(angle);
+                    var x2 = v1.X + (d + dw) * Math.cos(angle);
+                    var y2 = v1.Y + (d + dw) * Math.sin(angle);
+                    gt += "G1 X" + x1 + " Y" + y1 + "\n";
+                    gt += "G1 Z" + tabMaxZ + "\n";
+                    gt += "G1 X" + x2 + " Y" + y2 + "\n";
+                    gt += "G1 Z" + z + "\n";
+                }
+                return gt + g;
+            }
+            else{
+                var gc = curve.clockWise?"G2":"G3";
+                var I = curve.X - v1.X;
+                var J = curve.Y - v1.Y;
+                var g = gc + " X" + v2.X + " Y" + v2.Y + " I" + I + " J" + J + "\n";
+                if (!this.tabs.useTabs || isOpen || z > tabMaxZ) return g;
+                // if (!this.tabs.useTabs) return g;
+                // if (z > tabMaxZ) return g;
+
+                //var angle = curve.endAngle - curve.startAngle;
+                var angle = curve.curve * Math.PI / 180;
+                //if(!curve.clockWise) angle = 2 * Math.PI - angle;
+                var alpha = this.tabs.distance / curve.radius;
+                var beta  = (this.tabs.width / 2) / curve.radius;
+                var sign = curve.clockWise?-1:1;
+                var count = Math.round(Math.abs(angle/alpha) - 0.5);
+                console.log("AmeenArc curve =", curve);
+                console.log("AmeenArc angle =", angle*180/Math.PI, "alpha =", alpha*180/Math.PI, "beta =",beta*180/Math.PI, "count", count);
+                if (!(count>0)) return g;
+                var gt = "";
+                for(var n=0; n<count; n++){
+                    //var a = (curve.clockWise?curve.endAngle:curve.startAngle) + sign*(angle - alpha * (count-1))/2 + n * alpha;
+                    var a = curve.startAngle + sign*(Math.abs(angle) - alpha * (count-1))/2 + sign*n * alpha;
+                    var x1 = curve.X + curve.radius * Math.cos(a-sign*beta);
+                    var y1 = curve.Y + curve.radius * Math.sin(a-sign*beta);
+                    var x2 = curve.X + curve.radius * Math.cos(a+sign*beta);
+                    var y2 = curve.Y + curve.radius * Math.sin(a+sign*beta);
+                    console.log("AmeenArc n:", n, "a:",  a*180/Math.PI, "v1:", v1, "v2:", v2, "X1, Y1 :", x1, y1, "X2, Y2 :", x2, y2);
+                    gt += gc + " X" + x1 + " Y" + y1 + " I" + I + " J" + J + "\n";
+                    gt += "G1 Z" + tabMaxZ + "\n";
+                    I = curve.X - x1; J = curve.Y - y1;
+                    gt += gc + " X" + x2 + " Y" + y2 + " I" + I + " J" + J + "\n";
+                    I = curve.X - x2; J = curve.Y - y2;
+                    gt += "G1 Z" + z + "\n";
+                }
+                var g = gc + " X" + v2.X + " Y" + v2.Y + " I" + I + " J" + J + "\n";
+                console.log("AmeenArc g:", gt + g);
+                return gt + g;
+            }
+        },
+        exportGcodeDimensionsOld:function(){
+            var g = '';
+            var that = this;
+            //var diaOfEndmill = $('.dimension-mill-diameter').val();
+            var lastToolDia = this.holesToMill.length>0?that.millDiameterMin:-1;
+            var dir = $('#DirectionCutting').val();
+            var dLayerNumber = that.eagle.eagleLayersByName['Dimension'].number;
+            var mLayerNumber = that.eagle.eagleLayersByName['Milling'].number;
+            console.group("Generating Dimension Milling");
+            // if we have no dimensions, then let's return
+            if (!this.clipperDimension || !this.clipperDimension.length > 0) {
+                console.warn("for some reason there's no clipperDimension. huh?. returning.");
+                return g;
+            }
+            for(var n=0; n<that.clipperDimensionInfo.length; n++){
+                var cdi = that.clipperDimensionInfo[n];
+                if(cdi.type == -2) continue;
+                if(!that.useMillingLayer && cdi.layer == mLayerNumber) continue;
+                if(!that.useDimensionLayer && cdi.layer == dLayerNumber) continue;
+                var diaOfEndmill = cdi.millDiameter;
+                if (diaOfEndmill == 0) continue;
+                var millDim;
+                if(diaOfEndmill != lastToolDia){//if we already milled some holes, there is no need to do tool change
+                    g += "M5 (spindle off)\n";
+                    g += "T" + ++this.toolCount + " M6 (Milling board dimensions)\n";
+                    g += "(T" + this.toolCount++ + " D=" + diaOfEndmill + "mm - PCB End Mill)\n";
+                    g += "M3 S" + this.spindleRPM + " (spindle on)\n";
+                    g += "F" + this.feedRateDimensions + "\n";
+                }
+                lastToolDia = diaOfEndmill;
+                if(cdi.type == -1 || (cdi.type >= 0 && cdi.width >= that.minWireWidthToMill)){
+                    //We have open path or close path with fixed width, no need to inflate, just generate code along the path.
+                    millDim = this.clipperDimension.slice(cdi.start, cdi.end);
+                }
+                else {//we have a closed path with wire width < minimum tool diameter
+                    var delta = diaOfEndmill/2;
+                    if(cdi.type == 1) delta = -delta;
+                    // create new inflated path
+                    millDim = this.getInflatePath(
+                        [this.clipperDimension.slice(cdi.start, cdi.end)], delta);
+                    millDim = millDim[0];
+                    if(dir>0){
+                        //Here we are correcting orientation of board dimension path
+                        //True orientation means Convientional milling (CCW directions),
+                        //False orientation means Climb (CW direction)
+                        var o = ClipperLib.Clipper.Orientation(millDim);
+                        if(o != (dir==1)) 
+                        millDim.reverse();
+                    }
+                }
+                //console.log("Ameen Path", n, cdi.type, millDim);
+                // move to clearance
+                g += "G0 Z" + this.clearanceHeight + "\n";
+                g += "(dimensions)\n";
+                var l = (cdi.type>=0)? (millDim.length - 1):0;
+                if (millDim[l] !== undefined)
+                    g += "G0 X" + millDim[l].X + " Y" + millDim[l].Y + "\n";
+                // move down
+                g += "G0 Z0\n";
+                var newZ = 0;
+               var didLastPass = false;
+                while (!didLastPass) {
+                    newZ += this.stepDownDimensions;
+                    if (newZ <= this.depthOfDimensions) {
+                        newZ = this.depthOfDimensions;
+                        didLastPass = true;
+                    }
+                    g += "(step down " + this.stepDownDimensions + " for new z " + newZ + ")\n";
+                    g += "G1 Z" + newZ + " F" + this.feedRatePlunge + "\n";
+                    g += "F" + this.feedRateDimensions + "\n";
+
+                    // we have dimensions defined as linePieces so must eliminate duplicates
+                    var lastPt = {X:null,Y:null};
+                    millDim.forEach(function(pt) {
+                        console.log("making final dimension mill. pt:", pt, "lastPt:", lastPt);
+                        if (pt.X == lastPt.X && pt.Y == lastPt.Y) {
+                            //console.log(dimension mill: skipping pt:", pt);
+                        } else {
+                            //console.log("dimension mill: adding pt:", pt);
+                            g += "G1 X" + pt.X + " Y" + pt.Y + "\n";
+                        }
+                        lastPt = pt;
+                    });
+                    if(cdi.type== -1 && !didLastPass){
+                        g += "G0 Z" + this.clearanceHeight + "\n";
+                        g += "G0 X" + millDim[l].X + " Y" + millDim[l].Y + "\n";
+                        g += "G0 Z0\n";
+                    }
+                    
+                }
+            }
+            console.groupEnd();
+            return g;
+        },
+        exportGcodeDimensionsOldest:function(){
             
             var g = '';
             var that = this;
@@ -2207,7 +2670,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var dir = $('#DirectionCutting').val();
             // DIMENSION Milling
             g += "(------ DIMENSION Milling -------)\n";
-            if(this.holesToMill.lenght == 0){//if we already milled some holes, there is no need to do tool change
+            if(this.holesToMill.length == 0){//if we already milled some holes, there is no need to do tool change
                 g += "M5 (spindle off)\n";
                 g += "T" + ++this.toolCount + " M6 (Milling board dimensions)\n";
                 g += "(T" + this.toolCount + " D=" + diaOfEndmill + "mm - PCB End Mill)\n";
@@ -2279,7 +2742,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     g += "(step down " + this.stepDownDimensions + " for new z " + newZ + ")\n";
                     g += "G1 Z" + newZ + " F" + this.feedRatePlunge + "\n";
                     g += "F" + this.feedRateDimensions + "\n";
-                    console.log("this.clipperDimension:", this.clipperDimension);
+                    //console.log("this.clipperDimension:", this.clipperDimension);
                     
                     // we have dimensions defined as linePieces so must eliminate duplicates
                     var lastPt = {X:null,Y:null};
@@ -4392,7 +4855,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.sceneAdd(group);
             return group;
         },
-        createClipperPathsAsMesh: function (paths, color, opacity, holePath) {
+        createClipperPathsAsMesh_XXX: function (paths, color, opacity, holePath) {
             //console.log("createClipperPathsAsMesh. paths:", paths, "holePath:", holePath);
             if(color === undefined)
                color = this.colorDimension;
@@ -4481,6 +4944,60 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             //this.sceneAdd(group);
             
+        },
+        createClipperPathsAsMesh: function (paths, color, opacity, holePath, depth){
+            if(color === undefined) color = this.colorDimension;
+            //if(depth === undefined) depth = this.depthOfDimensions;
+            var mat = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: opacity,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            
+            var group = new THREE.Object3D();
+            for (var i = 0; i < paths.length; i++) {
+                var shape = new THREE.Shape();
+                for (var j = 0; j < paths[i].length; j++) {
+                    var pt = paths[i][j];
+                    if (j == 0) shape.moveTo(pt.X, pt.Y); else shape.lineTo(pt.X, pt.Y);
+                }
+               if (holePath !== undefined && holePath != null) {
+                    if (!(Array.isArray(holePath))) {
+                        holePath = [holePath];
+                    }
+                    
+                    for (var hi = 0; hi < holePath.length; hi++) {
+                        var hp = holePath[hi];
+                        var hole = new THREE.Path();
+                        for (var j = 0; j < hp.length; j++) {
+                            var pt = hp[j];
+                            if (j == 0) hole.moveTo(pt.X, pt.Y);
+                            else hole.lineTo(pt.X, pt.Y);
+                        }
+                        shape.holes.push(hole);
+                    }
+                }
+                var geometry;
+                if(depth !== undefined){
+                    var extrudeSettings = {
+                    	steps: 1,
+                    	amount: depth,
+                    	bevelEnabled: false,
+                    	bevelThickness: 0,
+                    	bevelSize: 0,
+                    	bevelSegments: 0
+                    };
+                    geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+                }
+                else
+                    geometry = new THREE.ShapeGeometry( shape );
+                
+                var shapeMesh = new THREE.Mesh(geometry, mat);
+                group.add(shapeMesh);
+            }
+            return group;
         },
         /**
          * This method is used to show the milling/laser path of a line by creating a cyan
@@ -4624,6 +5141,29 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             return offsetted_paths;
 
         },
+        getInflateOpenPath: function (paths, delta, joinType) {
+            var scale = 10000;
+            ClipperLib.JS.ScaleUpPaths(paths, scale);
+            var miterLimit = 2;
+            var arcTolerance = 10;
+            joinType = joinType ? joinType : ClipperLib.JoinType.jtRound
+            var co = new ClipperLib.ClipperOffset(miterLimit, arcTolerance);
+            co.AddPaths(paths, joinType, ClipperLib.EndType.etRound);
+            //var delta = 0.0625; // 1/16 inch endmill
+            var offsetted_paths = new ClipperLib.Paths();
+            co.Execute(offsetted_paths, delta * scale);
+
+            // scale back down
+            for (var i = 0; i < offsetted_paths.length; i++) {
+                for (var j = 0; j < offsetted_paths[i].length; j++) {
+                    offsetted_paths[i][j].X = offsetted_paths[i][j].X / scale;
+                    offsetted_paths[i][j].Y = offsetted_paths[i][j].Y / scale;
+                }
+            }
+            ClipperLib.JS.ScaleDownPaths(paths, scale);
+            return offsetted_paths;
+
+        },
         createThermalCutoutsFromSmd: function(smd, poly, myInflateBy) {
             
             console.log("creating thermal cutouts for an smd:", smd);
@@ -4697,19 +5237,44 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
 
         // THIS SECTION IS FOR WORKING ON THE DIMENSION OF THE BOARD
-        
+        wiresConnected: function(w1, w2){
+            return((w1.x2 == w2.x1) && (w1.y2 == w2.y1));
+        },
+        wiresConnectedF: function(w1, w2){
+            if((w1.x2 == w2.x1) && (w1.y2 == w2.y1)) return true;
+            if((w1.x2 == w2.x2) && (w1.y2 == w2.y2)){
+                var x = w2.x1; w2.x1=w2.x2; w2.x2=x;
+                var y = w2.y1; w2.y1=w2.y2; w2.y2=y;
+                w2.curve = -w2.curve;
+                return true;
+            }
+            return false;
+        },
+        wiresConnectedB: function(w1, w2){
+            if((w1.x1 == w2.x2) && (w1.y1 == w2.y2)) return true;
+            if((w1.x1 == w2.x1) && (w1.y1 == w2.y1)){
+                var x = w2.x1; w2.x1=w2.x2; w2.x2=x;
+                var y = w2.y1; w2.y1=w2.y2; w2.y2=y;
+                w2.curve = -w2.curve;
+                return true;
+            }
+            return false;
+        },
         clipperDimension: [], // holds clipper formatted dimension
-        getDimensionWires: function () {
-            var layerNumber = this.eagle.eagleLayersByName['Dimension'].number;
-
-            // dimension is wires on layer 20
+        buildDimensionclipper: function () {
+            // var dimansionLayerNumber = this.useDimensionLayer? this.eagle.eagleLayersByName['Dimension'].number:-1;
+            // var millingLayerNumber = this.useMillingLayer? this.eagle.eagleLayersByName['Milling'].number:-1;
+            var dimansionLayerNumber = this.eagle.eagleLayersByName['Dimension'].number;
+            var millingLayerNumber = this.eagle.eagleLayersByName['Milling'].number;
+            // dimension is wires on layer 20 and/or layer 46
             var wires = [];
+            var w = [];
             //V5.3 Updated, we need to look for package dimension wires in elements not directly in packages
             for (var elemKey in this.eagle.elements) {
                 var elem = this.eagle.elements[elemKey];
                 var pkg = this.eagle.packagesByName[elem.pkg];
                 pkg.wires.forEach(function(wire){
-                    if (wire.layer == layerNumber) {
+                    if (wire.layer == dimansionLayerNumber || wire.layer == millingLayerNumber) {
                         wires.push({
                             "curve": wire.curve,
                             "layer": wire.layer,
@@ -4727,100 +5292,158 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     // yes, there's wires in this array
                     for (var i = 0; i < this.eagle.plainWires[plainWireKey].length; i++) {
                         var wire = this.eagle.plainWires[plainWireKey][i];
-                        if (wire.layer == layerNumber) {
+                        if (wire.layer == dimansionLayerNumber || wire.layer == millingLayerNumber) {
                             // we have a dimension
                             wires.push(wire);
                         }
                     }
                 }
             }
-
-            //console.log("WSA: Wires unsorted \\n", JSON.stringify(wires));
-            //V5.2D20170105 Added: Sort wires to make sure consecutive wires end and start at same point.
-            for(i = 0; i < wires.length-1; i++){
-                //console.log("WSA: Testing Wire:", i, JSON.stringify(wires[i]));
-                var j = i + 1;
+            //sort wires by layer and by width
+            wires.sort(function(a, b){
+                if (a.layer > b.layer) return 1;
+                if (a.layer < b.layer) return -1;
+                if (a.width > b.width) return 1;
+                if (a.width < b.width) return -1;
+                return 0;
+            });
+            var wiresInfo = [];
+            var wiStartIndex = 0;
+            for(var i = 0; i<wires.length-1; i++){
                 var h = i + 1;
-                //if no common piont between current and next wire, search for correct wire and swap it with next one.
-                if(!((wires[i].x2 == wires[j].x1) && (wires[i].y2 == wires[j].y1) ||
-                     (wires[i].x2 == wires[j].x2) && (wires[i].y2 == wires[j].y2))){
-                    //console.log("WSA: Wire ", j, "in wrong position");
-                    var found = false;
-                    while(!found && j < wires.length){
-                        found = (wires[i].x2 == wires[j].x1) && (wires[i].y2 == wires[j].y1) ||
-                                (wires[i].x2 == wires[j].x2) && (wires[i].y2 == wires[j].y2);
-                        if(found){
-                            //console.log("WSA: Wire ", j, "found");
-                            var tWire = wires[h];
-                            wires[h] = wires[j];
-                            wires[j] = tWire;
-                            //console.log("WSA: Wire ", j, "swapped with wire", h);
-                        }
-                        j++;
-                    }
+                var group = (wires[i].layer == wires[h].layer) && (wires[i].width == wires[h].width);
+                
+                if (!group || h == wires.length-1) {
+                    var wiEndindex = group?h:i;
+                    wiresInfo.push({
+                        "start":wiStartIndex,
+                        "end":wiEndindex});
+                    wiStartIndex = i+1;
                 }
-                //if second point of next wire matchs second point of current wire, we need to revers direction of next wire
-                if(((wires[i].x2 == wires[h].x2) && (wires[i].y2 == wires[h].y2))){
-                    var t = wires[h].x1;
-                    wires[h].x1 = wires[h].x2;
-                    wires[h].x2 = t;
-                    t = wires[h].y1;
-                    wires[h].y1 = wires[h].y2;
-                    wires[h].y2 = t;
-                    wires[h].curve = -wires[h].curve;
-                    //console.log("WSA: Wire ", h, "flipped");
+                if(!group && h == wires.length-1){
+                    wiresInfo.push({
+                        "start":wiStartIndex,
+                        "end":wiStartIndex});
                 }
             }
+            //console.log("WSA:WireInfo", wiresInfo);
             
-            //V5.3D201701XX Following code added to support slots
-            this.dimensionInfo = [];
+            //console.log("WSA: Wires unsorted \\n", JSON.stringify(wires));
+            for(var x = 0; x < wiresInfo.length; x++){
+                var st = wiresInfo[x].start, en = wiresInfo[x].end;
+                var found = true, i = st;
+                for(;i<en && found; i++){//Check if wires are already sorted
+                    found = this.wiresConnectedF(wires[i], wires[i+1]);
+                }
+                if (found) continue;//if wires are sorted skip sorting algorithem and check next wire segment
+                var c = 0; i = st;
+                //console.log("WSA: examining wires", st, "to", en);
+                while(i < en && c <= (en-st)){//c is added to avoid endless loop, not necessary to keep but it won't harm
+                    var ix = i+1, ip  = i-1;
+                    var repeat = false;
+                    found = ip<st?false:this.wiresConnectedB(wires[i], wires[ip]);
+                    //console.log("WSA: comparing wires", i, "with previous wire, match=", found);
+                    for(var h = i+1; !found && h <= en; h++){
+                        found = this.wiresConnectedB(wires[i], wires[h]);
+                        //console.log("WSA: comparing wire", i, "with", h, "match=", found);
+                        if(found){
+                            //console.log("WSA: moving", h, "behind", i);
+                            //console.log("WSA: Shifting downd wires", i, "to", h-1);
+                            var w = wires[h];
+                            for(var n=h; n>i;n--) wires[n] = wires[n-1];
+                            wires[i] = w;
+                            var cp = this.wiresConnected(wires[h], wires[i]);
+                            for(var n=i; n<h && cp;n++) {
+                                cp = cp && this.wiresConnected(wires[n], wires[n+1]);
+                                console.log("WSA: looking for closed path", n, "to", n+1, found);
+                            }
+                            if(cp){
+                                //console.log("WSA: closed path found", i, "to", h, found);
+                                i=h+1;c=0;
+                            }
+                            repeat = true;
+                            c++;
+                        }
+                    }
+                    if(!repeat){//don't execute following code if current wire need to be compared again in above loop
+                        found = this.wiresConnectedF(wires[i], wires[ix]);
+                        //console.log("WSA: comparing wires", i, "with next wire, match=", found);
+                        for(var h = ix+1; !found && h <= en; h++){
+                            found = this.wiresConnectedF(wires[i], wires[h]);
+                            //console.log("WSA: comparing wire", i, "with", h, "match=", found);
+                            if(found){
+                                //console.log("WSA: moving", h, "after", i);
+                                //console.log("WSA: Shifting downd wires", ix, "to", h-1);
+                                var w = wires[h];
+                                for(var n=h; n>ix;n--) wires[n] = wires[n-1];
+                                wires[ix] = w;
+                            }
+                        }
+                        i++;c=0;
+                    }
+                }
+            }
+            //console.log("WSA: Wires sorted \\n", JSON.stringify(wires));
+
+            //V5.3 Following code added to support multiple wire paths
+            var dimensionInfo = [];
             var diStartIndex = 0;
             for(var i = 0; i<wires.length-1; i++){
                 var h = i + 1;
-                var connected = (wires[i].x2 == wires[h].x1) && (wires[i].y2 == wires[h].y1);
+                var connected = this.wiresConnected(wires[i], wires[h]);
                 
                 if (!connected || h == wires.length-1) {
-                    var diEndindex = h==wires.length-1?h:i;
-                    var diType = ((wires[diStartIndex].x1 == wires[diEndindex].x2) && 
-                                  (wires[diStartIndex].y1 == wires[diEndindex].y2));
-                    this.dimensionInfo.push({
+                    var diEndindex = connected?h:i;
+                    var diType = this.wiresConnected(wires[diEndindex], wires[diStartIndex]);
+                    dimensionInfo.push({
                         "start":diStartIndex,
-                        "end":diEndindex, 
+                        "end":diEndindex,
+                        "width": wires[i].width,
+                        "layer": wires[i].layer,
                         "type":diType?0:-1});
                     diStartIndex = i+1;
                 }
+                //if last wire is a path by it's own
+                if(!connected && h == wires.length-1){
+                    dimensionInfo.push({
+                        "start":diStartIndex,
+                        "end":diStartIndex, 
+                        "width": wires[i].width,
+                        "layer": wires[i].layer,
+                        "type":-1});
+                }
             }
-            
+            console.log("WSA: dimensionInfo", dimensionInfo);
             // build clipper dimension format
             this.clipperDimension = [];
             this.clipperDimensionInfo = []; //V5.3D201701XX Added to support slots
             var cdiStartIndex = 0;
             var cdiEndIndex = 0;
-            for(var n=0; n<this.dimensionInfo.length; n++){
-                var di = this.dimensionInfo[n];
+            for(var n=0; n<dimensionInfo.length; n++){
+                var di = dimensionInfo[n];
+                var curves = [];
                 for (var i = di.start; i <= di.end; i++) {
                     var wire = wires[i];
                     //console.log("clipper appending wire:", wire);
                     if(wire.curve == 0){//V5.2D20170105 if statement added to support curved dimensions
                         this.clipperDimension.push({X: wire.x1, Y: wire.y1});
-                        this.clipperDimension.push({X: wire.x2, Y: wire.y2});
-                        cdiEndIndex+=2;
+                        cdiEndIndex++;
                     }
                     else {//V5.2D20170105 following code added to support curved dimensions, curvers will be rendered as lines not arcs
+                        var curveStartIndex = cdiEndIndex;
                         var arc = this.drawArc(wire.x1, wire.y1, wire.x2, wire.y2, wire.curve, 0);
                         arc.updateMatrixWorld();
                         for(var j = 0; j < arc.geometry.vertices.length - 1; j++){
-                            var v = arc.geometry.vertices[j].clone();
-                            var vec = arc.localToWorld(v);
-                            //lineGeo.vertices.push(new THREE.Vector3(that.flipX(vec.x), that.flipY(vec.y), 0));
-                            this.clipperDimension.push({X: vec.x, Y: vec.y});
-                            v = arc.geometry.vertices[j+1].clone();
-                            vec = arc.localToWorld(v);
-                            this.clipperDimension.push({X: vec.x, Y: vec.y});
-                            cdiEndIndex+=2;
+                            var v1 = arc.geometry.vertices[j].clone();
+                            this.clipperDimension.push({X: v1.x, Y: v1.y});
+                            cdiEndIndex++;
                         }
+                        curves.push({"start":curveStartIndex, "end":cdiEndIndex-1, "curve":wire.curve});
                     }
                 }
+                //add second vertex of last wire to end of path
+                this.clipperDimension.push({X: wire.x2, Y: wire.y2});
+                //cdiEndIndex++;
                 var paths = [this.clipperDimension.slice(cdiStartIndex, cdiEndIndex)];
                 var bounds = ClipperLib.Clipper.GetBounds(paths);
                 
@@ -4828,10 +5451,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     "start":cdiStartIndex,
                     "end":cdiEndIndex, 
                     "type":di.type,
+                    "width": di.width,
+                    "millDiameter": di.width,
+                    "layer": di.layer,
+                    "curves": curves,
                     "bounds": bounds
                 });
                 
-                cdiStartIndex=cdiEndIndex+2;
+                cdiStartIndex=++cdiEndIndex;
             }
 
             //Calculate board boundries to be used in mirroring feature
@@ -4842,80 +5469,134 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 MaximumX: bounds.right,
                 MaximumY: bounds.bottom
             };
-            
-            //Mirror board dimensions
-            for(var c = 0; c < this.clipperDimension.length; c++){
-                this.clipperDimension[c].X = this.flipX(this.clipperDimension[c].X);
-                this.clipperDimension[c].Y = this.flipY(this.clipperDimension[c].Y);
-            }
-            
+
             //We now need to check which paths to deflate
-            //Also we need to check if slot is bigger than end mill
-            var diaOfEndmill = $('.dimension-mill-diameter').val();
+            //var diaOfEndmill = $('.dimension-mill-diameter').val();
             for(i=0; i<this.clipperDimensionInfo.length; i++){
                 for(j=0; j<this.clipperDimensionInfo.length; j++){
-                    if (i==j) continue;
+                    if (i==j) continue;//skip urself
                     var cdi1 = this.clipperDimensionInfo[i];
-                    if(cdi1.type < 0) continue;
+                    if(cdi1.type < 0) continue;//skip open path
                     var cdi2 = this.clipperDimensionInfo[j];
+                    //if path cdi1 inside path cdi1, deflate cdi1, AMEEN TODO: compare actual paths not bounds
                     if( (cdi1.bounds.left   > cdi2.bounds.left  ) &&
                         (cdi1.bounds.bottom < cdi2.bounds.bottom) &&
                         (cdi1.bounds.right  < cdi2.bounds.right ) &&
                         (cdi1.bounds.top    > cdi2.bounds.top   )
                     ){
-                        if(((cdi1.bounds.right - cdi1.bounds.left) > diaOfEndmill) &&
-                           ((cdi1.bounds.bottom - cdi1.bounds.top) > diaOfEndmill))
+                        // if(((cdi1.bounds.right - cdi1.bounds.left) > diaOfEndmill) &&
+                        //   ((cdi1.bounds.bottom - cdi1.bounds.top) > diaOfEndmill))
                             this.clipperDimensionInfo[i].type = 1;//deflate
-                        else
-                            this.clipperDimensionInfo[i].type = -2;//ignore
+                        // else
+                        //     this.clipperDimensionInfo[i].type = -2;//ignore
                         
                     }
                 }
             }
-            //Sort the array desending based on value of (type), so that gcode for deflated paths is generated first.
-            this.clipperDimensionInfo.sort(function(a, b){return b.type - a.type});
+            //Not required, to be sorted in exportGcodeDimensions
+            //this.clipperDimensionInfo.sort(function(a, b){return b.type - a.type});
             
-            //console.log("Ameen", "C Dimension Info: ", JSON.stringify(this.clipperDimensionInfo));
+            console.log("WSA", "C Dimension wire: ", this.clipperDimension);
+            console.log("WSA", "C Dimension Info: ", this.clipperDimensionInfo);
             //No need to return wires any more, clipperDimension and clipperDimensionInfo will be used instead
             //return wires;
         },
         
-        draw3dDimension: function (endmillSize) {
+        //draw3dDimension: function (endmillSize) {
+        draw3dDimension: function () {
             var that = this;
             
             console.log("draw3dDimension", this.eagle);
-            //var wires = this.getDimensionWires();
-            this.getDimensionWires();
-            var color = this.colorDimension;
 
-            var lineMat = new THREE.LineBasicMaterial({
-                color: color,
-                transparent: true,
-                opacity: this.opacityDimension
-            });
-            var lineMatFailed = new THREE.LineBasicMaterial({
-                color: 0xff0000,
-                transparent: true,
-                opacity: this.opacityDimension
-            });
-            //V5.3 New code
-            var SlotsUnhandledCount = 0;
+            //Set millDiameter based on user selections
+            that.millDiameterMin = that.millDiameter;
             for(var n=0; n<that.clipperDimensionInfo.length; n++){
                 var cdi = that.clipperDimensionInfo[n];
-                if(cdi.type < 0) SlotsUnhandledCount++;
+                if(cdi.width < that.minWireWidthToMill){
+                    if(that.ignoreSmallWires)
+                        cdi.millDiameter = 0;
+                    else
+                        cdi.millDiameter = that.millDiameter;
+                }
+                else {
+                    if(that.cuttingToolOption == 1)//use one tool
+                        cdi.millDiameter = that.millDiameter;
+                    else
+                        cdi.millDiameter = cdi.width;
+                }
+                that.millDiameterMin = Math.min(that.millDiameterMin, cdi.millDiameter)
+            }
+            //sort milling paths by tool size then by path type (1:Deflated, 0:Inflated, -1:open, -2:ignored)
+            this.clipperDimensionInfo.sort(function(a, b){
+                if(a.millDiameter > b.millDiameter) return 1;
+                if(a.millDiameter < b.millDiameter) return -1;
+                if(b.type > a.type) return 1;
+                if(b.type < a.type) return -1;
+                return 0;
+                
+            });
+            //console.log("Ameen - clipperDimensionInfo sorted", JSON.stringify(this.clipperDimensionInfo));
+            //V5.3 New code
+            for(var n=0; n<that.clipperDimensionInfo.length; n++){
+                var cdi = that.clipperDimensionInfo[n];
+                var color = cdi.layer == 20? this.colorDimension: this.colorMilling;
+                var lineMat = new THREE.LineBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: .8
+                });
                 var lineGeo = new THREE.Geometry();
-                for (var i = cdi.start; i < cdi.end; i++) {
+                for (var i = cdi.start; i <= cdi.end; i++) {
                     var cd = that.clipperDimension[i];
                     lineGeo.vertices.push(new THREE.Vector3(cd.X, cd.Y, 0));
                 }
-                if(cdi.type != -1) lineGeo.vertices.push(lineGeo.vertices[0]);
-                var line = new THREE.Line(lineGeo, cdi.type < 0?lineMatFailed:lineMat);
+                var line = new THREE.Line(lineGeo, lineMat);
                 this.sceneAdd(line);
+                // }
+                // else {
+                if(cdi.millDiameter != 0){
+                    var color = cdi.layer == 20? that.colorDimension: that.colorMilling;
+                    var path = this.clipperDimension.slice(cdi.start, cdi.end+1);
+                    var paths = new ClipperLib.Paths();
+                    var sol_pathsOuter = [];
+                    var sol_pathsHoles = [];
+                    if((cdi.width < that.minWireWidthToMill) && (cdi.type != -1)){//Closed path with wire width = zero
+                        paths = that.getInflatePath([path], cdi.type == 0? cdi.millDiameter/2:-cdi.millDiameter/2);
+                        //console.log("Ameen - Path", path);
+                        //console.log("Ameen - Paths[0].length", paths.length);
+                        if(paths.length > 0){
+                            path = [];
+                            paths[0].forEach(function(v){
+                                path.push({X:v.X,Y:v.Y});
+                            });
+                            path.push({X:paths[0][0].X,Y:paths[0][0].Y});
+                        }
+                        else{
+                            cdi.type = -2;
+                            color = this.colorFailed;
+                            sol_pathsOuter.push(path);
+                            //console.log("Ameen - Unhnadled Path found", path);
+                        }
+
+                    }
+                    if(cdi.type != -2){
+                        paths = that.getInflateOpenPath([path], cdi.millDiameter/2);
+                        paths.forEach(function(path) {
+                            if (ClipperLib.Clipper.Orientation(path)) {
+                                sol_pathsOuter.push(path);
+                            } else {
+                                sol_pathsHoles.push(path);
+                            }
+                        }, this);
+                    }
+                    var mesh = this.createClipperPathsAsMesh(sol_pathsOuter, color, that.opacityDimension, sol_pathsHoles);
+                    this.sceneAdd(mesh);
+                }
             }
-            if(SlotsUnhandledCount==0)
-                $('.eagle-slots-alert').addClass("hidden");
-            else
-                $('.eagle-slots-alert').removeClass("hidden");
+            // if(SlotsUnhandledCount==0)
+            //     $('.eagle-slots-alert').addClass("hidden");
+            // else
+            //     $('.eagle-slots-alert').removeClass("hidden");
                 
             //V5.3D201701XX dimensionInfo loop added to support multiple shapes or slots
             // for(var n=0; n<that.dimensionInfo.length; n++){
@@ -4956,9 +5637,169 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             //console.log("about to draw clipper inflated path for dimension:", dimMillPath);
             //var threeDim = this.drawClipperPaths(dimMillPath, this.colorMill, 0.8);
             //return threeDim;
-            return null;
+            //return null;
         },
-        
+        draw3dTabs: function (){
+            if(!this.tabs.useTabs) return;
+            for(var i=0; i<this.clipperDimensionInfo.length; i++){
+                var cdi = this.clipperDimensionInfo[i];
+                if(cdi.type < 0 || cdi.millDiameter == 0) continue;
+                if(cdi.type == 1 && !this.tabs.useForSlots) continue;
+                if(cdi.layer == 20 && !this.useDimensionLayer) continue;
+                if(cdi.layer == 46 && !this.useMillingLayer) continue;
+                var tabMesh = this.getTabMesh(this.tabs.width, cdi.millDiameter);
+                var sign = ClipperLib.Clipper.Orientation(this.clipperDimension.slice(cdi.start, cdi.end))?1:-1;
+                var hasCurves = cdi.curves.length > 0;
+                var ci = 0; //curve index
+                for(var j=cdi.start; j<cdi.end; j++){
+                    if(hasCurves &&  cdi.curves[ci].start == j){
+                        console.log("tags - Curve found at",j , cdi.curves[ci]);
+                        var v1 = this.clipperDimension[j];
+                        var v2 = this.clipperDimension[cdi.curves[ci].end];
+                        var fl = ((this.mirrorX && !this.mirrorY) ||(!this.mirrorX & this.mirrorY));
+                        var curve = fl? this.getCurveParameters(v2.X, v2.Y, v1.X, v1.Y, cdi.curves[ci].curve):
+                                        this.getCurveParameters(v1.X, v1.Y, v2.X, v2.Y, cdi.curves[ci].curve);;
+                        //var length = Math.abs(curve.radius * cdi.curves[ci].curve*Math.PI/180);
+                        //var count = Math.round(length/this.tabs.distance - 0.5);
+                        var tabAngle = this.tabs.width / curve.radius;
+                        var distanceAngle = this.tabs.distance / curve.radius;
+                        var curveAngle = cdi.curves[ci].curve*Math.PI/180;
+                        var count = Math.round(Math.abs(curveAngle)/distanceAngle - 0.5);
+                        console.log("tags - ", count, tabAngle*180/Math.PI, distanceAngle*180/Math.PI, curve);
+                        for(var n=0; n<count; n++){
+                            //var angle = curve.startAngle + (cdi.curves[ci].curve*Math.PI/180 - distanceAngle * (count-1))/2 + n * distanceAngle;
+                            var angle = curve.startAngle + (curveAngle - distanceAngle * (count-1))/2 + n * distanceAngle;
+                            var mesh = this.getTabMeshCurved(curve.x, curve.y, curve.radius, 
+                                angle-Math.sign(cdi.curves[ci].curve)*tabAngle/2, 
+                                angle+Math.sign(cdi.curves[ci].curve)*tabAngle/2, 
+                                curve.clockWise, this.tabs.width, cdi.millDiameter,
+                                cdi.width < this.minWireWidthToMill);
+                            this.sceneAdd( mesh );
+                        }
+                        j=cdi.curves[ci].end;
+                        console.log("tags - OK");
+                        if((ci+1) < cdi.curves.length) ci++;
+                    }
+                    else {
+                        console.log("tags - Line found at", j);
+                        var v1 = this.clipperDimension[j];
+                        var v2 = this.clipperDimension[j+1];
+                        var length = Math.sqrt((v2.X-v1.X)*(v2.X-v1.X) + (v2.Y-v1.Y)*(v2.Y-v1.Y));
+                        var count = Math.round(length/this.tabs.distance - 0.5);
+                        var angle = Math.atan2(v2.Y-v1.Y, v2.X-v1.X);
+                        for(var n=0; n<count; n++){
+                            var d = (length - this.tabs.distance * (count-1))/2 + n * this.tabs.distance;
+                            var x = v1.X + d * Math.cos(angle);
+                            var y = v1.Y + d * Math.sin(angle);
+                            if(cdi.width < this.minWireWidthToMill){
+                                x+=sign*cdi.millDiameter*Math.sin(angle)/2;
+                                y-=sign*cdi.millDiameter*Math.cos(angle)/2;
+                            }
+                            //this.draw3dTab(x, y, angle, this.tabs.width, cdi.millDiameter);
+                            var mesh = tabMesh.clone();
+                            mesh.rotation.z = angle;
+                            mesh.position.set(x, y, 0.05);
+                            this.sceneAdd( mesh );
+                        }
+                    }
+                }
+            }
+        },
+        getTabMesh: function(width, d){
+            //var arc, points, path, arcGeo;
+            var shape = new THREE.Shape();
+            
+            shape.moveTo(-width/2, -d/2);
+            shape.lineTo( width/2, -d/2);
+            shape.lineTo( width/2,  d/2);
+            shape.lineTo(-width/2,  d/2);
+            shape.lineTo(-width/2, -d/2);
+            
+            //shape.moveTo(-width/2-d/2, -d/2);
+            // arc = new THREE.ArcCurve( width/2+d/2, 0, d/2, 3*Math.PI/2, Math.PI/2, true );
+            // path = new THREE.Path();
+            // points = arc.getSpacedPoints( 15 );
+            // arcGeo = path.createGeometry( points );
+            // for(var i=0; i<arcGeo.vertices.length; i++)
+            //     shape.lineTo(arcGeo.vertices[i].x, arcGeo.vertices[i].y);
+            
+            // arc = new THREE.ArcCurve(-width/2-d/2, 0, d/2, Math.PI/2, 3*Math.PI/2, true );
+            // path = new THREE.Path();
+            // points = arc.getSpacedPoints( 15 );
+            // arcGeo = path.createGeometry( points );
+            // for(var i=0; i<arcGeo.vertices.length; i++)
+            //     shape.lineTo(arcGeo.vertices[i].x, arcGeo.vertices[i].y);
+                
+            var geometry, material;
+            if(false){
+                var extrudeSettings = {
+                	steps: 1,
+                	amount: this.tabs.height,
+                	bevelEnabled: false,
+                	bevelThickness: 0,
+                	bevelSize: 0,
+                	bevelSegments: 0
+                };
+                geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+                material = new THREE.MeshBasicMaterial( { color: this.colorTabs, transparent: true, opacity: this.opacityTabs } );
+            }
+            else{
+                geometry = new THREE.ShapeGeometry( shape );
+                material = new THREE.LineBasicMaterial( { color: this.colorTabs, transparent: true, opacity: this.opacityTabs } );
+            }
+            
+            var mesh = new THREE.Mesh( geometry, material );
+            return mesh;
+        },
+        getTabMeshCurved: function(x, y, r, sa, ea, cw, w, d, t){//center x & y, radius, start angle, end angle, clock wise, tab width, tool diameter, t:wire width less than minimum
+            var arc, points, path, arcGeo;
+            var shape = new THREE.Shape();
+            //console.log("Ameen - ",x, y, r, sa*180/Math.PI, ea*180/Math.PI, cw, w, d);
+
+            arc = new THREE.ArcCurve( x, y, r+(t?d:d/2), sa, ea, cw );
+            path = new THREE.Path();
+            points = arc.getSpacedPoints( 15 );
+            arcGeo = path.createGeometry( points );
+            
+            var mx = arcGeo.vertices[0].x;
+            var my = arcGeo.vertices[0].y;
+            shape.moveTo(mx, my);
+            
+            for(var i=0; i<arcGeo.vertices.length; i++){
+                shape.lineTo(arcGeo.vertices[i].x, arcGeo.vertices[i].y);
+            }
+            
+
+            arc = new THREE.ArcCurve( x, y, r-(t?0:d/2), sa, ea, cw );
+            path = new THREE.Path();
+            points = arc.getSpacedPoints( 15 );
+            arcGeo = path.createGeometry( points );
+
+            for(var i=arcGeo.vertices.length-1; i>=0; i--){
+                shape.lineTo(arcGeo.vertices[i].x, arcGeo.vertices[i].y);
+            }
+            shape.lineTo(mx, my);
+            var geometry, material;
+            if(false){
+                var extrudeSettings = {
+                	steps: 1,
+                	amount: this.tabs.height,
+                	bevelEnabled: false,
+                	bevelThickness: 0,
+                	bevelSize: 0,
+                	bevelSegments: 0
+                };
+                geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+                material = new THREE.MeshBasicMaterial( { color: this.colorTabs, transparent: true, opacity: this.opacityTabs } );
+            }
+            else{
+                geometry = new THREE.ShapeGeometry( shape );
+                material = new THREE.LineBasicMaterial( { color: this.colorTabs, transparent: true, opacity: this.opacityTabs } );
+            }
+            var mesh = new THREE.Mesh( geometry, material );
+            return mesh;
+            
+        },
         // UTILITY METHOD TO GENERATE A THREE.JS STROKE FOR A LINE
         // i.e. this takes a line with start/end and creates a stroked line with
         // a round end and returns a three.js object
@@ -5652,7 +6493,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         holesUnhandledCount: 0, //V5.2D20170105 Count number of holes that cannot be drilled/milled 
                                 //(drill diameter > drillMaxDiameter and <= millDiameter)
         addHole: function(drill, x, y){//V5.2D20170105 Added
-            if(drill > this.drillMaxDiameter && drill <= this.millDiameter){
+            if(drill > this.drillMaxDiameter && drill <= this.millDiameterMin){
                 this.holesUnhandledCount++
                 return false; //We don't have tool suitable for this hole.
             }
@@ -6659,6 +7500,27 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
             return square;
         },
+        getCurveParameters: function(x1, y1, x2, y2, curve){
+            var radian = curve * Math.PI / 180,
+                sn = (curve > 0 && curve < 180) || (curve <-180 && curve > -360)?1:-1,
+                ql = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)), //distance between points 1 and 2
+                rd = Math.abs((ql/2)/Math.sin(radian/2)),
+                x3 = (x1+x2)/2, y3 = (y1+y2)/2, //the point halfway between points 1 and 2
+                dx = (y1-y2)/ql, dy = (x2-x1)/ql, //direction of mirror line (normalized) that passing through (x, y) an between points 1 and 2
+                ax = x3 + sn * Math.sqrt(rd*rd - (ql/2)*(ql/2))*dx, //X coordinate of arc center
+                ay = y3 + sn * Math.sqrt(rd*rd - (ql/2)*(ql/2))*dy, //Y coordinate of arc center
+                aStartAngle = Math.atan2(y1-ay, x1-ax),
+                aEndAngle = Math.atan2(y2-ay, x2-ax),
+                cw = curve < 0;
+            return {
+                'x': ax,
+                'y': ay,
+                'radius': rd,
+                'startAngle': aStartAngle,
+                'endAngle': aEndAngle,
+                'clockWise': cw
+            };
+        },
         //V5.2D20170105 Added to support curved wires
         //V5.3D201701XX Updated to support any value of "curve", previous version supported only 90/-90
         //Check this page for math: http://mathforum.org/library/drmath/view/53027.html
@@ -6992,6 +7854,9 @@ EagleCanvas.LARGE_NUMBER = 99999;
 function EagleCanvas(canvasId) {
     this.canvasId = canvasId;
 
+    this.dimensionLayerUsed = false;
+    this.millingLayerUsed = false;
+    
     this.visibleLayers = {};
     this.visibleLayers[EagleCanvas.LayerId.BOTTOM_COPPER] = false;
     this.visibleLayers[EagleCanvas.LayerId.BOTTOM_SILKSCREEN] = false;
@@ -7417,9 +8282,8 @@ EagleCanvas.prototype.parseVia = function (via) {
         var size = diameter - drill; //width of copper ring predifined by user
         if(size > v.outer.size) diameterOuter = diameter;
         if(size > v.inner.size && v.useDiameter) diameterInner = diameter;
-        console.log("Ameen - diameter exists");
+
     }
-    console.log("Ameen - ", drill, diameter, diameterOuter, diameterInner);
     return {
         'x': parseFloat(via.getAttribute('x')),
         'y': parseFloat(via.getAttribute('y')),
@@ -7446,7 +8310,6 @@ EagleCanvas.prototype.parsePad = function (pad) {
         if(size > p.inner.size && p.useDiameter) diameterInner = diameter;
         if(size > p.bottom.size) diameterBottom = diameter;
     }
-    console.log("Ameen - ", drill, diameterTop, diameterInner, diameterBottom);
     return {
         'x': parseFloat(pad.getAttribute('x')),
         'y': parseFloat(pad.getAttribute('y')),
@@ -7463,16 +8326,19 @@ EagleCanvas.prototype.parsePad = function (pad) {
 
 EagleCanvas.prototype.parseWire = function (wire) {
     var width = parseFloat(wire.getAttribute('width'));
-    if (width <= 0.0) width = this.minLineWidth;
+    //if (width <= 0.0) width = this.minLineWidth;
     var curve = parseFloat(wire.getAttribute('curve'));  //V5.2D20170105 Added
+    var layer = parseInt(wire.getAttribute('layer'));
     if(!curve) curve = 0;                        //V5.2D20170105 Added
+    this.millingLayerUsed = this.millingLayerUsed || (layer == 46);
+    this.dimensionLayerUsed = this.dimensionLayerUsed || (layer == 20);
     return {
         'x1': parseFloat(wire.getAttribute('x1')),
             'y1': parseFloat(wire.getAttribute('y1')),
             'x2': parseFloat(wire.getAttribute('x2')),
             'y2': parseFloat(wire.getAttribute('y2')),
             'width': width,
-            'layer': parseInt(wire.getAttribute('layer')),
+            'layer': layer,
             'curve': curve  //V5.2D20170105 Added
     };
 }
@@ -7692,7 +8558,7 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
                     </div>
                 </div>
             </div> <span class="panel-title" data-toggle="popover">Eagle BRD</span> <span 
-            style="font-size:9px;" class="fb-build">v5.3</span>
+            style="font-size:9px;" class="fb-build">v5.4 beta</span>
 
         </div>
         <div class="alert alert-danger hidden eagle-holes-alert" style="margin-bottom:5px;padding:5px;font-size:80%;">Gcode could not be generated for some of the holes (the ones highlighted in red), check tool size in the Gcode tab.</div>
@@ -7852,228 +8718,294 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
                     <canvas id="eagle-canvas" class="hidden" width="100%" height="130"></canvas>
                 </div>
 
-                <div class="tab-pane xactive" id="eagle-gcode">
+                <div class="tab-pane tab-pane-container xactive" id="eagle-gcode">
                     <button type="button" class="btn btn-xs btn-default btn-eagle-sendgcodetows" 
                     style="margin: 4px 0;" disabled><span class="glyphicon glyphicon-send"></span> Send Gcode to Workspace</button>
-
-                    <h2 style="margin-top:10px;">Traces</h2> 
                     
-                    Depth of Milling Traces
-                    <div class="input-group">
-                        <input class="form-control trace-depth" type="number" placeholder="Depth" value="-0.1" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <p class="descriptive-text">If you use ChiliPeppr's Auto-Level, you should be able to achieve copper removal with -0.1mm depth on 2oz copper. Or refer to the following depths:
-                        <ul class="descriptive-text" style="padding-left:20px;padding-top:0;">
-                            <li>1 oz copper : <b>-0.07</b>mm depth (0.035mm is typical thickness)</li>
-                            <li>2 oz copper : <b>-0.1</b>mm depth (Most popular. 0.07mm is typical thickness)</li>
-                            <li>3 oz copper : <b>-0.15</b>mm depth (0.105mm is typical thickness)</li>
-                        </ul>
-                    </p>
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="active"><a href="#gcode-traces" role="tab" data-toggle="tab">Traces</a>
+                        </li>
+                        <li><a href="#gcode-drilling" role="tab" data-toggle="tab">Drilling</a>
+                        </li>
+                        <li><a href="#gcode-milling" role="tab" data-toggle="tab">Milling</a>
+                        </li>
+                        <li><a href="#gcode-tabs" role="tab" data-toggle="tab">Tabs</a>
+                        </li>
+                        <li><a href="#gcode-gcode" role="tab" data-toggle="tab">Gcode</a>
+                        </li>
+                    </ul>
                     
-                    Tracing Board Dimensions
-                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
-                        <div class="checkbox">
-                            <label>
-                            <input type="checkbox" class="AvoidTraceBoardDimensions" checked /> Avoid Tracing Board Dimensions
-                            </label>
-                        </div>
-                        <p class="descriptive-text">Experimental - This feature will eliminate tracing any path(s) that matches board dimensions, hit Render button after changing this checkbox to see the results.</p>
-                    </div>
-                    
-                    Feedrate for Milling Traces
-                    <div class="input-group">
-                        <input class="form-control trace-fr" type="number" placeholder="Feedrate" value="80" />
-                        <div class="input-group-addon">mm/min</div>
-                    </div>
-                    <p class="descriptive-text">The feedrate to use for milling your traces. Default is 80mm/min.
-                    </p>
-
-                    Feedrate for Plunge into Copper
-                    <div class="input-group">
-                        <input class="form-control trace-fr-plunge" type="number" placeholder="Feedrate" value="30" />
-                        <div class="input-group-addon">mm/min</div>
-                    </div>
-                    <p class="descriptive-text">The feedrate to use when the Z is descending into your copper. Default is 30mm/min.
-                    </p>
-                    
-                    Spindle Speed
-                    <div class="input-group">
-                        <input class="form-control spindle-rpm" type="number" placeholder="" value="12000" />
-                        <div class="input-group-addon">rpm</div>
-                    </div>
-                    <p class="descriptive-text">Spindle speed (rpm) value will be used for a whole job. If you need various speeds for different parts of the job e.g. milling traces, drilling, milling board outline, please edit the gcode file manually and replace S12000 with Sxxxx, where xxxx = your new spindle speed value.
-                    </p>
-                    <h2>Clearance Height</h2> Clearance for Z Axis Moves
-                    <div class="input-group">
-                        <input class="form-control clearance-height" type="number" placeholder="Clearance" value="1" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <p class="descriptive-text">The clearance height to move the Z axis to for moving from trace to trace without hitting anything. Default is 1mm, but if you are using the Auto-Level you could get away with 0.5mm.
-                    </p>
-
-
-                    <!--  ----------------------- DRILLING ------------------------>
-                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
-
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="use-drilling" checked>
-                                <h2>Drilling Holes</h2></input>
-                            </label>
-                        </div>
-
-                        Mark holes for drilling
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="drill-markholes" checked> Mark holes for drilling </input>
-                            </label>
-                        </div>
-                        <p class="descriptive-text">This will mark holes for drill. The first endmill (V-Bit or other) will touch the middle of a hole to center the mill, to prevent "dancing drill" effect.</p>
-
-                        Depth for Drilling Holes
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="drill-useboarddepth" checked> Use Board Depth </input>
-                            </label>
-                        </div>
-                        <div class="input-group">
-                            <input class="form-control drill-depth" type="number" placeholder="Depth" value="" disabled />
-                            <div class="input-group-addon">mm</div>
-                        </div>
-                        <p class="descriptive-text">The depth for drilling your holes will typically match your board depth.
-                        </p>
-
-                        Maximum hole diameter to drill
-                        <div class="input-group">
-                            <input class="form-control drill-max" type="number" placeholder="MaxDiameter" value="2.00" />
-                            <div class="input-group-addon">mm</div>
-                        </div>
-                        <p class="descriptive-text">The maximum diameter to drill. If you have bigger holes then they want to mill. I.e. You have a PCb with a lot of 1mm holes and on every corner a hole with 3.6mm. You want the small holes drill and the bigger ones to mill. Please
-                            remember, you need a endmill for dimension with a diameter smaller as this value!</p>
-
-                        <div class="drill-feedrate" style="">
-                            Feedrate for Drill
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="gcode-traces">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="use-traces" checked>
+                                    <h2 style="margin-top:10px;">Traces</h2> 
+                                </label>
+                            </div>
+                            Depth of Milling Traces
                             <div class="input-group">
-                                <input class="form-control drill-feedrate" type="number" placeholder="Drillfeedrate" value="200" />
+                                <input class="form-control trace-depth" type="number" placeholder="Depth" value="-0.1" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">If you use ChiliPeppr's Auto-Level, you should be able to achieve copper removal with -0.1mm depth on 2oz copper. Or refer to the following depths:
+                                <ul class="descriptive-text" style="padding-left:20px;padding-top:0;">
+                                    <li>1 oz copper : <b>-0.07</b>mm depth (0.035mm is typical thickness)</li>
+                                    <li>2 oz copper : <b>-0.1</b>mm depth (Most popular. 0.07mm is typical thickness)</li>
+                                    <li>3 oz copper : <b>-0.15</b>mm depth (0.105mm is typical thickness)</li>
+                                </ul>
+                            </p>
+                            
+                            Tracing Board Dimensions
+                            <div class="panel eagle-advanced" style="margin-bottom:10px;">
+                                <div class="checkbox">
+                                    <label>
+                                    <input type="checkbox" class="AvoidTraceBoardDimensions" checked /> Avoid Tracing Board Dimensions
+                                    </label>
+                                </div>
+                                <p class="descriptive-text">Experimental - This feature will eliminate tracing any path(s) that matches board dimensions, hit Render button after changing this checkbox to see the results.</p>
+                            </div>
+                            
+                            Feedrate for Milling Traces
+                            <div class="input-group">
+                                <input class="form-control trace-fr" type="number" placeholder="Feedrate" value="80" />
                                 <div class="input-group-addon">mm/min</div>
                             </div>
-                            <p class="descriptive-text">The Feedrate for Drilling.</p>
+                            <p class="descriptive-text">The feedrate to use for milling your traces. Default is 80mm/min.
+                            </p>
+        
+                            Feedrate for Plunge into Copper
+                            <div class="input-group">
+                                <input class="form-control trace-fr-plunge" type="number" placeholder="Feedrate" value="30" />
+                                <div class="input-group-addon">mm/min</div>
+                            </div>
+                            <p class="descriptive-text">The feedrate to use when the Z is descending into your copper. Default is 30mm/min.
+                            </p>
+                            
+                            Spindle Speed
+                            <div class="input-group">
+                                <input class="form-control spindle-rpm" type="number" placeholder="" value="12000" />
+                                <div class="input-group-addon">rpm</div>
+                            </div>
+                            <p class="descriptive-text">Spindle speed (rpm) value will be used for a whole job. If you need various speeds for different parts of the job e.g. milling traces, drilling, milling board outline, please edit the gcode file manually and replace S12000 with Sxxxx, where xxxx = your new spindle speed value.
+                            </p>
+                            <h2>Clearance Height</h2> Clearance for Z Axis Moves
+                            <div class="input-group">
+                                <input class="form-control clearance-height" type="number" placeholder="Clearance" value="1" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">The clearance height to move the Z axis to for moving from trace to trace without hitting anything. Default is 1mm, but if you are using the Auto-Level you could get away with 0.5mm.
+                            </p>
                         </div>
-                    </div>
-                    <!--  ----------------------- DRILLING END ------------------------>
-
-                    <h2>Board Dimensions</h2> Diameter of tool for cutting dimension
-                    <div class="input-group">
-                        <input class="form-control dimension-mill-diameter" type="number" placeholder="Size" value="2" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <p class="descriptive-text">Please input the diameter of your endmill for cutting the dimension. If you want to mill some holes, then the tool diameter has to be smaller than the smallest hole.
-                    </p>
-                    
-                    Depth of Cutting Out Dimensions (Board Depth)
-                    <div class="input-group">
-                        <input class="form-control dimension-depth" type="number" placeholder="Size" value="-1.7" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <p class="descriptive-text">Typical FR4 thickness is 1.7mm.
-                    </p>
-
-                    Step Down for Cutting Dimensions
-                    <div class="input-group">
-                        <input class="form-control dimension-stepdown" type="number" placeholder="Size" value="-0.5" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <p style="margin-bottom:0px;">Passes <code><span class="dimension-passes  highlight"><i>4</i></span></code> Last Pass <code><span class="dimension-lastpass highlight"><i>-0.2</i>mm</span></code></p>
-                    <p class="descriptive-text">The amount to step down in the Z axis for each pass of cutting out your board dimensions. Default value is -0.5mm. </p>
-
-                    <!--
-                    Create PCB Holders
-                    <div class="input-group">
-                        <input class="form-control pcbholder-length" type="number" placeholder="Pcbholder length in mm" value="1" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <div class="input-group">
-                        <input class="form-control pcbholder-count" type="number" placeholder="Count of pcb holder on every side" value="1" />
-                        <div class="input-group-addon">pcs</div>
-                    </div>
-                    <p class="descriptive-text">Count of pcb holder on every side.</p>
-                    -->
-
-                    Feedrate for Cutting Dimensions
-                    <div class="input-group">
-                        <input class="form-control dimension-feedrate" type="number" placeholder="Feedrate" value="100" />
-                        <div class="input-group-addon">mm/min</div>
-                    </div>
-                    <p class="descriptive-text">The feedrate used for cutting out your dimensions. Default value is 100mm/min.
-                    </p>
-                    
-                    <!--  ----------------------- TABS --------------------------->
-                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="use-tabs" checked>
-                                <h2>Tabs (Board Holders)</h2></input>
-                            </label>
-                        </div>
-                        <p class="descriptive-text">Add tabs to board dimensions toolpaths to provide fixture of your PCB. <code>Work in progress, to be implemented in V5.4</code></p>
+    
+                        <div class="tab-pane xactive" id="gcode-drilling">
+                        <!--  ----------------------- DRILLING ------------------------>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="use-drilling" checked>
+                                    <h2 style="margin-top:10px;">Drilling Holes</h2>
+                                </label>
+                            </div>
+    
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="drill-markholes" checked> Mark holes for drilling </input>
+                                </label>
+                            </div>
+                            <p class="descriptive-text">This will mark holes for drill. The first endmill (V-Bit or other) will touch the middle of a hole to center the mill, to prevent "dancing drill" effect.</p>
+    
+                            Depth for Drilling Holes
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="drill-useboarddepth" checked> Use Board Depth </input>
+                                </label>
+                            </div>
+                            <div class="input-group">
+                                <input class="form-control drill-depth" type="number" placeholder="Depth" value="" disabled />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">The depth for drilling your holes will typically match your board depth.
+                            </p>
+    
+                            Maximum hole diameter to drill
+                            <div class="input-group">
+                                <input class="form-control drill-max" type="number" placeholder="MaxDiameter" value="2.00" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">The maximum diameter to drill. If you have bigger holes then they want to mill. I.e. You have a PCB with a lot of 1mm holes and on every corner a hole with 3.6mm. You want the small holes drill and the bigger ones to mill. Please
+                                remember, you need a endmill for dimension with a diameter smaller as this value!</p>
+    
+                            <div class="drill-feedrate" style="">
+                                Feedrate for Drill
+                                <div class="input-group">
+                                    <input class="form-control drill-feedrate" type="number" placeholder="Drillfeedrate" value="200" />
+                                    <div class="input-group-addon">mm/min</div>
+                                </div>
+                                <p class="descriptive-text">The Feedrate for Drilling.</p>
+                            </div>
                         
-                        Tab Count
-                        <div class="input-group">
-                            <input class="form-control tab-count" type="number" placeholder="Feedrate" value="4" />
-                            <div class="input-group-addon">mm</div>
+                        <!--  ----------------------- DRILLING END ------------------------>
                         </div>
-                        <p class="descriptive-text">Number of tabs per each board dimension toolpath.</p>
                         
-                        Tab Width
-                        <div class="input-group">
-                            <input class="form-control tab-width" type="number" placeholder="Feedrate" value="1" />
-                            <div class="input-group-addon">mm</div>
+                        <div class="tab-pane xactive" id="gcode-milling">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="use-milling" checked>
+                                    <h2 style="margin-top:10px;">Milling Dimensions</h2>
+                                </label>
+                            </div>
+                            
+                            Select Dimension Layer(s)
+                            <div class="panel eagle-advanced" style="margin-bottom:10px;">
+                                <div class="checkbox" style="margin-bottom:6px;">
+                                    <label>
+                                        <input type="checkbox" class="dimension-layer-20" checked> 20 Dimension</input>
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="dimension-layer-46" checked> 46 Milling</input>
+                                    </label>
+                                </div>
+                                <p class="descriptive-text">Select which layer to use as board dimansions layer, both layers will be rendered in the 3D viewer, but gcode will be generated for selected layer(s) only.
+                                </p>
+                            </div>
+                            
+                            Tool Size Options
+                            <div class="panel eagle-advanced" style="margin-bottom:10px;padding-top:10px;">
+                                Diameter of tool for cutting dimension
+                                <div class="input-group">
+                                    <input class="form-control dimension-mill-diameter" type="number" placeholder="Size" value="1" />
+                                    <div class="input-group-addon">mm</div>
+                                </div>
+                                <p class="descriptive-text">Please input the diameter of your endmill for cutting the dimension. If you want to use multiple tools, then use wire width as tool diameter.<br />If you want to mill some holes, then the tool diameter has to be smaller than the smallest hole, if you are using multiple cutting tools, the tools with smallest diameter will be used to mill holes.
+                                </p>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="com-chilipeppr-widget-eagle-dimension-tso" class="com-chilipeppr-widget-eagle-dimension-tso-oneTool" xchecked /> 
+                                        Use same tool for all paths
+                                        <p style="margin-top:0px;margin-bottom:0px;font-size:11px;">
+                                        Mill all dimension paths (including large holes) with one tool, select tool size from above option.
+                                        </p>
+                                        </input>
+                                    </label>
+                                </div>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="com-chilipeppr-widget-eagle-dimension-tso" class="com-chilipeppr-widget-eagle-dimension-tso-wireWidth" checked /> 
+                                        Use wire width
+                                        <p style="margin-top:0px;margin-bottom:0px;font-size:11px;">
+                                        Use wire width as tool diameter, you can override width of small or zero width wires with the diameter set above by setting minimum wire width listed next.
+                                        </p>
+                                    </label>
+                                </div>
+                                Minimum wire width to use as tool diameter
+                                <div class="input-group">
+                                    <input class="form-control dimension-minimum-wire-width" type="number" placeholder="Size" value="1" />
+                                    <div class="input-group-addon">mm</div>
+                                </div>
+            
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="dimension-ignore-small-wires" xchecked> Ignore wires with smaller width</input>
+                                    </label>
+                                </div>
+                                <p class="descriptive-text">If this option is checked, smaller wires will be ignored, otherwise will be milled with cutting tool set above.
+                                </p>
+                            </div>
+                            
+                            Depth of Cutting Out Dimensions (Board Depth)
+                            <div class="input-group">
+                                <input class="form-control dimension-depth" type="number" placeholder="Size" value="-1.7" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">Typical FR4 thickness is 1.7mm.
+                            </p>
+        
+                            Step Down for Cutting Dimensions
+                            <div class="input-group">
+                                <input class="form-control dimension-stepdown" type="number" placeholder="Size" value="-0.5" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p style="margin-bottom:0px;">Passes <code><span class="dimension-passes  highlight"><i>4</i></span></code> Last Pass <code><span class="dimension-lastpass highlight"><i>-0.2</i>mm</span></code></p>
+                            <p class="descriptive-text">The amount to step down in the Z axis for each pass of cutting out your board dimensions. Default value is -0.5mm. </p>
+        
+                            Feedrate for Cutting Dimensions
+                            <div class="input-group">
+                                <input class="form-control dimension-feedrate" type="number" placeholder="Feedrate" value="100" />
+                                <div class="input-group-addon">mm/min</div>
+                            </div>
+                            <p class="descriptive-text">The feedrate used for cutting out your dimensions. Default value is 100mm/min.
+                            </p>
                         </div>
-                        <p class="descriptive-text">Tab width, value between 0.5mm to 3.0mm, take in consideration tool radius</p>
                         
-                        Tab Height
-                        <div class="input-group">
-                            <input class="form-control tab-height" type="number" placeholder="Feedrate" value="0.8" />
-                            <div class="input-group-addon">mm</div>
+                        <div class="tab-pane xactive" id="gcode-tabs">
+                            <!--  ----------------------- TABS --------------------------->
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="use-tabs" checked>
+                                    <h2 style="margin-top:10px;">Tabs (Board Holders)</h2>
+                                </label>
+                            </div>
+                            <p class="descriptive-text">Add tabs to board dimensions toolpaths to provide fixture of your PCB.</p>
+                            
+                            Tab Distance
+                            <div class="input-group">
+                                <input class="form-control tab-distance" type="number" placeholder="Feedrate" value="25" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">The distance between two tabs at one dimension segment.</p>
+                            
+                            Tab Width
+                            <div class="input-group">
+                                <input class="form-control tab-width" type="number" placeholder="Feedrate" value="1" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">Tab width, value between 0.5mm to 3.0mm, take in consideration tool radius</p>
+                            
+                            Tab Height
+                            <div class="input-group">
+                                <input class="form-control tab-height" type="number" placeholder="Feedrate" value="0.8" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">Tab height from bottom of board, value between 0.5mm to 1.7mm (board thinkness)</p>
+    
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="tabs-4-slots">
+                                    Tabs for slots and holes</input>
+                                </label>
+                            </div>
+                            <p class="descriptive-text">Add tabs to inner board dimensions like slots and large holes, no tabs will be added to small slots or holes.</p>
+                            <!--  ----------------------- TABS END ----------------------->
                         </div>
-                        <p class="descriptive-text">Tab height from bottom of board, value between 0.5mm to 1.7mm (board thinkness)</p>
-
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="tabs-4-slots">
-                                Tabs for slots and holes</input>
-                            </label>
-                        </div>
-                        <p class="descriptive-text">Add tabs to inner board dimensions like slots and large holes, no tabs will be added to small slots or holes (less the 6x of tool diameter)</p>
                         
+                        <div class="tab-pane xactive" id="gcode-gcode">
+                            <!--  ----------------- Milling Direction--------------------->
+                            
+                            <h2 style="margin-top:10px;">Tool Paths Direction</h2>
+                            <p class="descriptive-text">Following selections will adjust the orientation of tool paths, if left to default, orientation of paths is unpredictable and depends on how traces and wires were drawn in Eagle. Hit Render button after changing these values.
+                            </p>
+                            <div class="form-group">
+                                Milling Traces
+                                <select class="selectMillTraces form-control" id="DirectionMilling">
+                                    <option value='0'>Don't Care</option>
+                                    <option value='1'>Conventional Milling</option>
+                                    <option value='2'>Climb milling</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                Cutting Dimensions &amp; Milling Holes
+                                <select class="selectMillTraces form-control" id="DirectionCutting">
+                                    <option value='0'>Don't Care</option>
+                                    <option value='1'>Conventional Milling</option>
+                                    <option value='2'>Climb milling</option>
+                                </select>
+                            </div>
+                            Generated Gcode
+                            <textarea class="com-chilipeppr-widget-eagle-gcode"></textarea>
+                        </div>
                     </div>
-                    <!--  ----------------------- TABS END ----------------------->
-                    
-                    <!--  ----------------- Milling Direction--------------------->
-                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
-                        <h2>Milling Direction</h2>
-                        <p class="descriptive-text">Following selections will adjust the orientation of tool paths, if left to default, orientation of paths is unpredectible and depends on how traces and wire are drawen in Eagle. Hit Render button after changing these values.
-                        </p>
-                        <div class="form-group">
-                            Milling Traces
-                            <select class="selectMillTraces form-control" id="DirectionMilling">
-                                <option value='0'>Don't Care</option>
-                                <option value='1'>Conventional Milling</option>
-                                <option value='2'>Climb milling</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            Cutting Dimensions/Milling Holes
-                            <select class="selectMillTraces form-control" id="DirectionCutting">
-                                <option value='0'>Don't Care</option>
-                                <option value='1'>Conventional Milling</option>
-                                <option value='2'>Climb milling</option>
-                            </select>
-                        </div>
-                    </div>
-                    Generated Gcode
-                    <textarea class="com-chilipeppr-widget-eagle-gcode"></textarea>
                 </div>
                 
                 <div class="tab-pane xactive" id="eagle-soldermask">
