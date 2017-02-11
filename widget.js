@@ -1696,6 +1696,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.intersectObjects = [];
             this.clipperDimension = [];
             this.clipperDimensionInfo = []; //V5.3D201701XX Added
+            this.dimensionsToMill = [];
             this.clipperSignalWires = [];
             this.clipperElements = [];
             this.clipperPads = [];
@@ -1814,7 +1815,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // create board
                 this.eagle = new EagleCanvas('eagle-canvas');
                 this.eagle.loadText(file);
-                this.useDimensionLayer = this.eagle.dimensionLayerUsed;
+                this.useDimensionLayer = this.eagle.dimensionLayerUsed && !this.eagle.millingLayerUsed;
                 this.useMillingLayer = this.eagle.millingLayerUsed;
                 $('#com-chilipeppr-widget-eagle .dimension-layer-20').prop('checked', this.useDimensionLayer);
                 $('#com-chilipeppr-widget-eagle .dimension-layer-46').prop('checked', this.useMillingLayer);
@@ -1939,6 +1940,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.draw3dVias('1-16');
             this.draw3dDimension();
             this.draw3dHoles(); //V5.2D20170105 Added
+            this.dimensionsToMill = this.getBoardDimensionsToMill();
             this.draw3dTabs();
             //this.threeDimensions = this.draw3dDimension(this.endmillSize);
             //this.obj3d.children = [];
@@ -2149,7 +2151,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             return g;
         },
         getBoardDimensionsToMill:function(){
-            console.log("AmeenX", this.clipperDimensionInfo, this.clipperDimension);
+            console.log("AmeenD", this.clipperDimensionInfo, this.clipperDimension);
             var boardDimensionsToMill = [];
             var dLayerNumber = this.eagle.eagleLayersByName['Dimension'].number;
             var mLayerNumber = this.eagle.eagleLayersByName['Milling'].number;
@@ -2194,7 +2196,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         //if(v3i == cdi.end-1) v3i++;
                         
                     }
-                    console.log("AmeenX - v3i", v3i);
                     var v1 = this.clipperDimension[v1i];
                     var v2 = this.clipperDimension[v2i];
                     var v3 = this.clipperDimension[v3i];
@@ -2239,8 +2240,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                             a2 = Math.PI + a2;
                             a3 = Math.PI + a3;
                         }
-                        if((or && thisCurveAngle<0) || (!or && thisCurveAngle>0)) {a2 = a2 - Math.PI; a1 = a1 - Math.PI};
-                        if((or && nextCurveAngle<0) || (!or && nextCurveAngle>0)) {a3 = a3 - Math.PI};
+                        var isThisConcave = (or && thisCurveAngle<0) || (!or && thisCurveAngle>0);
+                        var isNextConcave = (or && nextCurveAngle<0) || (!or && nextCurveAngle>0);
+                        if(isThisConcave) {a2 = a2 - Math.PI; a1 = a1 - Math.PI;}
+                        if(isNextConcave) {a3 = a3 - Math.PI};
                         var a4 = a3 - a2;
                         var a5 = (a2 - a3 + Math.PI)/2;
                         var s4 = Math.sin(a4);
@@ -2269,7 +2272,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         // if(v1i == (cdi.end-1) && cdi.type == 1){ dimensionPath.X = v5.X; dimensionPath.Y = v5.Y; }
                         if(isThisLineCurve){
                             dimensionPath.lines.push({X:v5.X, Y:v5.Y, isCurve:true, 
-                                C:{ X: thisCurve.x, Y: thisCurve.y, radius: thisCurve.radius+rd,
+                                C:{ X: thisCurve.x, Y: thisCurve.y, radius: thisCurve.radius+(isThisConcave?-rd:rd),
                                     startAngle:thisCurve.startAngle,
                                     endAngle:thisCurve.endAngle - isCrossing?a5:0,
                                     curve: thisCurveAngle,
@@ -2282,12 +2285,13 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         var isSameAngle = (Math.abs(a3-a2) % (2*Math.PI)) < 0.0001;
                         console.log("AmeenD: a3-a2", (Math.abs(a3-a2) % (2*Math.PI)), isCrossing);
                         if(!isSameAngle && !isCrossing){
+                            var cr = a3-a2;
                             dimensionPath.lines.push({X:v6.X, Y:v6.Y, isCurve:true, 
                                 C:{ X:v2.X, Y:v2.Y, radius: rd,
                                     startAngle:a2,
                                     endAngle:a3,
-                                    curve: a3-a2,
-                                    clockWise: !or}
+                                    curve: cr * 180 / Math.PI,
+                                    clockWise: cdi.type==1?or:!or}//or?cr<0:a3-a2>0}
                                 });
                             console.log("AmeenD: has connector");
                         }
@@ -2309,7 +2313,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var g = '';
             if(! $('#com-chilipeppr-widget-eagle .use-milling').is(':checked')) return g;
             
-            var dimensions = this.getBoardDimensionsToMill();
+            //var dimensions = this.getBoardDimensionsToMill();
+            var dimensions = this.dimensionsToMill;
             var lastToolDia = this.holesToMill.length>0?this.millDiameterMin:-1;
             var dir = $('#DirectionCutting').val();
             console.group("Generating Dimension Milling");
@@ -5347,6 +5352,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var cdi1 = this.clipperDimensionInfo[i];
                     if(cdi1.type < 0) continue;//skip open path
                     var cdi2 = this.clipperDimensionInfo[j];
+                    if (cdi1.layer != cdi2.layer) continue;
                     //if path cdi1 inside path cdi1, deflate cdi1, AMEEN TODO: compare actual paths not bounds
                     if( (cdi1.bounds.left   > cdi2.bounds.left  ) &&
                         (cdi1.bounds.bottom < cdi2.bounds.bottom) &&
@@ -5397,10 +5403,16 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             }
             //sort milling paths by tool size then by path type (1:Deflated, 0:Inflated, -1:open, -2:ignored)
             this.clipperDimensionInfo.sort(function(a, b){
+                var ta = a.type, tb = b.type;
+                ta = ta<0?9:ta; tb = tb<0?9:tb;
+                console.log("AmeenD Sort", a, b);
                 if(a.millDiameter > b.millDiameter) return 1;
                 if(a.millDiameter < b.millDiameter) return -1;
-                if(b.type > a.type) return 1;
-                if(b.type < a.type) return -1;
+                // if(b.type > a.type) return 1;
+                // if(b.type < a.type) return -1;
+                if(tb > ta) return 1;
+                if(tb < ta) return -1;
+                console.log("AmeenD Sorted", ta, tb);
                 return 0;
                 
             });
@@ -5510,6 +5522,58 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         draw3dTabs: function (){
             if(!this.tabs.useTabs) return;
+            var dimensions = this.dimensionsToMill;
+            console.log("AmeenTabs", dimensions);
+            for(var i = 0; i<dimensions.length; i++){
+                diaOfEndmill = dimensions[i].millDiameter;
+                var tabMesh = this.getTabMesh(this.tabs.width, diaOfEndmill);
+                if(dimensions[i].isOpen) continue;
+                var v1 = {X: dimensions[i].X, Y: dimensions[i].Y};
+                for(var j=0; j<dimensions[i].lines.length; j++){
+                    line = dimensions[i].lines[j];
+                    var v2 = {X: line.X, Y: line.Y};
+                    if(line.isCurve){
+                        if(i==11) console.log("AmeenTabs - C", v1, v2);
+                        var angle = line.C.curve * Math.PI / 180;
+                        var alpha = this.tabs.distance / line.C.radius;
+                        var count = Math.round(Math.abs(angle/alpha) - 0.5);
+                        if (!(count>0)) {v1 = v2; continue;}
+                        var sign = line.C.clockWise?-1:1;
+                        var offset = line.C.startAngle + sign*(Math.abs(angle) - alpha * (count-1))/2;
+                        for(var n=0; n<count; n++){
+                            var a =  offset + sign * n * alpha;
+                            var x = line.C.X + line.C.radius * Math.cos(a);
+                            var y = line.C.Y + line.C.radius * Math.sin(a);
+                            var mesh = tabMesh.clone();
+                            mesh.rotation.z = a + Math.PI/2;
+                            mesh.position.set(x, y, 0.05);
+                            this.sceneAdd( mesh );
+                        }
+                    }
+                    else{
+                        if(i==11) console.log("AmeenTabs - L", v1, v2);
+                        var length = Math.sqrt((v2.X-v1.X)*(v2.X-v1.X) + (v2.Y-v1.Y)*(v2.Y-v1.Y));
+                        var count = Math.round(length/this.tabs.distance - 0.5);
+                        if (!(count>0)) {v1 = v2; continue;}
+                        var angle = Math.atan2(v2.Y-v1.Y, v2.X-v1.X);
+                        var offset = (length - this.tabs.distance * (count-1))/2;
+                        for(var n=0; n<count; n++){
+                            var d = offset + n * this.tabs.distance;
+                            var x = v1.X + d * Math.cos(angle);
+                            var y = v1.Y + d * Math.sin(angle);
+                            var mesh = tabMesh.clone();
+                            mesh.rotation.z = angle;
+                            mesh.position.set(x, y, 0.05);
+                            this.sceneAdd( mesh );
+                        }
+                    }
+                    v1 = v2;
+                }
+                v1 = {X: dimensions[i].X, Y: dimensions[i].Y};
+            }
+        },
+        draw3dTabsOld: function (){
+            if(!this.tabs.useTabs) return;
             for(var i=0; i<this.clipperDimensionInfo.length; i++){
                 var cdi = this.clipperDimensionInfo[i];
                 if(cdi.type < 0 || cdi.millDiameter == 0) continue;
@@ -5517,7 +5581,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 if(cdi.layer == 20 && !this.useDimensionLayer) continue;
                 if(cdi.layer == 46 && !this.useMillingLayer) continue;
                 var tabMesh = this.getTabMesh(this.tabs.width, cdi.millDiameter);
-                var sign = ClipperLib.Clipper.Orientation(this.clipperDimension.slice(cdi.start, cdi.end))?1:-1;
+                var or = ClipperLib.Clipper.Orientation(this.clipperDimension.slice(cdi.start, cdi.end));
                 var hasCurves = cdi.curves.length > 0;
                 var ci = 0; //curve index
                 for(var j=cdi.start; j<cdi.end; j++){
@@ -5526,23 +5590,34 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         var v1 = this.clipperDimension[j];
                         var v2 = this.clipperDimension[cdi.curves[ci].end];
                         var fl = ((this.mirrorX && !this.mirrorY) ||(!this.mirrorX & this.mirrorY));
-                        var curve = fl? this.getCurveParameters(v2.X, v2.Y, v1.X, v1.Y, cdi.curves[ci].curve):
-                                        this.getCurveParameters(v1.X, v1.Y, v2.X, v2.Y, cdi.curves[ci].curve);;
+                        // var curve = fl? this.getCurveParameters(v2.X, v2.Y, v1.X, v1.Y, cdi.curves[ci].curve):
+                        //                 this.getCurveParameters(v1.X, v1.Y, v2.X, v2.Y, cdi.curves[ci].curve);
+                        var curve = this.getCurveParameters(v1.X, v1.Y, v2.X, v2.Y, (fl?-1:1) * cdi.curves[ci].curve);
                         //var length = Math.abs(curve.radius * cdi.curves[ci].curve*Math.PI/180);
                         //var count = Math.round(length/this.tabs.distance - 0.5);
-                        var tabAngle = this.tabs.width / curve.radius;
-                        var distanceAngle = this.tabs.distance / curve.radius;
                         var curveAngle = cdi.curves[ci].curve*Math.PI/180;
+                        var isConcave = (or && curveAngle<0) || (!or && curveAngle>0);
+                        var tabAngle = (this.tabs.width / 2) / curve.radius;
+                        var distanceAngle = this.tabs.distance / curve.radius;
+                        
+                        var sn = curve.clockWise?-1:1;
                         var count = Math.round(Math.abs(curveAngle)/distanceAngle - 0.5);
                         console.log("tags - ", count, tabAngle*180/Math.PI, distanceAngle*180/Math.PI, curve);
                         for(var n=0; n<count; n++){
                             //var angle = curve.startAngle + (cdi.curves[ci].curve*Math.PI/180 - distanceAngle * (count-1))/2 + n * distanceAngle;
-                            var angle = curve.startAngle + (curveAngle - distanceAngle * (count-1))/2 + n * distanceAngle;
-                            var mesh = this.getTabMeshCurved(curve.x, curve.y, curve.radius, 
-                                angle-Math.sign(cdi.curves[ci].curve)*tabAngle/2, 
-                                angle+Math.sign(cdi.curves[ci].curve)*tabAngle/2, 
-                                curve.clockWise, this.tabs.width, cdi.millDiameter,
-                                cdi.width < this.minWireWidthToMill);
+                            var angle = curve.startAngle + sn * (Math.abs(curveAngle) - distanceAngle * (count-1))/2 + sn * n * distanceAngle;
+                            // var mesh = this.getTabMeshCurved(curve.x, curve.y,
+                            //     curve.radius  - (isConcave?cdi.millDiameter:0), 
+                            //     angle-sn*tabAngle, 
+                            //     angle+sn*tabAngle, 
+                            //     curve.clockWise, this.tabs.width, cdi.millDiameter,
+                            //     cdi.width < this.minWireWidthToMill);
+                            var r = curve.radius  - (isConcave?cdi.millDiameter:0);
+                            var x = curve.x + r * Math.cos(angle);
+                            var y = curve.y + r * Math.sin(angle);
+                            var mesh = tabMesh.clone();
+                            mesh.rotation.z = angle + Math.PI/2;
+                            mesh.position.set(x, y, 0.05);
                             this.sceneAdd( mesh );
                         }
                         j=cdi.curves[ci].end;
@@ -5561,8 +5636,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                             var x = v1.X + d * Math.cos(angle);
                             var y = v1.Y + d * Math.sin(angle);
                             if(cdi.width < this.minWireWidthToMill){
-                                x+=sign*cdi.millDiameter*Math.sin(angle)/2;
-                                y-=sign*cdi.millDiameter*Math.cos(angle)/2;
+                                x+=(or?1:-1)*cdi.millDiameter*Math.sin(angle)/2;
+                                y-=(or?1:-1)*cdi.millDiameter*Math.cos(angle)/2;
                             }
                             //this.draw3dTab(x, y, angle, this.tabs.width, cdi.millDiameter);
                             var mesh = tabMesh.clone();
