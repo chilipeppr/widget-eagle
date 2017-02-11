@@ -420,7 +420,7 @@
                             
                             Depth of Cutting Out Dimensions (Board Depth)
                             <div class="input-group">
-                                <input class="form-control dimension-depth" type="number" placeholder="Size" value="-1.7" />
+                                <input class="form-control dimension-depth" type="number" placeholder="Size" value="-1.7" max="0" step="0.1" />
                                 <div class="input-group-addon">mm</div>
                             </div>
                             <p class="descriptive-text">Typical FR4 thickness is 1.7mm.
@@ -428,7 +428,7 @@
         
                             Step Down for Cutting Dimensions
                             <div class="input-group">
-                                <input class="form-control dimension-stepdown" type="number" placeholder="Size" value="-0.5" />
+                                <input class="form-control dimension-stepdown" type="number" placeholder="Size" value="-0.5" max="0" step="0.1" />
                                 <div class="input-group-addon">mm</div>
                             </div>
                             <p style="margin-bottom:0px;">Passes <code><span class="dimension-passes  highlight"><i>4</i></span></code> Last Pass <code><span class="dimension-lastpass highlight"><i>-0.2</i>mm</span></code></p>
@@ -455,21 +455,21 @@
                             
                             Tab Distance
                             <div class="input-group">
-                                <input class="form-control tab-distance" type="number" placeholder="Feedrate" value="25" />
+                                <input class="form-control tab-distance" type="number" placeholder="Distance between tabs" value="25" />
                                 <div class="input-group-addon">mm</div>
                             </div>
                             <p class="descriptive-text">The distance between two tabs at one dimension segment.</p>
                             
                             Tab Width
                             <div class="input-group">
-                                <input class="form-control tab-width" type="number" placeholder="Feedrate" value="1" />
+                                <input class="form-control tab-width" type="number" placeholder="Tab Width" value="1" min="0.5" max="3" step="0.1"/>
                                 <div class="input-group-addon">mm</div>
                             </div>
                             <p class="descriptive-text">Tab width, value between 0.5mm to 3.0mm, take in consideration tool radius</p>
                             
                             Tab Height
                             <div class="input-group">
-                                <input class="form-control tab-height" type="number" placeholder="Feedrate" value="0.8" />
+                                <input class="form-control tab-height" type="number" placeholder="Tab Height" value="0.8" min="0.5" step="0.1"/>
                                 <div class="input-group-addon">mm</div>
                             </div>
                             <p class="descriptive-text">Tab height from bottom of board, value between 0.5mm to 1.7mm (board thinkness)</p>
