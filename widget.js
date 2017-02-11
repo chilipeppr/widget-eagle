@@ -1273,7 +1273,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             selectLayerDropdown.empty();
             for (i = 0; i < 16; i++) {
                 var loopingLayer = i + 1; //brd layer # is 1 greater than index
-                if (actionableLayers[i] == true) {
+                if (actionableLayers[i] == true || i == 0 || i == 15) {
                     selectLayerDropdown.append($("<option />").text(this.eagle.layersByNumber[loopingLayer].name));
 
                     console.log("r3:  sent layer to dropdown:", this.eagle.layersByNumber[loopingLayer].name);
@@ -3032,7 +3032,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var key = keys[i];
                 var signal = this.clipperBySignalKey[key];
                 console.log("step 1 key:", key, "signal:", signal);
-            
                 var signalPaths = [];
                 var signalPathsInflated = [];
                 var signalPathsInflatedHalf = [];
@@ -5695,55 +5694,55 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var mesh = new THREE.Mesh( geometry, material );
             return mesh;
         },
-        getTabMeshCurved: function(x, y, r, sa, ea, cw, w, d, t){//center x & y, radius, start angle, end angle, clock wise, tab width, tool diameter, t:wire width less than minimum
-            var arc, points, path, arcGeo;
-            var shape = new THREE.Shape();
-            //console.log("Ameen - ",x, y, r, sa*180/Math.PI, ea*180/Math.PI, cw, w, d);
+        // getTabMeshCurved: function(x, y, r, sa, ea, cw, w, d, t){//center x & y, radius, start angle, end angle, clock wise, tab width, tool diameter, t:wire width less than minimum
+        //     var arc, points, path, arcGeo;
+        //     var shape = new THREE.Shape();
+        //     //console.log("Ameen - ",x, y, r, sa*180/Math.PI, ea*180/Math.PI, cw, w, d);
 
-            arc = new THREE.ArcCurve( x, y, r+(t?d:d/2), sa, ea, cw );
-            path = new THREE.Path();
-            points = arc.getSpacedPoints( 15 );
-            arcGeo = path.createGeometry( points );
+        //     arc = new THREE.ArcCurve( x, y, r+(t?d:d/2), sa, ea, cw );
+        //     path = new THREE.Path();
+        //     points = arc.getSpacedPoints( 15 );
+        //     arcGeo = path.createGeometry( points );
             
-            var mx = arcGeo.vertices[0].x;
-            var my = arcGeo.vertices[0].y;
-            shape.moveTo(mx, my);
+        //     var mx = arcGeo.vertices[0].x;
+        //     var my = arcGeo.vertices[0].y;
+        //     shape.moveTo(mx, my);
             
-            for(var i=0; i<arcGeo.vertices.length; i++){
-                shape.lineTo(arcGeo.vertices[i].x, arcGeo.vertices[i].y);
-            }
+        //     for(var i=0; i<arcGeo.vertices.length; i++){
+        //         shape.lineTo(arcGeo.vertices[i].x, arcGeo.vertices[i].y);
+        //     }
             
 
-            arc = new THREE.ArcCurve( x, y, r-(t?0:d/2), sa, ea, cw );
-            path = new THREE.Path();
-            points = arc.getSpacedPoints( 15 );
-            arcGeo = path.createGeometry( points );
+        //     arc = new THREE.ArcCurve( x, y, r-(t?0:d/2), sa, ea, cw );
+        //     path = new THREE.Path();
+        //     points = arc.getSpacedPoints( 15 );
+        //     arcGeo = path.createGeometry( points );
 
-            for(var i=arcGeo.vertices.length-1; i>=0; i--){
-                shape.lineTo(arcGeo.vertices[i].x, arcGeo.vertices[i].y);
-            }
-            shape.lineTo(mx, my);
-            var geometry, material;
-            if(false){
-                var extrudeSettings = {
-                	steps: 1,
-                	amount: this.tabs.height,
-                	bevelEnabled: false,
-                	bevelThickness: 0,
-                	bevelSize: 0,
-                	bevelSegments: 0
-                };
-                geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
-                material = new THREE.MeshBasicMaterial( { color: this.colorTabs, transparent: true, opacity: this.opacityTabs } );
-            }
-            else{
-                geometry = new THREE.ShapeGeometry( shape );
-                material = new THREE.LineBasicMaterial( { color: this.colorTabs, transparent: true, opacity: this.opacityTabs } );
-            }
-            var mesh = new THREE.Mesh( geometry, material );
-            return mesh;
+        //     for(var i=arcGeo.vertices.length-1; i>=0; i--){
+        //         shape.lineTo(arcGeo.vertices[i].x, arcGeo.vertices[i].y);
+        //     }
+        //     shape.lineTo(mx, my);
+        //     var geometry, material;
+        //     if(false){
+        //         var extrudeSettings = {
+        //         	steps: 1,
+        //         	amount: this.tabs.height,
+        //         	bevelEnabled: false,
+        //         	bevelThickness: 0,
+        //         	bevelSize: 0,
+        //         	bevelSegments: 0
+        //         };
+        //         geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+        //         material = new THREE.MeshBasicMaterial( { color: this.colorTabs, transparent: true, opacity: this.opacityTabs } );
+        //     }
+        //     else{
+        //         geometry = new THREE.ShapeGeometry( shape );
+        //         material = new THREE.LineBasicMaterial( { color: this.colorTabs, transparent: true, opacity: this.opacityTabs } );
+        //     }
+        //     var mesh = new THREE.Mesh( geometry, material );
+        //     return mesh;
             
-        },
+        // },
         // UTILITY METHOD TO GENERATE A THREE.JS STROKE FOR A LINE
         // i.e. this takes a line with start/end and creates a stroked line with
         // a round end and returns a three.js object
@@ -6700,6 +6699,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     // so we're pushing an smd into an alternate hierarchy
                     var ud = line.userData;
                     var signalKey = ud.elem.padSignals[ud.smd.name];
+                    if (signalKey == undefined) signalKey = ud.smd.name;
                     // add to mondo object
                     if (this.clipperBySignalKey[signalKey] === undefined)
                         this.clipperBySignalKey[signalKey] = {};
@@ -7221,6 +7221,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     // so we're pushing an smd into an alternate hierarchy
                     var ud = mesh.userData;
                     var signalKey = ud.elem.padSignals[ud.pad.name];
+                    if (signalKey == undefined) signalKey = ud.pad.name;
                     // add to mondo object
                     if (this.clipperBySignalKey[signalKey] === undefined)
                         this.clipperBySignalKey[signalKey] = {};
@@ -7234,7 +7235,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     });
                     
                 }, this);
-
+                console.log("AmeenSignals", this.clipperBySignalKey);
                 // draw temp union of padgroup
                 temparr.forEach(function (d) {
                     this.clipperPads.push(d);
