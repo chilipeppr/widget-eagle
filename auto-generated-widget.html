@@ -420,7 +420,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
             }
             
-            //this.setupFrequentThreeFeatures();  //global definition of frequently used Three features
+            this.setupFrequentThreeFeatures();  //global definition of frequently used Three features
             
             this.setupUiFromLocalStorage();
 
@@ -734,7 +734,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         
                         // push this line onto gcode array
                         this.solderMaskGcodePath.push(deflatePath);
-                        
+
                     } else {
                         // no path left, so done deflating
                         isStillAPath = false;
@@ -753,7 +753,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                             console.log("mesh of lastDeflatePath. mesh:", mesh);
                             
                             // get center
-                            var centroid = this.getCentroid(mesh.children[1]);
+                            var centroid = this.getCentroid(mesh.children[1].children[0]);
     
                             // get point of last deflatePath and draw line to center
                             console.log("centroid:", centroid, "lastDeflatePath:", lastDeflatePath);
@@ -1297,6 +1297,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         getCentroid: function ( mesh ) {
 
+            // if(mesh.geometry === undefined)
+            //     return { x : 0, y : 0, z : 0 };
             mesh.geometry.computeBoundingBox();
             var boundingBox = mesh.geometry.boundingBox;
             console.log("boundingBox:", boundingBox);
@@ -1496,31 +1498,31 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         
         //defining Three features we frequently utilize.  No need to redefine constantly.  
         
-        // ThreeAxisX: null,
-        // ThreeAxisY: null,
-        // ThreeAxisZ: null,
+        ThreeAxisX: null,
+        ThreeAxisY: null,
+        ThreeAxisZ: null,
         
-        // deg180toRad: null,
+        deg180toRad: null,
         
-        // //function to setup these properties.  Call this during init.
-        // setupFrequentThreeFeatures: function () {
+        //function to setup these properties.  Call this during init.
+        setupFrequentThreeFeatures: function () {
             
-        //     if (!this.ThreeAxisX)
-        //         this. ThreeAxisX = new THREE.Vector3(1, 0, 0);
+            if (!this.ThreeAxisX)
+                this. ThreeAxisX = new THREE.Vector3(1, 0, 0);
                 
-        //     if (!this.ThreeAxisY)
-        //         this. ThreeAxisY = new THREE.Vector3(0, 1, 0);
+            if (!this.ThreeAxisY)
+                this. ThreeAxisY = new THREE.Vector3(0, 1, 0);
                 
-        //     if (!this.ThreeAxisZ)
-        //         this. ThreeAxisZ = new THREE.Vector3(0, 0, 1);
+            if (!this.ThreeAxisZ)
+                this. ThreeAxisZ = new THREE.Vector3(0, 0, 1);
                 
             
-        //     if (!this.deg180toRad)
-        //         this. deg180toRad = (Math.PI / 180) * 180;
+            if (!this.deg180toRad)
+                this. deg180toRad = (Math.PI / 180) * 180;
             
-        //     if (!this.boardFlipAxis)
-        //         this. boardFlipAxis = this.ThreeAxisY;
-        // },
+            if (!this.boardFlipAxis)
+                this. boardFlipAxis = this.ThreeAxisY;
+        },
         
         setupFeedsDepths: function() {
             // As user changes vals, just update our global props
@@ -2073,7 +2075,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // these methods will draw all Eagle objects into several global
             // properties, the most important of which is this.clipperBySignalKey
             // which holds a structured object of each signal, i.e. +3V, GND, etc.
-            this.buildDimensionclipper();
+            this.buildDimensionClipper();
             //Mirror board dimensions
             for(var c = 0; c < this.clipperDimension.length; c++){
                 this.clipperDimension[c].X = this.flipX(this.clipperDimension[c].X);
@@ -2680,174 +2682,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 }
             }
             console.groupEnd();
-            return g;
-        },
-        exportGcodeDimensionsOldest:function(){
-            
-            var g = '';
-            var that = this;
-            
-            var diaOfEndmill = $('.dimension-mill-diameter').val();
-            var dir = $('#DirectionCutting').val();
-            // DIMENSION Milling
-            g += "(------ DIMENSION Milling -------)\n";
-            if(this.holesToMill.length == 0){//if we already milled some holes, there is no need to do tool change
-                g += "M5 (spindle off)\n";
-                g += "T" + ++this.toolCount + " M6 (Milling board dimensions)\n";
-                g += "(T" + this.toolCount + " D=" + diaOfEndmill + "mm - PCB End Mill)\n";
-                g += "M3 S" + this.spindleRPM + " (spindle on)\n";
-                g += "F" + this.feedRateDimensions + "\n";
-            }
-            // generate dimensions
-            // we need to take into account the diameter of the endmill
-            // for milling dimensions
-            console.group("Generating Dimension Milling");
-            
-            // if we have no dimensions, then let's return
-            if (!this.clipperDimension || !this.clipperDimension.length > 0) {
-                console.warn("for some reason there's no clipperDimension. huh?. returning.");
-                return g;
-            }
-            //V5.3D201701XX Loop added to support multiple dimensions and slots
-            //console.log("Ameen CDI:", that.clipperDimensionInfo);
-            //console.log("Ameen CDI:", that.clipperDimension);
-            for(var n=0; n<that.clipperDimensionInfo.length; n++){
-                var cdi = that.clipperDimensionInfo[n];
-                
-                if(cdi.type < 0) continue;
-                
-                var delta = diaOfEndmill/2;
-                if(cdi.type == 1) delta = -delta;
-                // create new inflated path
-                var millDim = this.getInflatePath(
-                    [this.clipperDimension.slice(cdi.start, cdi.end)], delta);
-                millDim = millDim[0];
-                //console.log("Ameen Gcode for CP:", cdi.start, cdi.end);
-                //console.log("Ameen inflated dimension:", millDim);
-                // save original clipperDimensions to reset at end of method
-                console.log("original clipperDimension", this.clipperDimension);
-                console.log("inflated dimension:", millDim);
-                var origClipperDimensions = this.clipperDimension;
-                this.clipperDimension = millDim;
-                if(dir>0){
-                    //Here we are correcting orientation of board dimension path
-                    //True orientation means Convientional milling (CCW directions),
-                    //False orientation means Climb (CW direction)
-                    var o = ClipperLib.Clipper.Orientation(this.clipperDimension);
-                    if(o != (dir==1)) 
-                    this.clipperDimension.reverse();
-                }
-                // TODO: please check if exists holes in eagle board
-                // move to clearance
-                g += "G0 Z" + this.clearanceHeight + "\n";
-                g += "(dimensions)\n";
-                // move to last position of path
-                // last position because the inflated path does not start and end at same position
-                // previously first position was used and that left a gap between plunge and retract positions
-                var l = this.clipperDimension.length - 1;
-                //console.log("Ameen CP Length", l, this.clipperDimension[l])
-                if (this.clipperDimension[l] !== undefined)
-                    g += "G0 X" + this.clipperDimension[l].X + " Y" + this.clipperDimension[l].Y + "\n";
-                // move down
-                g += "G0 Z0\n";
-                var newZ = 0;
-                
-                var didLastPass = false;
-                while (!didLastPass) { //newZ > this.depthOfDimensions) {
-                    newZ += this.stepDownDimensions;
-                    if (newZ <= this.depthOfDimensions) {
-                        // don't let z go that low
-                        newZ = this.depthOfDimensions;
-                        didLastPass = true;
-                    }
-                    g += "(step down " + this.stepDownDimensions + " for new z " + newZ + ")\n";
-                    g += "G1 Z" + newZ + " F" + this.feedRatePlunge + "\n";
-                    g += "F" + this.feedRateDimensions + "\n";
-                    //console.log("this.clipperDimension:", this.clipperDimension);
-                    
-                    // we have dimensions defined as linePieces so must eliminate duplicates
-                    var lastPt = {X:null,Y:null};
-                    this.clipperDimension.forEach(function(pt) {
-                        console.log("making final dimension mill. pt:", pt, "lastPt:", lastPt);
-                        if (pt.X == lastPt.X && pt.Y == lastPt.Y) {
-                            //console.log("dimension mill: skipping pt:", pt);
-                        } else {
-                            //console.log("dimension mill: adding pt:", pt);
-                            g += "G1 X" + pt.X + " Y" + pt.Y + "\n";
-                            //V5.3D201701XX disable Dimension Holder since it has some bugs
-                            //g += that.exportPCBDimensionHolder(pt, lastPt, newZ, diaOfEndmill/2);
-                        }
-                        lastPt = pt;
-                    });                // move to first point
-                    //g += "G1 X" + this.clipperDimension[0].X + " Y" + this.clipperDimension[0].Y + "\n";
-                    // just to be safe, move to 2nd point no more than 3mm
-                    //g += "G1 X" + this.clipperDimension[1].X + " Y" + this.clipperDimension[1].Y + "\n";
-    
-                    
-                }
-                this.clipperDimension = origClipperDimensions;
-            }
-            //console.log("Ameen gcode:", g);
-            console.groupEnd();
-            return g;
-        },
-        exportPCBDimensionHolder: function(point, lastpoint, z, radiusEndmill){
-            // Set pcb holder if user like
-            // Measure distance between points and 
-            // decide to set a holder or not
-
-            // User data:
-            // this.PCBHolderCount = 1; 
-            // this.PCBHolderLength= 1; // mm
-
-            var defmove = "G1 X" + point.X + " Y" + point.Y + " F" + this.feedRateDimensions + "\n";
-            if(this.PCBHolderCount == 0 || lastpoint.X == null)
-                return defmove;            
-                
-            // PCBHolderCount for one distance: 1 // 2 // 3 ...
-            // PCBHolderLength: 1 mmm  
-            var distance = { 
-                x: point.X - lastpoint.X,
-                y: point.Y - lastpoint.Y,
-                segment: {},
-            };
-            
-            distance.segment.x = distance.x/(this.PCBHolderCount+1);
-            distance.segment.y = distance.y/(this.PCBHolderCount+1);
-
-            // ony straigth lines
-            if(distance.x != 0 && distance.y != 0)
-                return defmove;
-
-            if(Math.abs(distance.segment.x) < this.PCBHolderLength && Math.abs(distance.segment.y) < this.PCBHolderLength*3)
-                return defmove;            
-
-            var g = '',x = lastpoint.X, y = lastpoint.Y;
-            for(var c=0;c < this.PCBHolderCount;c++){
-                if(Math.abs(distance.segment.x) > this.PCBHolderLength)
-                    x += (distance.segment.x - (this.PCBHolderLength + radiusEndmill));
-                else
-                    x += distance.segment.x;
-
-                if(Math.abs(distance.segment.y) > this.PCBHolderLength)
-                    y += (distance.segment.y - (this.PCBHolderLength + radiusEndmill));
-                else
-                    y += distance.segment.y;
-                    
-                g += "G1 X" + x + " Y" + y + " F" + this.feedRateDimensions + "\n";
-                // go up ..     
-                g += "G0 Z" + (z+1) + "\n"; // let 1mm material stay in this tab
-
-                // move to next plunge
-                if(Math.abs(distance.segment.x) > this.PCBHolderLength)
-                    (distance.segment.x < 0 ? x -= (this.PCBHolderLength + radiusEndmill) : x += (this.PCBHolderLength + radiusEndmill));
-                if(Math.abs(distance.segment.y) > this.PCBHolderLength)
-                    (distance.segment.y < 0 ? y -= (this.PCBHolderLength + radiusEndmill) : y += (this.PCBHolderLength + radiusEndmill));
-
-                g += "G1 X" + x + " Y" + y + " F" + this.feedRateDimensions + "\n";  // jump and ...
-                g += "G1 Z" + z + " F" + this.feedRatePlunge + "\n";
-            }
-
             return g;
         },
         exportGcodeFooter:function(){
@@ -4574,6 +4408,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     }
                     console.log("signalKey:", signalKey);
                     
+                    if(signalKey == undefined){
+                        if(ud.type == "pad") signalKey = ud.pad.name;
+                        if(ud.type == "smd") signalKey = ud.smd.name;
+                    }//UndefinedFix
                     
                     // update opacity for ALL smds/pads/vias/wires for this signal
                     // we use shared materials across all smds/pads/vias/wires
@@ -4656,14 +4494,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                             this.infoArea.find('.info-title').text("SMD Pad");
                             this.infoArea.find('.info-pad').text(ud.smd.name + " (of " + ud.pkg.smds.length + " smds)");
                             var sigName = ud.elem.padSignals[ud.smd.name];
-                            if (sigName === undefined || sigName == null) sigName = "undefined";
+                            if (sigName === undefined || sigName == null) sigName = "Not Connected";
                             this.infoArea.find('.info-signal').text(sigName);
                             this.infoArea.find('.info-layer').text(ud.smd.layer);
                         } else {
                             this.infoArea.find('.info-title').text("Pad");
                             this.infoArea.find('.info-pad').text(ud.pad.name + " (of " + ud.pkg.pads.length + " pads)");
                             var sigName = ud.elem.padSignals[ud.pad.name];
-                            if (sigName === undefined || sigName == null) sigName = "undefined";
+                            if (sigName === undefined || sigName == null) sigName = "Not Connected";
                             this.infoArea.find('.info-signal').text(sigName);
                             this.infoArea.find('.info-layer').text("Top Copper");
                         }
@@ -4866,12 +4704,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 }
                 // close it by connecting last point to 1st point
                 if (isClosed) lineUnionGeo.vertices.push(new THREE.Vector3(paths[i][0].X, paths[i][0].Y, z));
-
+                console.log ("AmeenX lineUnionGeo", lineUnionGeo);
 
                 var lineUnion = new THREE.Line(lineUnionGeo, lineUnionMat);
+                console.log ("AmeenX lineUnion", lineUnion);
                 //lineUnion.position.set(0,-20,0);
                 group.add(lineUnion);
             }
+            console.log ("AmeenX group", group);
             this.sceneAdd(group);
             return group;
         },
@@ -5042,7 +4882,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var isShowOutline = 'isShowOutline' in opts ? opts.isShowOutline : true;
             
             var retGrp = new THREE.Group();
-            
+            console.log("getMeshLineFromClipperPath", opts);
             var localInflateBy = width / 2;
             // var trueInflateBy = width;
             
@@ -5090,18 +4930,21 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     }
                     
                 }
+                console.log("getMeshLineFromClipperPath - csThisPath", csThisPath);
                 var csUnion = this.getUnionOfClipperPaths(csThisPath);
                 //console.log("drawing csUnion:", csUnion);
                 
                 if (isShowOutline) {
+                    console.log("getMeshLineFromClipperPath - isShowOutline");
                     var threeObj = this.drawClipperPaths(csUnion, 0x0000ff, opacity + 0.2, 0);
                     //this.sceneAdd(group);
                     retGrp.add(threeObj);
+                    console.log("Ameen threeObj", threeObj);
                 }
                 
                 // This is SUPER SLOW cuz of the triangle calculation
                 if (isSolid) {
-                    
+                    console.log("getMeshLineFromClipperPath - isSolid");
                     //if (csUnion.length > 1) console.warn("got more than 1 path on union");
                     // investigate holes
                     var csUnionHoles = [];
@@ -5126,7 +4969,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 
                 pathCtr++;
             }, this);
-            
+            console.log("getMeshLineFromClipperPath - retGrp", retGrp);
             return retGrp;
                 
         },
@@ -5281,7 +5124,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             return false;
         },
         clipperDimension: [], // holds clipper formatted dimension
-        buildDimensionclipper: function () {
+        buildDimensionClipper: function () {
             // var dimansionLayerNumber = this.useDimensionLayer? this.eagle.eagleLayersByName['Dimension'].number:-1;
             // var millingLayerNumber = this.useMillingLayer? this.eagle.eagleLayersByName['Milling'].number:-1;
             var dimansionLayerNumber = this.eagle.eagleLayersByName['Dimension'].number;
@@ -5718,83 +5561,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 v1 = {X: dimensions[i].X, Y: dimensions[i].Y};
             }
         },
-        draw3dTabsOld: function (){
-            if(!this.tabs.useTabs) return;
-            for(var i=0; i<this.clipperDimensionInfo.length; i++){
-                var cdi = this.clipperDimensionInfo[i];
-                if(cdi.type < 0 || cdi.millDiameter == 0) continue;
-                if(cdi.type == 1 && !this.tabs.useForSlots) continue;
-                if(cdi.layer == 20 && !this.useDimensionLayer) continue;
-                if(cdi.layer == 46 && !this.useMillingLayer) continue;
-                var tabMesh = this.getTabMesh(this.tabs.width, cdi.millDiameter);
-                var or = ClipperLib.Clipper.Orientation(this.clipperDimension.slice(cdi.start, cdi.end));
-                var hasCurves = cdi.curves.length > 0;
-                var ci = 0; //curve index
-                for(var j=cdi.start; j<cdi.end; j++){
-                    if(hasCurves &&  cdi.curves[ci].start == j){
-                        console.log("tags - Curve found at",j , cdi.curves[ci]);
-                        var v1 = this.clipperDimension[j];
-                        var v2 = this.clipperDimension[cdi.curves[ci].end];
-                        var fl = ((this.mirrorX && !this.mirrorY) ||(!this.mirrorX & this.mirrorY));
-                        // var curve = fl? this.getCurveParameters(v2.X, v2.Y, v1.X, v1.Y, cdi.curves[ci].curve):
-                        //                 this.getCurveParameters(v1.X, v1.Y, v2.X, v2.Y, cdi.curves[ci].curve);
-                        var curve = this.getCurveParameters(v1.X, v1.Y, v2.X, v2.Y, (fl?-1:1) * cdi.curves[ci].curve);
-                        //var length = Math.abs(curve.radius * cdi.curves[ci].curve*Math.PI/180);
-                        //var count = Math.round(length/this.tabs.distance - 0.5);
-                        var curveAngle = cdi.curves[ci].curve*Math.PI/180;
-                        var isConcave = (or && curveAngle<0) || (!or && curveAngle>0);
-                        var tabAngle = (this.tabs.width / 2) / curve.radius;
-                        var distanceAngle = this.tabs.distance / curve.radius;
-                        
-                        var sn = curve.clockWise?-1:1;
-                        var count = Math.round(Math.abs(curveAngle)/distanceAngle - 0.5);
-                        console.log("tags - ", count, tabAngle*180/Math.PI, distanceAngle*180/Math.PI, curve);
-                        for(var n=0; n<count; n++){
-                            //var angle = curve.startAngle + (cdi.curves[ci].curve*Math.PI/180 - distanceAngle * (count-1))/2 + n * distanceAngle;
-                            var angle = curve.startAngle + sn * (Math.abs(curveAngle) - distanceAngle * (count-1))/2 + sn * n * distanceAngle;
-                            // var mesh = this.getTabMeshCurved(curve.x, curve.y,
-                            //     curve.radius  - (isConcave?cdi.millDiameter:0), 
-                            //     angle-sn*tabAngle, 
-                            //     angle+sn*tabAngle, 
-                            //     curve.clockWise, this.tabs.width, cdi.millDiameter,
-                            //     cdi.width < this.minWireWidthToMill);
-                            var r = curve.radius  - (isConcave?cdi.millDiameter:0);
-                            var x = curve.x + r * Math.cos(angle);
-                            var y = curve.y + r * Math.sin(angle);
-                            var mesh = tabMesh.clone();
-                            mesh.rotation.z = angle + Math.PI/2;
-                            mesh.position.set(x, y, 0.05);
-                            this.sceneAdd( mesh );
-                        }
-                        j=cdi.curves[ci].end;
-                        console.log("tags - OK");
-                        if((ci+1) < cdi.curves.length) ci++;
-                    }
-                    else {
-                        console.log("tags - Line found at", j);
-                        var v1 = this.clipperDimension[j];
-                        var v2 = this.clipperDimension[j+1];
-                        var length = Math.sqrt((v2.X-v1.X)*(v2.X-v1.X) + (v2.Y-v1.Y)*(v2.Y-v1.Y));
-                        var count = Math.round(length/this.tabs.distance - 0.5);
-                        var angle = Math.atan2(v2.Y-v1.Y, v2.X-v1.X);
-                        for(var n=0; n<count; n++){
-                            var d = (length - this.tabs.distance * (count-1))/2 + n * this.tabs.distance;
-                            var x = v1.X + d * Math.cos(angle);
-                            var y = v1.Y + d * Math.sin(angle);
-                            if(cdi.width < this.minWireWidthToMill){
-                                x+=(or?1:-1)*cdi.millDiameter*Math.sin(angle)/2;
-                                y-=(or?1:-1)*cdi.millDiameter*Math.cos(angle)/2;
-                            }
-                            //this.draw3dTab(x, y, angle, this.tabs.width, cdi.millDiameter);
-                            var mesh = tabMesh.clone();
-                            mesh.rotation.z = angle;
-                            mesh.position.set(x, y, 0.05);
-                            this.sceneAdd( mesh );
-                        }
-                    }
-                }
-            }
-        },
         getTabMesh: function(width, d){
             //var arc, points, path, arcGeo;
             var shape = new THREE.Shape();
@@ -5841,55 +5607,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var mesh = new THREE.Mesh( geometry, material );
             return mesh;
         },
-        // getTabMeshCurved: function(x, y, r, sa, ea, cw, w, d, t){//center x & y, radius, start angle, end angle, clock wise, tab width, tool diameter, t:wire width less than minimum
-        //     var arc, points, path, arcGeo;
-        //     var shape = new THREE.Shape();
-        //     //console.log("Ameen - ",x, y, r, sa*180/Math.PI, ea*180/Math.PI, cw, w, d);
 
-        //     arc = new THREE.ArcCurve( x, y, r+(t?d:d/2), sa, ea, cw );
-        //     path = new THREE.Path();
-        //     points = arc.getSpacedPoints( 15 );
-        //     arcGeo = path.createGeometry( points );
-            
-        //     var mx = arcGeo.vertices[0].x;
-        //     var my = arcGeo.vertices[0].y;
-        //     shape.moveTo(mx, my);
-            
-        //     for(var i=0; i<arcGeo.vertices.length; i++){
-        //         shape.lineTo(arcGeo.vertices[i].x, arcGeo.vertices[i].y);
-        //     }
-            
-
-        //     arc = new THREE.ArcCurve( x, y, r-(t?0:d/2), sa, ea, cw );
-        //     path = new THREE.Path();
-        //     points = arc.getSpacedPoints( 15 );
-        //     arcGeo = path.createGeometry( points );
-
-        //     for(var i=arcGeo.vertices.length-1; i>=0; i--){
-        //         shape.lineTo(arcGeo.vertices[i].x, arcGeo.vertices[i].y);
-        //     }
-        //     shape.lineTo(mx, my);
-        //     var geometry, material;
-        //     if(false){
-        //         var extrudeSettings = {
-        //         	steps: 1,
-        //         	amount: this.tabs.height,
-        //         	bevelEnabled: false,
-        //         	bevelThickness: 0,
-        //         	bevelSize: 0,
-        //         	bevelSegments: 0
-        //         };
-        //         geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
-        //         material = new THREE.MeshBasicMaterial( { color: this.colorTabs, transparent: true, opacity: this.opacityTabs } );
-        //     }
-        //     else{
-        //         geometry = new THREE.ShapeGeometry( shape );
-        //         material = new THREE.LineBasicMaterial( { color: this.colorTabs, transparent: true, opacity: this.opacityTabs } );
-        //     }
-        //     var mesh = new THREE.Mesh( geometry, material );
-        //     return mesh;
-            
-        // },
         // UTILITY METHOD TO GENERATE A THREE.JS STROKE FOR A LINE
         // i.e. this takes a line with start/end and creates a stroked line with
         // a round end and returns a three.js object
@@ -6846,7 +6564,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     // so we're pushing an smd into an alternate hierarchy
                     var ud = line.userData;
                     var signalKey = ud.elem.padSignals[ud.smd.name];
-                    if (signalKey == undefined) signalKey = ud.smd.name;
+                    if (signalKey == undefined) signalKey = ud.smd.name; //UndefinedFix
                     // add to mondo object
                     if (this.clipperBySignalKey[signalKey] === undefined)
                         this.clipperBySignalKey[signalKey] = {};
@@ -7368,7 +7086,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     // so we're pushing an smd into an alternate hierarchy
                     var ud = mesh.userData;
                     var signalKey = ud.elem.padSignals[ud.pad.name];
-                    if (signalKey == undefined) signalKey = ud.pad.name;
+                    if (signalKey == undefined) signalKey = ud.pad.name; //UndefinedFix
                     // add to mondo object
                     if (this.clipperBySignalKey[signalKey] === undefined)
                         this.clipperBySignalKey[signalKey] = {};
