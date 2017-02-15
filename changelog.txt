@@ -17,12 +17,12 @@ Release date: 09 FEB 2017
 - Curved board dimensions are rendered as G2/G3 commands.
 - Tabs functionality is fully impelmented.
 - Gcode tab is seperated to multiple tabs (Taces, Drilling, Milling, Tabs & Gocde).
-- 
-TODO: Implement functionality of Tabs Feature.
+- Circles as board dimensions are now supported.
 TODO: Mill empty areas.
 TODO: Keep 3dview angle after Render button is pressed.
 TODO: Registration holes feature.
 TODO: Smash (give z hight to board parts)
+TODO: SMD Roundness
 
 Version 5.3
 **************************************************
