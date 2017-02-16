@@ -80,7 +80,7 @@
                 </li>
             </ul>
             
-            <!-- Tab panes -->
+            <!--  ----------------------- RENDER ------------------------>
             <div class="tab-content">
                 <div class="tab-pane tab-pane-container active" id="eagle-main">
                     <!-- <p>Best Endmill Size to Use <code><span class="best-size highlight"><i>Undetermined</i></span></code></p> -->
@@ -90,18 +90,18 @@
                     </div>
                     <div style="margin: 10px 0;"></div>
                     <ul class="nav nav-tabs" role="tablist">
-                        <li class="active"><a href="#main-layer" role="tab" data-toggle="tab">Layers</a>
+                        <li class="active"><a href="#main-board" role="tab" data-toggle="tab">Board</a>
                         </li>
-                        <li><a href="#main-inflation" role="tab" data-toggle="tab">Inflate</a>
+                        <li><a href="#main-signals" role="tab" data-toggle="tab">Signals</a>
                         </li>
-                        <li id="com-chilipeppr-widget-eagle-navtab-main-registration"><a href="#main-registation" role="tab" data-toggle="tab">Registration</a>
-                        </li>
+                        <!--<li id="com-chilipeppr-widget-eagle-navtab-main-registration"><a href="#main-registation" role="tab" data-toggle="tab">Registration</a>-->
+                        <!--</li>-->
                         <li><a href="#main-options" role="tab" data-toggle="tab">Options</a>
                         </li>
                     </ul>
-                    
+                    <!--  ----------------------- RENDER:BOARD ------------------------>
                     <div class="tab-content">
-                        <div class="tab-pane active" id="main-layer">
+                        <div class="tab-pane active" id="main-board">
                             <h2 style="margin-top:10px;">Board Layer</h2>
                             <div class="form-group">
                                 <select class="selectLayer form-control" id="selectLayer">
@@ -110,6 +110,7 @@
                             </div>
                             <div class="form-group">
                                 Select Mirror Axis
+                                <p class="descriptive-text">To see mirrored results, either select different board layer or hit Render button.</p>
                                 <div class="checkbox">
                                     <label>
                                     <input type="checkbox" class="mirrorAxisY" checked /> Mirror horizontally - Y Axis
@@ -120,12 +121,92 @@
                                     <input type="checkbox" class="mirrorAxisX" checked /> Mirror vertically - X Axis
                                     </label>
                                 </div> 
-                                <p class="descriptive-text">To see mirrored results, either different board layer or hit Render button.</p>
+                                
+                            </div>
+                            <!--  ----------------------- RENDER:BOARD:BLANK FR4 BOARD ------------------------>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="use-blank-pcb" checked>
+                                    <h2 style="margin-top:10px;">Blank FR4 Board</h2> 
+                                </label>
+                            </div>
+                            <p class="descriptive-text">Following settings will affect how selected board layer is mirrored, if this option is unchecked widget will use board dimensions instead.</p>
+                            Width
+                            <div class="input-group">
+                                <input class="form-control blank-pcb-width" type="number" placeholder="Width" value="150" min="20" step="10"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            Height
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <input class="form-control blank-pcb-height" type="number" placeholder="Height" value="100" min="20" step="10"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            Location (X, Y)
+                            <p class="descriptive-text" style="margin-bottom: 0px; padding-top: 0px;">Location of left bottom corner of blank FR4 board</p>
+                            <div class="input-group">
+                                <input class="form-control blank-pcb-x" style="width:48%; margin-right: 4%;" type="number" placeholder="X" value="0" step="1"/>
+                                <input class="form-control blank-pcb-y" style="width:48%;" type="number" placeholder="Y" value="0" step="1"/>
+                            </div>
+                            <!--  ----------------------- RENDER:BOARD:REGISTRATION HOLES ------------------------>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="form-group use-reg-holes" checked>
+                                    <h2 style="margin-top:10px;">Registration Holes</h2> 
+                                </label>
+                            </div>
+                            <p class="descriptive-text">Following settings will generate Gcode to drill registration hole, this will be a seperate Gcode file, the registration holes are useful when milling a board with multiple layers or whenever there is a need to remove the board and put it back in exactly the same location.</p>
+                            Holes Pattern
+                            <div class="form-group">
+                                <select class="form-control" id="reg-holes-pattern">
+                                    <option value='400'>4 Hole on corners</option>
+                                    <option value='410'>4 Hole on sides</option>
+                                    <option value='200'>2 Hole on corners BL/TR</option>
+                                    <option value='201'>2 Hole on corners TL/BR</option>
+                                    <option value='210'>2 Hole on sides T/B</option>
+                                    <option value='211'>2 Hole on sides L/R</option>
+                                </select>
+                                <p class="descriptive-text">T: Top, B: Bottom, L: Left, R: Right.</p>
                             </div>
                             
+                            Holes Diameter
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <input class="form-control reg-holes-diameter" type="number" placeholder="Diameter" value="3.175" min="1" max="4" step=".1"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            Distance from Edges
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <input class="form-control reg-holes-distance" type="number" placeholder="Distance" value="1" min="0.5" max="10" step=".5"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <!--  ----------------------- RENDER:BOARD:REGISTRATION HOLES:GCODE ------------------------>
+                            <h2 style="margin-top:10px;">Gcode Parameters</h2>
+                            <p class="descriptive-text" style="padding-top: 0px;">Following Gcode parementers are used for drilling registration holes only.</p>
+                            Depth for Drilling
+                            <div class="input-group">
+                                <input class="form-control reg-holes-depth" type="number" placeholder="Depth" value="-1.7" min="-20" max="-0.1" step="0.1"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            Clearance Height
+                            <div class="input-group">
+                                <input class="form-control reg-holes-clearance" type="number" placeholder="Clearance" value="2" min="0.5" step="0.5"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            Feedrate
+                            <div class="input-group">
+                                <input class="form-control reg-holes-feedrate" type="number" placeholder="Feed rate" value="200" min="20" step="100"/>
+                                <div class="input-group-addon">mm/min</div>
+                            </div>
+                            Spindle Speed
+                            <div class="input-group">
+                                <input class="form-control reg-holes-spindle-rpm" type="number" placeholder="Speed" value="12000" min="3000" step="1000"/>
+                                <div class="input-group-addon">rpm</div>
+                            </div>
+                            <button style="margin-bottom:4px;" type="button" class="btn btn-default reg-holes-sendgcodetows">Send Gcode to Workspace</button>
+                            <textarea class="reg-holes-gcode" rows="3" spellcheck="false"></textarea>
                         </div>
-                        
-                        <div class="tab-pane xactive" id="main-inflation">
+
+                        <!--  ----------------------- RENDER:SIGNALS ------------------------>
+                        <div class="tab-pane xactive" id="main-signals">
                             <h2 style="margin-top:10px;">Inflate Traces</h2>
                             <div class="form-group">
                                 Inflate Milling Path By
@@ -194,76 +275,7 @@
                     
                         </div>
                         
-                        <div class="tab-pane xactive" id="main-registation">
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" class="use-registration-holes" checked>
-                                    <h2 style="margin-top:10px;">Registration Holes</h2> 
-                                </label>
-                            </div>
-                            <p class="descriptive-text">This feature will extract some attributes from Layer 47 (Measures) and use them to define size/location of the blank PCB and diameter/location of registration holes, this is useful when milling a board with multiple layers or whenever there is a need to remove the board and put it back in exactly the same location.
-                            </p>
-                            <p class="descriptive-text">This feature will look for the following attributes:
-                            </p>
-                            <ul class="descriptive-text" style="padding-left:20px;padding-top:0;">
-                                <li>Circles to identify diameter/locations of registation holes.</li>
-                                <li>Rectangular shaped wire path or Vertical & Horizontal dimensions to identify size/location of blank board.</li>
-                            </ul>
-                            Depth for Drilling
-                            <div class="input-group">
-                                <input class="form-control reg-holes-depth" type="number" placeholder="Depth" value="-1.7" min="-5" max="0"/>
-                                <div class="input-group-addon">mm</div>
-                            </div>
-                            Step Down
-                            <div class="input-group">
-                                <input class="form-control reg-holes-stepdown" type="number" placeholder="stepdown" value="-0.5"/>
-                                <div class="input-group-addon">mm</div>
-                            </div>
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" class="reg-holes-retract" checked>Retract after each step
-                                </label>
-                            </div>
-                            Clearance height
-                            <div class="input-group">
-                                <input class="form-control reg-holes-clearance" type="number" placeholder="clearance" value="1"/>
-                                <div class="input-group-addon">mm</div>
-                            </div>
-                            Feedrate
-                            <div class="input-group">
-                                <input class="form-control reg-holes-feedrate" type="number" placeholder="Feed rate" value="100"/>
-                                <div class="input-group-addon">mm/min</div>
-                            </div>
-                            Spindle Speed
-                            <div class="input-group">
-                                <input class="form-control reg-holes-spindle-rpm" type="number" placeholder="" value="12000" />
-                                <div class="input-group-addon">rpm</div>
-                            </div>
-                             <h2 style="margin-top:10px;">Blank board identification</h2>
-                            <div class="radio">
-                                <label>
-                                    <input type="radio" name="com-chilipeppr-widget-eagle-reg-board-size" class="com-chilipeppr-widget-eagle-reg-board-size-dimensions" checked /> 
-                                    Dimensions
-                                    <p style="margin-top:0px;margin-bottom:0px;font-size:11px;">
-                                    Use horizental & vertical dimensions from Layer 46 to identify dimensions & location of blank board.
-                                    </p>
-                                    </input>
-                                </label>
-                            </div>
-                            <div class="radio">
-                                <label>
-                                    <input type="radio" name="com-chilipeppr-widget-eagle-reg-board-size" class="com-chilipeppr-widget-eagle-reg-board-size-wires" xchecked /> 
-                                    Wires
-                                    <p style="margin-top:0px;margin-bottom:0px;font-size:11px;">
-                                    Use wires from Layer 46 to identify dimensions & location of blank board.
-                                    </p>
-                                    </input>
-                                </label>
-                            </div>
-                            Generated Gcode
-                            <textarea class="com-chilipeppr-widget-eagle-registration-gcode" rows="3" spellcheck="false"></textarea>
-                        </div>
-                        
+                        <!--  ----------------------- RENDER:OPTIONS ------------------------>
                         <div class="tab-pane xactive" id="main-options">
                             <h2 style="margin-top:10px;">Options</h2>
                             <div class="form-group">
@@ -600,7 +612,7 @@
                                 </select>
                             </div>
                             Generated Gcode
-                            <textarea class="com-chilipeppr-widget-eagle-gcode"></textarea>
+                            <textarea class="com-chilipeppr-widget-eagle-gcode" spellcheck="false"></textarea>
                         </div>
                     </div>
                 </div>

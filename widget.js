@@ -303,6 +303,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
             //$('#com-chilipeppr-widget-eagle .btnAnimate').click( this.animateOverlapPath.bind(this) );
 
+            console.log("Ameen init");
+            this.setupBlankBoardParamenters();
+            this.setupRegHolesParamenters();
+            
             // init 3d for eagle widget
             this.init3d();
 
@@ -326,87 +330,81 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             
             this.setupSolderMaskTab();
 
-            this.setupRegistrationHolesTab();
-            
             console.log(this.name + " done loading.");
         },
-        setupRegistrationHolesTab: function() {
-            this.useRegistrationHoles = $('.use-registration-holes').is(':checked');
-            $('.use-registration-holes').click(this.useRegistrationHolesChanged.bind(this));
+        blankBoard: {
+            use: true,
+            x: 0,
+            y: 0,
+            width: 150,
+            height: 100
         },
-        useRegistrationHolesChanged: function() {
-            this.useRegistrationHoles = $('.use-registration-holes').is(':checked');
-        },
-        draw3dRegistrationHoles: function() {
-            if(!this.useRegistrationHoles) return;
-            var measuresLayerNumber = this.eagle.eagleLayersByName['Measures'].number;
-            var useDimensions = $('.com-chilipeppr-widget-eagle-reg-board-size-dimensions')[0].checked;
-            console.log("Ameen useDimensions", useDimensions, $('.com-chilipeppr-widget-eagle-reg-board-size-dimensions'));
-            var wires = [];
-            var holes = [];
-            if(useDimensions) {
-                for (var key in this.eagle.plainDimensions) {
-                    if (this.eagle.plainDimensions[key].length > 0) {
-                        for (var i = 0; i < this.eagle.plainDimensions[key].length; i++) {
-                            var dimension = this.eagle.plainDimensions[key][i];
-                            //We are only looking for horizontal and vertical dimension on layer 47
-                            if (dimension.layer == measuresLayerNumber && (dimension.x1 == dimension.x2 || dimension.y1 == dimension.y2))
-                                wires.push({x1:dimension.x1, y1:dimension.y1, x2:dimension.x2, y2:dimension.y2});
-                        }
-                    }
-                }
-            }
-            else {
-                for (var key in this.eagle.plainWires) {
-                    if (this.eagle.plainWires[key].length > 0) {
-                        for (var i = 0; i < this.eagle.plainWires[key].length; i++) {
-                            var wire = this.eagle.plainWires[key][i];
-                            //We are only looking for horizontal and vertical wires on layer 47
-                            if (wire.layer == measuresLayerNumber && (wire.x1 == wire.x2 || wire.y1 == wire.y2))
-                                wires.push({x1:wire.x1, y1:wire.y1, x2:wire.x2, y2:wire.y2});
-                        }
-                    }
-                }
-            }
-
-            var boundries = {
-                MinimumX: Number.MAX_VALUE,
-                MinimumY: Number.MAX_VALUE,
-                MaximumX: Number.MIN_VALUE,
-                MaximumY: Number.MIN_VALUE
-            };
-            for (var i = 0; i < wires.length; i++) {
-                boundries.MinimumX = Math.min(boundries.MinimumX, wires[i].x1, wires[i].x2);
-                boundries.MaximumX = Math.max(boundries.MaximumX, wires[i].x1, wires[i].x2);
-                boundries.MinimumY = Math.min(boundries.MinimumY, wires[i].y1, wires[i].y2);
-                boundries.MaximumY = Math.max(boundries.MaximumY, wires[i].y1, wires[i].y2);
-            }
-            var x1 = boundries.MinimumX,
-                x2 = boundries.MaximumX,
-                y1 = boundries.MinimumY,
-                y2 = boundries.MaximumY;
-                
-            var area = (x2 - x1) * (y2 - y1);
-            console.log("Ameen area", area, boundries, wires);
-            if((useDimensions && wires.length < 2) || ((!useDimensions) && wires.length < 4) || area < 4){
-                console.log("Ameen logic", (useDimensions && wires.length < 2), ((!useDimensions) && wires.length < 4), area < 4); 
-                this.useRegistrationHoles = false;
-                return;
-            }
-            console.log("Ameen useRegistrationHoles", this.useRegistrationHoles);    
-            this.blankBoundaries = boundries;
+        blankBoardSceneGroup: null,
+        setupBlankBoardParamenters: function() {
+            $("#com-chilipeppr-widget-eagle .use-blank-pcb").checked = this.blankBoard.use;
+            $("#com-chilipeppr-widget-eagle .blank-pcb-width").val(this.blankBoard.width);
+            $("#com-chilipeppr-widget-eagle .blank-pcb-height").val(this.blankBoard.height);
+            $("#com-chilipeppr-widget-eagle .blank-pcb-x").val(this.blankBoard.x);
+            $("#com-chilipeppr-widget-eagle .blank-pcb-y").val(this.blankBoard.y);
             
-            for (var key in this.eagle.plainCircles) {
-                if (this.eagle.plainCircles[key].length > 0) {
-                    for (var i = 0; i < this.eagle.plainCircles[key].length; i++) {
-                        var circle = this.eagle.plainCircles[key][i];
-                        if (circle.layer == measuresLayerNumber && circle.radius<4) {
-                            holes.push({x:circle.x, y:circle.y, radius:circle.radius});
-                        }
-                    }
-                }
+            $("#com-chilipeppr-widget-eagle .use-blank-pcb").change(this.onChangeBlankBoardParamenters.bind(this));
+            $("#com-chilipeppr-widget-eagle .blank-pcb-width").change(this.onChangeBlankBoardParamenters.bind(this));
+            $("#com-chilipeppr-widget-eagle .blank-pcb-height").change(this.onChangeBlankBoardParamenters.bind(this));
+            $("#com-chilipeppr-widget-eagle .blank-pcb-x").change(this.onChangeBlankBoardParamenters.bind(this));
+            $("#com-chilipeppr-widget-eagle .blank-pcb-y").change(this.onChangeBlankBoardParamenters.bind(this));
+        },
+        onChangeBlankBoardParamenters: function() {
+            this.blankBoard.use = $("#com-chilipeppr-widget-eagle .use-blank-pcb").prop("checked");
+
+            var item = $("#com-chilipeppr-widget-eagle .blank-pcb-x");
+            if (item.val() == "") item.val(this.blankBoard.x); else this.blankBoard.x = parseFloat(item.val());
+            
+            item = $("#com-chilipeppr-widget-eagle .blank-pcb-y");
+            if (item.val() == "") item.val(this.blankBoard.y); else this.blankBoard.y = parseFloat(item.val());
+            
+            item = $("#com-chilipeppr-widget-eagle .blank-pcb-width");
+            if (item.val() == "") item.val(this.blankBoard.width); 
+            else {
+                var v = parseFloat(item.val()), min = parseFloat(item[0].min);
+                if(v<min) {v = min; item.val(v);}
+                this.blankBoard.width = v;
             }
-            this.registrationHoles = holes;
+            
+            item = $("#com-chilipeppr-widget-eagle .blank-pcb-height");
+            if (item.val() == "") item.val(this.blankBoard.height); 
+            else {
+                var v = parseFloat(item.val()), min = parseFloat(item[0].min);
+                if(v<min) {v = min; item.val(v);}
+                this.blankBoard.height = v;
+            }
+            
+            if(this.blankBoardSceneGroup != null) this.sceneRemove(this.blankBoardSceneGroup);
+            
+            this.draw3dBlankBoard();
+            
+            if(this.regHolesSceneGroup != null) this.sceneRemove(this.regHolesSceneGroup);
+            
+            this.regHoles.holes = this.getRegHoles();
+            this.draw3dRegHoles();
+            this.exportGcodeRegistrationHoles();
+            
+            chilipeppr.publish('/com-chilipeppr-widget-3dviewer/drawextents' );
+        },
+        draw3dBlankBoard: function(){
+            if(!this.blankBoard.use) return;
+            
+            var x1 = this.blankBoard.x,
+                x2 = this.blankBoard.x + this.blankBoard.width,
+                y1 = this.blankBoard.y,
+                y2 = this.blankBoard.y + this.blankBoard.height;
+                
+            this.blankBoundaries = {
+                MinimumX: x1,
+                MinimumY: y1,
+                MaximumX: x2,
+                MaximumY: y2
+            };
+                
             var regColor = 0xB87333;
             var lineMat = new THREE.LineBasicMaterial({
                 color: regColor,
@@ -420,70 +418,385 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             lineGeo.vertices.push(new THREE.Vector3(x2, y2, 0));
             lineGeo.vertices.push(new THREE.Vector3(x1, y2, 0));
             lineGeo.vertices.push(new THREE.Vector3(x1, y1, 0));
-
+            
             var line = new THREE.Line(lineGeo, lineMat);
-            var sceneGroup = new THREE.Group();
-            sceneGroup.add(line);
             
+            this.blankBoardSceneGroup = new THREE.Group();
+            this.blankBoardSceneGroup.add(line);
+            this.sceneAdd(this.blankBoardSceneGroup);
+        },
+        regHoles: {
+            use: true,
+            pattern: 201,
+            diameter: 3.175,
+            distance: 1,
+            holes: []
+        },
+        regHoleGcodePara: {
+            depth: -1.7,
+            clearance: 2,
+            feedrate: 200,
+            spindleRPM: 1200
+        },
+        regHolesSceneGroup: null,
+        setupRegHolesParamenters: function() {
+            $("#com-chilipeppr-widget-eagle .use-reg-holes").checked = this.regHoles.use;
+            $("#com-chilipeppr-widget-eagle #reg-holes-pattern").val(this.regHoles.pattern);
+            $("#com-chilipeppr-widget-eagle .reg-holes-diameter").val(this.regHoles.diameter);
+            $("#com-chilipeppr-widget-eagle .reg-holes-distance").val(this.regHoles.distance);
+            
+            $("#com-chilipeppr-widget-eagle .reg-holes-depth").val(this.regHoleGcodePara.depth);
+            $("#com-chilipeppr-widget-eagle .reg-holes-clearance").val(this.regHoleGcodePara.clearance);
+            $("#com-chilipeppr-widget-eagle .reg-holes-feedrate").val(this.regHoleGcodePara.feedrate);
+            $("#com-chilipeppr-widget-eagle .reg-holes-spindle-rpm").val(this.regHoleGcodePara.spindleRPM);
+            
+            $("#com-chilipeppr-widget-eagle .use-reg-holes").change(this.onChangeRegHolesParamenters.bind(this));
+            $("#com-chilipeppr-widget-eagle #reg-holes-pattern").change(this.onChangeRegHolesParamenters.bind(this));
+            $("#com-chilipeppr-widget-eagle .reg-holes-diameter").change(this.onChangeRegHolesParamenters.bind(this));
+            $("#com-chilipeppr-widget-eagle .reg-holes-distance").change(this.onChangeRegHolesParamenters.bind(this));
+            
+            $("#com-chilipeppr-widget-eagle .reg-holes-sendgcodetows").click(this.sendRegHoleGcodeToWorkspace.bind(this));
+            
+            $("#com-chilipeppr-widget-eagle .reg-holes-depth").change(this.onChangeRegHolesGcodeParamenters.bind(this));
+            $("#com-chilipeppr-widget-eagle .reg-holes-clearance").change(this.onChangeRegHolesGcodeParamenters.bind(this));
+            $("#com-chilipeppr-widget-eagle .reg-holes-feedrate").change(this.onChangeRegHolesGcodeParamenters.bind(this));
+            $("#com-chilipeppr-widget-eagle .reg-holes-spindle-rpm").change(this.onChangeRegHolesGcodeParamenters.bind(this));
+            this.regHoles.holes = this.getRegHoles();
+        },
+        onChangeRegHolesGcodeParamenters: function() {
+            var item = $("#com-chilipeppr-widget-eagle .reg-holes-depth");
+            if (item.val() == "") item.val(this.regHoleGcodePara.depth); 
+            else {
+                var v = parseFloat(item.val()), min = parseFloat(item[0].min), max = parseFloat(item[0].max);
+                if(v>max) {v = max; item.val(v);}
+                if(v<min) {v = min; item.val(v);}
+                this.regHoleGcodePara.depth = v;
+            }
+            
+            item = $("#com-chilipeppr-widget-eagle .reg-holes-clearance");
+            if (item.val() == "") item.val(this.regHoleGcodePara.clearance); 
+            else {
+                var v = parseFloat(item.val()), min = parseFloat(item[0].min);
+                if(v<min) {v = min; item.val(v);}
+                this.regHoleGcodePara.clearance = v;
+            }
+            
+            item = $("#com-chilipeppr-widget-eagle .reg-holes-feedrate");
+            if (item.val() == "") item.val(this.regHoleGcodePara.feedrate); 
+            else {
+                var v = parseFloat(item.val()), min = parseFloat(item[0].min);
+                if(v<min) {v = min; item.val(v);}
+                this.regHoleGcodePara.feedrate = v;
+            }
+            item = $("#com-chilipeppr-widget-eagle .reg-holes-spindle-rpm");
+            if (item.val() == "") item.val(this.regHoleGcodePara.spindleRPM); 
+            else {
+                var v = parseFloat(item.val()), min = parseFloat(item[0].min);
+                if(v<min) {v = min; item.val(v);}
+                this.regHoleGcodePara.spindleRPM = v;
+            }
+        },
+        onChangeRegHolesParamenters: function() {
+            this.regHoles.use = $("#com-chilipeppr-widget-eagle .use-reg-holes").prop("checked");
+
+            this.regHoles.pattern = parseInt($('#com-chilipeppr-widget-eagle #reg-holes-pattern').val());
+            var item = $("#com-chilipeppr-widget-eagle .reg-holes-diameter");
+            if (item.val() == "") item.val(this.regHoles.diameter); 
+            else {
+                var v = parseFloat(item.val()), min = parseFloat(item[0].min), max = parseFloat(item[0].max);
+                if(v>max) {v = max; item.val(v);}
+                if(v<min) {v = min; item.val(v);}
+                this.regHoles.diameter = v;
+            }
+            
+            item = $("#com-chilipeppr-widget-eagle .reg-holes-distance");
+            if (item.val() == "") item.val(this.regHoles.distance); 
+            else {
+                var v = parseFloat(item.val()), min = parseFloat(item[0].min), max = parseFloat(item[0].max);
+                if(v>max) {v = max; item.val(v);}
+                if(v<min) {v = min; item.val(v);}
+                this.regHoles.distance = v;
+            }
+                
+            this.regHoles.holes = this.getRegHoles();
+
+            if(this.regHolesSceneGroup != null)
+                this.sceneRemove(this.regHolesSceneGroup);
+            this.draw3dRegHoles();
+            this.exportGcodeRegistrationHoles();
+        },
+        getRegHoles: function(){
+            var pattern = this.regHoles.pattern;
+            var count = Math.round(pattern/100);
+            var onSides = Math.round((pattern - 100 * count)/10) == 1;
+            var v = (pattern - 100 * count - 10 * onSides) == 0;
+            console.log("Ameen getRegHoles:", pattern, count, onSides, v);
+            var x = this.blankBoard.x,
+                y = this.blankBoard.y,
+                w = this.blankBoard.width,
+                h = this.blankBoard.height,
+                d = this.regHoles.distance + this.regHoles.diameter/2;
+            console.log("Ameen xywhd:", x, y, w, h, d);
+            var holes = [];
+            if(count == 4){
+                holes.push({x: x + d,                 y: y + (onSides?h/2:d)});
+                holes.push({x: x + (onSides?w/2:d),   y: y + h - d});
+                holes.push({x: x + w - d,             y: y + (onSides?h/2:h-d)});
+                holes.push({x: x + (onSides?w/2:w-d), y: y + d});
+            }
+            else {
+                holes.push({x: x + (onSides?(v?w/2:d)  :d  ), y: y + (onSides?(v?d:h/2)  :(v?d:h-d))});
+                holes.push({x: x + (onSides?(v?w/2:w-d):w-d), y: y + (onSides?(v?h-d:h/2):(v?h-d:d))});
+            }
+            console.log("Ameen getRegHoles", this.regHoles);
+            return holes;
+        },
+        draw3dRegHoles: function(){
+            if(!this.regHoles.use || !this.blankBoard.use) return;
             var that = this;
+            var r = this.regHoles.diameter/2;
+            var regColor = 0xB87333;
+            var lineMat = new THREE.LineBasicMaterial({
+                color: regColor,
+                transparent: true,
+                opacity: .4
+            });
             
-            holes.forEach(function(hole){
-                var line = that.drawCircle(hole.x, hole.y, hole.radius, regColor, 32, .4);
+            this.regHolesSceneGroup = new THREE.Group();
+            var that = this;
+            this.regHoles.holes.forEach(function(hole){
+                var line = that.drawCircle(hole.x, hole.y, r, regColor, 32, .4);
                 line.rotateZ(Math.PI / 8);
-                sceneGroup.add (line);
+                that.regHolesSceneGroup.add(line);
                 var line1Geo = new THREE.Geometry();
-                line1Geo.vertices.push(new THREE.Vector3(hole.x-hole.radius/2, hole.y, 0));
-                line1Geo.vertices.push(new THREE.Vector3(hole.x+hole.radius/2, hole.y, 0));
+                line1Geo.vertices.push(new THREE.Vector3(hole.x-r/2, hole.y, 0));
+                line1Geo.vertices.push(new THREE.Vector3(hole.x+r/2, hole.y, 0));
                 var line1 = new THREE.Line(line1Geo, lineMat);
                 var line2Geo = new THREE.Geometry();
-                line2Geo.vertices.push(new THREE.Vector3(hole.x, hole.y-hole.radius/2, 0));
-                line2Geo.vertices.push(new THREE.Vector3(hole.x, hole.y+hole.radius/2, 0));
+                line2Geo.vertices.push(new THREE.Vector3(hole.x, hole.y-r/2, 0));
+                line2Geo.vertices.push(new THREE.Vector3(hole.x, hole.y+r/2, 0));
                 var line2 = new THREE.Line(line2Geo, lineMat);
-                sceneGroup.add(line1);
-                sceneGroup.add(line2);
+                that.regHolesSceneGroup.add(line1);
+                that.regHolesSceneGroup.add(line2);
             });
-            this.sceneAdd(sceneGroup);
+            this.sceneAdd(this.regHolesSceneGroup);
         },
         exportGcodeRegistrationHoles: function() {
-            var holes = this.registrationHoles;
-            if(holes.length < 2 || !this.useRegistrationHoles) {
-                $('.com-chilipeppr-widget-eagle-registration-gcode').val("");
+            console.log("Ameen exportGcode Called");
+            var holes = this.regHoles.holes;
+            if(holes.length < 2 || !this.regHoles.use) {
+                $('#com-chilipeppr-widget-eagle .reg-holes-gcode').text("");
                 return;
             }
-            holes.sort(function(a, b) {return a.radius - b.radius;});
-            var clearanceHeight = $(".reg-holes-clearance").val();
-            var drillDepth = $(".reg-holes-depth").val();
-            var drillFeedrate = $(".reg-holes-feedrate").val();
-            var spindleRPM = $(".reg-holes-spindle-rpm").val();
-            var toolDia = holes[0].radius * 2;
-            var lastToolDia = -1;
-            var toolCount = 0;
+            console.log("Ameen exportGcode Running");
+            var clearanceHeight = $("#com-chilipeppr-widget-eagle .reg-holes-clearance").val();
+            var drillDepth = $("#com-chilipeppr-widget-eagle .reg-holes-depth").val();
+            var drillFeedrate = $("#com-chilipeppr-widget-eagle .reg-holes-feedrate").val();
+            var spindleRPM = $("#com-chilipeppr-widget-eagle .reg-holes-spindle-rpm").val();
+            var toolDia = this.regHoles.diameter;
             var g = '';
             g += "(Gcode generated by ChiliPeppr Eagle PCB Widget " + (new Date()).toLocaleString() + ")\n";
             g += "G21 (mm mode)\n";
             g += "G90 (abs mode)\n";
             g += "(------ DRILLING REGISTRATION HOLES -------)\n";
+            g += "M5 (spindle off)\n";
+            g += "T0 M6 (Drilling holes - diameter " + toolDia + "mm)\n";
+            g += "(T0 D=" + toolDia + "mm - PCB Drill Bit)\n";
+            g += "M3 S" + spindleRPM + " (spindle on)\n";
+            g += "F" + drillFeedrate + "\n";
             holes.forEach(function(hole){
-                if(toolDia != lastToolDia){
-                    g += "M5 (spindle off)\n";
-                    g += "T" + toolCount + " M6 (Drilling holes - diameter " + toolDia + "mm)\n";
-                    g += "(T" + toolCount++ + " D=" + toolDia + "mm - PCB Drill Bit)\n";
-                    g += "M3 S" + spindleRPM + " (spindle on)\n";
-                    g += "F" + drillFeedrate + "\n";
-                }
                 g += "G0 Z" + clearanceHeight + "\n";
                 g += "G0 X" + hole.x + " Y" + hole.y   + "\n";
                 g += "G0 Z" + clearanceHeight/10 + "\n";
                 g += "G1 Z" + drillDepth  + "\n";
                 g += "G1 Z" + clearanceHeight/10 + "\n";
-                lastToolDia  = toolDia;
             });
             g += "G0 Z" + clearanceHeight + "\n";
             g += "M5 (spindle stop)\n";
             g += "M30 (prog stop)\n";
             
-            $('.com-chilipeppr-widget-eagle-registration-gcode').val(g);
+            $('#com-chilipeppr-widget-eagle .reg-holes-gcode').text(g);
+            console.log("Ameen exportGcode completed", g);
         },
+        sendRegHoleGcodeToWorkspace: function(){
+            this.exportGcodeRegistrationHoles();
+            var info = {
+                name: "Eagle Registration Holes: " + this.fileInfo.name.replace(/.brd$/i, ""), 
+                lastModified: new Date()
+            };
+            // grab gcode from textarea
+            var gcodetxt = $('.reg-holes-gcode').text();
+            
+            if (gcodetxt.length < 10) {
+                chilipeppr.publish("/com-chilipeppr-elem-flashmsg/flashmsg", "Error Sending Gcode", "It looks like you don't have any Gcode to send to the workspace. Huh?", 5 * 1000);
+                return;
+            }
+            
+            // send event off as if the file was drag/dropped
+            chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondropped", gcodetxt, info);
+            
+            chilipeppr.publish("/com-chilipeppr-elem-flashmsg/flashmsg", "Sent Gcode to Workspace", "Sent your solder mask Gcode to the workscape. Close the Eagle widget to see it.");
+            
+            var that = this;
+            this.get3dObj(function() {
+                console.log("got callback after 3dviewer re-sent us the 3dobj and 3dobjmeta. 3dobj:", that.obj3d, "obj3dmeta:", that.obj3dmeta);
+                that.sceneReAddMySceneGroup();
+            });
+        },
+        // setupRegistrationHolesTab: function() {
+        //     this.useRegistrationHoles = $('.use-registration-holes').is(':checked');
+        //     $('.use-registration-holes').click(this.useRegistrationHolesChanged.bind(this));
+        // },
+        // useRegistrationHolesChanged: function() {
+        //     this.useRegistrationHoles = $('.use-registration-holes').is(':checked');
+        // },
+        // draw3dRegistrationHoles: function() {
+        //     if(!this.useRegistrationHoles) return;
+        //     var measuresLayerNumber = this.eagle.eagleLayersByName['Measures'].number;
+        //     var useDimensions = $('.com-chilipeppr-widget-eagle-reg-board-size-dimensions')[0].checked;
+        //     console.log("Ameen useDimensions", useDimensions, $('.com-chilipeppr-widget-eagle-reg-board-size-dimensions'));
+        //     var wires = [];
+        //     var holes = [];
+        //     if(useDimensions) {
+        //         for (var key in this.eagle.plainDimensions) {
+        //             if (this.eagle.plainDimensions[key].length > 0) {
+        //                 for (var i = 0; i < this.eagle.plainDimensions[key].length; i++) {
+        //                     var dimension = this.eagle.plainDimensions[key][i];
+        //                     //We are only looking for horizontal and vertical dimension on layer 47
+        //                     if (dimension.layer == measuresLayerNumber && (dimension.x1 == dimension.x2 || dimension.y1 == dimension.y2))
+        //                         wires.push({x1:dimension.x1, y1:dimension.y1, x2:dimension.x2, y2:dimension.y2});
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     else {
+        //         for (var key in this.eagle.plainWires) {
+        //             if (this.eagle.plainWires[key].length > 0) {
+        //                 for (var i = 0; i < this.eagle.plainWires[key].length; i++) {
+        //                     var wire = this.eagle.plainWires[key][i];
+        //                     //We are only looking for horizontal and vertical wires on layer 47
+        //                     if (wire.layer == measuresLayerNumber && (wire.x1 == wire.x2 || wire.y1 == wire.y2))
+        //                         wires.push({x1:wire.x1, y1:wire.y1, x2:wire.x2, y2:wire.y2});
+        //                 }
+        //             }
+        //         }
+        //     }
+
+        //     var boundries = {
+        //         MinimumX: Number.MAX_VALUE,
+        //         MinimumY: Number.MAX_VALUE,
+        //         MaximumX: Number.MIN_VALUE,
+        //         MaximumY: Number.MIN_VALUE
+        //     };
+        //     for (var i = 0; i < wires.length; i++) {
+        //         boundries.MinimumX = Math.min(boundries.MinimumX, wires[i].x1, wires[i].x2);
+        //         boundries.MaximumX = Math.max(boundries.MaximumX, wires[i].x1, wires[i].x2);
+        //         boundries.MinimumY = Math.min(boundries.MinimumY, wires[i].y1, wires[i].y2);
+        //         boundries.MaximumY = Math.max(boundries.MaximumY, wires[i].y1, wires[i].y2);
+        //     }
+        //     var x1 = boundries.MinimumX,
+        //         x2 = boundries.MaximumX,
+        //         y1 = boundries.MinimumY,
+        //         y2 = boundries.MaximumY;
+                
+        //     var area = (x2 - x1) * (y2 - y1);
+        //     console.log("Ameen area", area, boundries, wires);
+        //     if((useDimensions && wires.length < 2) || ((!useDimensions) && wires.length < 4) || area < 4){
+        //         console.log("Ameen logic", (useDimensions && wires.length < 2), ((!useDimensions) && wires.length < 4), area < 4); 
+        //         this.useRegistrationHoles = false;
+        //         return;
+        //     }
+        //     console.log("Ameen useRegistrationHoles", this.useRegistrationHoles);    
+        //     this.blankBoundaries = boundries;
+            
+        //     for (var key in this.eagle.plainCircles) {
+        //         if (this.eagle.plainCircles[key].length > 0) {
+        //             for (var i = 0; i < this.eagle.plainCircles[key].length; i++) {
+        //                 var circle = this.eagle.plainCircles[key][i];
+        //                 if (circle.layer == measuresLayerNumber && circle.radius<4) {
+        //                     holes.push({x:circle.x, y:circle.y, radius:circle.radius});
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     this.registrationHoles = holes;
+        //     var regColor = 0xB87333;
+        //     var lineMat = new THREE.LineBasicMaterial({
+        //         color: regColor,
+        //         transparent: true,
+        //         opacity: .4
+        //     });
+        //     var lineGeo = new THREE.Geometry();
+            
+        //     lineGeo.vertices.push(new THREE.Vector3(x1, y1, 0));
+        //     lineGeo.vertices.push(new THREE.Vector3(x2, y1, 0));
+        //     lineGeo.vertices.push(new THREE.Vector3(x2, y2, 0));
+        //     lineGeo.vertices.push(new THREE.Vector3(x1, y2, 0));
+        //     lineGeo.vertices.push(new THREE.Vector3(x1, y1, 0));
+
+        //     var line = new THREE.Line(lineGeo, lineMat);
+        //     var sceneGroup = new THREE.Group();
+        //     sceneGroup.add(line);
+            
+        //     var that = this;
+            
+        //     holes.forEach(function(hole){
+        //         var line = that.drawCircle(hole.x, hole.y, hole.radius, regColor, 32, .4);
+        //         line.rotateZ(Math.PI / 8);
+        //         sceneGroup.add (line);
+        //         var line1Geo = new THREE.Geometry();
+        //         line1Geo.vertices.push(new THREE.Vector3(hole.x-hole.radius/2, hole.y, 0));
+        //         line1Geo.vertices.push(new THREE.Vector3(hole.x+hole.radius/2, hole.y, 0));
+        //         var line1 = new THREE.Line(line1Geo, lineMat);
+        //         var line2Geo = new THREE.Geometry();
+        //         line2Geo.vertices.push(new THREE.Vector3(hole.x, hole.y-hole.radius/2, 0));
+        //         line2Geo.vertices.push(new THREE.Vector3(hole.x, hole.y+hole.radius/2, 0));
+        //         var line2 = new THREE.Line(line2Geo, lineMat);
+        //         sceneGroup.add(line1);
+        //         sceneGroup.add(line2);
+        //     });
+        //     this.sceneAdd(sceneGroup);
+        // },
+        // exportGcodeRegistrationHoles: function() {
+        //     var holes = this.registrationHoles;
+        //     if(holes.length < 2 || !this.useRegistrationHoles) {
+        //         $('.com-chilipeppr-widget-eagle-registration-gcode').val("");
+        //         return;
+        //     }
+        //     holes.sort(function(a, b) {return a.radius - b.radius;});
+        //     var clearanceHeight = $(".reg-holes-clearance").val();
+        //     var drillDepth = $(".reg-holes-depth").val();
+        //     var drillFeedrate = $(".reg-holes-feedrate").val();
+        //     var spindleRPM = $(".reg-holes-spindle-rpm").val();
+        //     var toolDia = holes[0].radius * 2;
+        //     var lastToolDia = -1;
+        //     var toolCount = 0;
+        //     var g = '';
+        //     g += "(Gcode generated by ChiliPeppr Eagle PCB Widget " + (new Date()).toLocaleString() + ")\n";
+        //     g += "G21 (mm mode)\n";
+        //     g += "G90 (abs mode)\n";
+        //     g += "(------ DRILLING REGISTRATION HOLES -------)\n";
+        //     holes.forEach(function(hole){
+        //         if(toolDia != lastToolDia){
+        //             g += "M5 (spindle off)\n";
+        //             g += "T" + toolCount + " M6 (Drilling holes - diameter " + toolDia + "mm)\n";
+        //             g += "(T" + toolCount++ + " D=" + toolDia + "mm - PCB Drill Bit)\n";
+        //             g += "M3 S" + spindleRPM + " (spindle on)\n";
+        //             g += "F" + drillFeedrate + "\n";
+        //         }
+        //         g += "G0 Z" + clearanceHeight + "\n";
+        //         g += "G0 X" + hole.x + " Y" + hole.y   + "\n";
+        //         g += "G0 Z" + clearanceHeight/10 + "\n";
+        //         g += "G1 Z" + drillDepth  + "\n";
+        //         g += "G1 Z" + clearanceHeight/10 + "\n";
+        //         lastToolDia  = toolDia;
+        //     });
+        //     g += "G0 Z" + clearanceHeight + "\n";
+        //     g += "M5 (spindle stop)\n";
+        //     g += "M30 (prog stop)\n";
+            
+        //     $('.com-chilipeppr-widget-eagle-registration-gcode').val(g);
+        // },
         /**
          * This sets up the tab to generate solder mask Gcode.
          */
@@ -1889,27 +2202,16 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             //$('#com-chilipeppr-widget-eagle .process-list').disableSelection();
         },
         sendGcodeToWorkspace: function() {
-            var isMainTab = $("#com-chilipeppr-widget-eagle-navtab-main")[0].className == "active";
-            var isRegsTab = $("#com-chilipeppr-widget-eagle-navtab-main-registration")[0].className == "active";
             var gcodetxt = "";
-            if(isMainTab && isRegsTab && this.useRegistrationHoles){
-                this.exportGcodeRegistrationHoles();
-                var info = {
-                    name: "Eagle BRD: " + this.fileInfo.name.replace(/.brd$/i, ""), 
-                    lastModified: new Date()
-                };
-                // grab gcode from textarea
-                gcodetxt = $('.com-chilipeppr-widget-eagle-registration-gcode').val();
-            }
-            else{
-                this.exportGcode();
-                var info = {
-                    name: "Eagle BRD: " + this.fileInfo.name.replace(/.brd$/i, ""), 
-                    lastModified: new Date()
-                };
-                // grab gcode from textarea
-                gcodetxt = $('.com-chilipeppr-widget-eagle-gcode').val();
-            }
+
+            this.exportGcode();
+            var info = {
+                name: "Eagle BRD: " + this.fileInfo.name.replace(/.brd$/i, ""), 
+                lastModified: new Date()
+            };
+            // grab gcode from textarea
+            gcodetxt = $('.com-chilipeppr-widget-eagle-gcode').val();
+
             if (gcodetxt.length < 10) {
                 chilipeppr.publish("/com-chilipeppr-elem-flashmsg/flashmsg", "Error Sending Gcode", "It looks like you don't have any Gcode to send to the workspace. Huh?", 5 * 1000);
                 return;
@@ -2112,7 +2414,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // these methods will draw all Eagle objects into several global
             // properties, the most important of which is this.clipperBySignalKey
             // which holds a structured object of each signal, i.e. +3V, GND, etc.
-            this.draw3dRegistrationHoles();
+            this.draw3dBlankBoard();
+            this.draw3dRegHoles();
             this.buildDimensionClipper();
             console.log("Ameen boundries",this.boundries());
             //Mirror board dimensions
@@ -3721,7 +4024,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             // Export Gcode
             this.paths = paths;
             setTimeout(this.exportGcode.bind(this), 500);
-            setTimeout(this.exportGcodeRegistrationHoles.bind(this), 500);
             
             if (callback) {
                 console.log("there was a callback after final drawing of board.");
@@ -7143,7 +7445,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             object.rotation.setFromRotationMatrix(object.matrix);
         },
         boundries: function(){
-            return this.useRegistrationHoles? this.blankBoundaries: this.boardBoundaries;
+            return this.blankBoard.use? this.blankBoundaries: this.boardBoundaries;
         },
         //V5.1D20161229 - Added
         /**Recalculate value of X if board is being mirrored*/
