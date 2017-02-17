@@ -759,7 +759,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         sendRegHoleGcodeToWorkspace: function(){
             this.exportGcodeRegistrationHoles();
             var info = {
-                name: "Eagle Registration Holes: " + this.fileInfo.name.replace(/.brd$/i, ""), 
+                name: "Eagle Registration Holes", 
                 lastModified: new Date()
             };
             // grab gcode from textarea
