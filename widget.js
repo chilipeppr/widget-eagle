@@ -6670,7 +6670,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     if (that.activeLayer == "Top")
                         diameter = pad.diameterTop;
                     else if (that.activeLayer == "Bottom")
-                        diameter = pad.diameterbottom;
+                        diameter = pad.diameterBottom;
                     else
                         diameter = pad.diameterInner;
    
