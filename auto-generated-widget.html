@@ -435,7 +435,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
             //$('#com-chilipeppr-widget-eagle .btnAnimate').click( this.animateOverlapPath.bind(this) );
 
-            console.log("Ameen init");
             this.setupBlankBoardParamenters();
             this.setupRegHolesParamenters();
             
@@ -465,7 +464,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             console.log(this.name + " done loading.");
         },
         blankBoard: {
-            use: true,
+            use: false,
             x: 0,
             y: 0,
             width: 150,
@@ -473,7 +472,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         blankBoardSceneGroup: null,
         setupBlankBoardParamenters: function() {
-            $("#com-chilipeppr-widget-eagle .use-blank-pcb").checked = this.blankBoard.use;
+            $("#com-chilipeppr-widget-eagle .use-blank-pcb").prop("checked", this.blankBoard.use);
             $("#com-chilipeppr-widget-eagle .blank-pcb-width").val(this.blankBoard.width);
             $("#com-chilipeppr-widget-eagle .blank-pcb-height").val(this.blankBoard.height);
             $("#com-chilipeppr-widget-eagle .blank-pcb-x").val(this.blankBoard.x);
@@ -487,7 +486,12 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         onChangeBlankBoardParamenters: function() {
             this.blankBoard.use = $("#com-chilipeppr-widget-eagle .use-blank-pcb").prop("checked");
-
+            $("#com-chilipeppr-widget-eagle .use-reg-holes").prop("disabled", !this.blankBoard.use);
+            if(this.blankBoard.use)
+                $("#com-chilipeppr-widget-eagle .reg-holes-note").hide();
+            else
+                $("#com-chilipeppr-widget-eagle .reg-holes-note").show();
+            console.log("Ameen", $("#com-chilipeppr-widget-eagle .reg-holes-note"));
             var item = $("#com-chilipeppr-widget-eagle .blank-pcb-x");
             if (item.val() == "") item.val(this.blankBoard.x); else this.blankBoard.x = parseFloat(item.val());
             
@@ -557,6 +561,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.blankBoardSceneGroup.add(line);
             this.sceneAdd(this.blankBoardSceneGroup);
         },
+        
         regHoles: {
             use: true,
             pattern: 201,
@@ -572,7 +577,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
         regHolesSceneGroup: null,
         setupRegHolesParamenters: function() {
-            $("#com-chilipeppr-widget-eagle .use-reg-holes").checked = this.regHoles.use;
+            $("#com-chilipeppr-widget-eagle .use-reg-holes").prop("checked", this.regHoles.use);
+            $("#com-chilipeppr-widget-eagle .use-reg-holes").prop("disabled", !this.blankBoard.use);
             $("#com-chilipeppr-widget-eagle #reg-holes-pattern").val(this.regHoles.pattern);
             $("#com-chilipeppr-widget-eagle .reg-holes-diameter").val(this.regHoles.diameter);
             $("#com-chilipeppr-widget-eagle .reg-holes-distance").val(this.regHoles.distance);
@@ -662,13 +668,13 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var count = Math.round(pattern/100);
             var onSides = Math.round((pattern - 100 * count)/10) == 1;
             var v = (pattern - 100 * count - 10 * onSides) == 0;
-            console.log("Ameen getRegHoles:", pattern, count, onSides, v);
+            
             var x = this.blankBoard.x,
                 y = this.blankBoard.y,
                 w = this.blankBoard.width,
                 h = this.blankBoard.height,
                 d = this.regHoles.distance + this.regHoles.diameter/2;
-            console.log("Ameen xywhd:", x, y, w, h, d);
+            
             var holes = [];
             if(count == 4){
                 holes.push({x: x + d,                 y: y + (onSides?h/2:d)});
@@ -680,7 +686,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 holes.push({x: x + (onSides?(v?w/2:d)  :d  ), y: y + (onSides?(v?d:h/2)  :(v?d:h-d))});
                 holes.push({x: x + (onSides?(v?w/2:w-d):w-d), y: y + (onSides?(v?h-d:h/2):(v?h-d:d))});
             }
-            console.log("Ameen getRegHoles", this.regHoles);
+
             return holes;
         },
         draw3dRegHoles: function(){
@@ -714,13 +720,13 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.sceneAdd(this.regHolesSceneGroup);
         },
         exportGcodeRegistrationHoles: function() {
-            console.log("Ameen exportGcode Called");
+
             var holes = this.regHoles.holes;
             if(holes.length < 2 || !this.regHoles.use) {
                 $('#com-chilipeppr-widget-eagle .reg-holes-gcode').text("");
                 return;
             }
-            console.log("Ameen exportGcode Running");
+
             var clearanceHeight = $("#com-chilipeppr-widget-eagle .reg-holes-clearance").val();
             var drillDepth = $("#com-chilipeppr-widget-eagle .reg-holes-depth").val();
             var drillFeedrate = $("#com-chilipeppr-widget-eagle .reg-holes-feedrate").val();
@@ -748,7 +754,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             g += "M30 (prog stop)\n";
             
             $('#com-chilipeppr-widget-eagle .reg-holes-gcode').text(g);
-            console.log("Ameen exportGcode completed", g);
+
         },
         sendRegHoleGcodeToWorkspace: function(){
             this.exportGcodeRegistrationHoles();
@@ -775,160 +781,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 that.sceneReAddMySceneGroup();
             });
         },
-        // setupRegistrationHolesTab: function() {
-        //     this.useRegistrationHoles = $('.use-registration-holes').is(':checked');
-        //     $('.use-registration-holes').click(this.useRegistrationHolesChanged.bind(this));
-        // },
-        // useRegistrationHolesChanged: function() {
-        //     this.useRegistrationHoles = $('.use-registration-holes').is(':checked');
-        // },
-        // draw3dRegistrationHoles: function() {
-        //     if(!this.useRegistrationHoles) return;
-        //     var measuresLayerNumber = this.eagle.eagleLayersByName['Measures'].number;
-        //     var useDimensions = $('.com-chilipeppr-widget-eagle-reg-board-size-dimensions')[0].checked;
-        //     console.log("Ameen useDimensions", useDimensions, $('.com-chilipeppr-widget-eagle-reg-board-size-dimensions'));
-        //     var wires = [];
-        //     var holes = [];
-        //     if(useDimensions) {
-        //         for (var key in this.eagle.plainDimensions) {
-        //             if (this.eagle.plainDimensions[key].length > 0) {
-        //                 for (var i = 0; i < this.eagle.plainDimensions[key].length; i++) {
-        //                     var dimension = this.eagle.plainDimensions[key][i];
-        //                     //We are only looking for horizontal and vertical dimension on layer 47
-        //                     if (dimension.layer == measuresLayerNumber && (dimension.x1 == dimension.x2 || dimension.y1 == dimension.y2))
-        //                         wires.push({x1:dimension.x1, y1:dimension.y1, x2:dimension.x2, y2:dimension.y2});
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     else {
-        //         for (var key in this.eagle.plainWires) {
-        //             if (this.eagle.plainWires[key].length > 0) {
-        //                 for (var i = 0; i < this.eagle.plainWires[key].length; i++) {
-        //                     var wire = this.eagle.plainWires[key][i];
-        //                     //We are only looking for horizontal and vertical wires on layer 47
-        //                     if (wire.layer == measuresLayerNumber && (wire.x1 == wire.x2 || wire.y1 == wire.y2))
-        //                         wires.push({x1:wire.x1, y1:wire.y1, x2:wire.x2, y2:wire.y2});
-        //                 }
-        //             }
-        //         }
-        //     }
-
-        //     var boundries = {
-        //         MinimumX: Number.MAX_VALUE,
-        //         MinimumY: Number.MAX_VALUE,
-        //         MaximumX: Number.MIN_VALUE,
-        //         MaximumY: Number.MIN_VALUE
-        //     };
-        //     for (var i = 0; i < wires.length; i++) {
-        //         boundries.MinimumX = Math.min(boundries.MinimumX, wires[i].x1, wires[i].x2);
-        //         boundries.MaximumX = Math.max(boundries.MaximumX, wires[i].x1, wires[i].x2);
-        //         boundries.MinimumY = Math.min(boundries.MinimumY, wires[i].y1, wires[i].y2);
-        //         boundries.MaximumY = Math.max(boundries.MaximumY, wires[i].y1, wires[i].y2);
-        //     }
-        //     var x1 = boundries.MinimumX,
-        //         x2 = boundries.MaximumX,
-        //         y1 = boundries.MinimumY,
-        //         y2 = boundries.MaximumY;
-                
-        //     var area = (x2 - x1) * (y2 - y1);
-        //     console.log("Ameen area", area, boundries, wires);
-        //     if((useDimensions && wires.length < 2) || ((!useDimensions) && wires.length < 4) || area < 4){
-        //         console.log("Ameen logic", (useDimensions && wires.length < 2), ((!useDimensions) && wires.length < 4), area < 4); 
-        //         this.useRegistrationHoles = false;
-        //         return;
-        //     }
-        //     console.log("Ameen useRegistrationHoles", this.useRegistrationHoles);    
-        //     this.blankBoundaries = boundries;
-            
-        //     for (var key in this.eagle.plainCircles) {
-        //         if (this.eagle.plainCircles[key].length > 0) {
-        //             for (var i = 0; i < this.eagle.plainCircles[key].length; i++) {
-        //                 var circle = this.eagle.plainCircles[key][i];
-        //                 if (circle.layer == measuresLayerNumber && circle.radius<4) {
-        //                     holes.push({x:circle.x, y:circle.y, radius:circle.radius});
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     this.registrationHoles = holes;
-        //     var regColor = 0xB87333;
-        //     var lineMat = new THREE.LineBasicMaterial({
-        //         color: regColor,
-        //         transparent: true,
-        //         opacity: .4
-        //     });
-        //     var lineGeo = new THREE.Geometry();
-            
-        //     lineGeo.vertices.push(new THREE.Vector3(x1, y1, 0));
-        //     lineGeo.vertices.push(new THREE.Vector3(x2, y1, 0));
-        //     lineGeo.vertices.push(new THREE.Vector3(x2, y2, 0));
-        //     lineGeo.vertices.push(new THREE.Vector3(x1, y2, 0));
-        //     lineGeo.vertices.push(new THREE.Vector3(x1, y1, 0));
-
-        //     var line = new THREE.Line(lineGeo, lineMat);
-        //     var sceneGroup = new THREE.Group();
-        //     sceneGroup.add(line);
-            
-        //     var that = this;
-            
-        //     holes.forEach(function(hole){
-        //         var line = that.drawCircle(hole.x, hole.y, hole.radius, regColor, 32, .4);
-        //         line.rotateZ(Math.PI / 8);
-        //         sceneGroup.add (line);
-        //         var line1Geo = new THREE.Geometry();
-        //         line1Geo.vertices.push(new THREE.Vector3(hole.x-hole.radius/2, hole.y, 0));
-        //         line1Geo.vertices.push(new THREE.Vector3(hole.x+hole.radius/2, hole.y, 0));
-        //         var line1 = new THREE.Line(line1Geo, lineMat);
-        //         var line2Geo = new THREE.Geometry();
-        //         line2Geo.vertices.push(new THREE.Vector3(hole.x, hole.y-hole.radius/2, 0));
-        //         line2Geo.vertices.push(new THREE.Vector3(hole.x, hole.y+hole.radius/2, 0));
-        //         var line2 = new THREE.Line(line2Geo, lineMat);
-        //         sceneGroup.add(line1);
-        //         sceneGroup.add(line2);
-        //     });
-        //     this.sceneAdd(sceneGroup);
-        // },
-        // exportGcodeRegistrationHoles: function() {
-        //     var holes = this.registrationHoles;
-        //     if(holes.length < 2 || !this.useRegistrationHoles) {
-        //         $('.com-chilipeppr-widget-eagle-registration-gcode').val("");
-        //         return;
-        //     }
-        //     holes.sort(function(a, b) {return a.radius - b.radius;});
-        //     var clearanceHeight = $(".reg-holes-clearance").val();
-        //     var drillDepth = $(".reg-holes-depth").val();
-        //     var drillFeedrate = $(".reg-holes-feedrate").val();
-        //     var spindleRPM = $(".reg-holes-spindle-rpm").val();
-        //     var toolDia = holes[0].radius * 2;
-        //     var lastToolDia = -1;
-        //     var toolCount = 0;
-        //     var g = '';
-        //     g += "(Gcode generated by ChiliPeppr Eagle PCB Widget " + (new Date()).toLocaleString() + ")\n";
-        //     g += "G21 (mm mode)\n";
-        //     g += "G90 (abs mode)\n";
-        //     g += "(------ DRILLING REGISTRATION HOLES -------)\n";
-        //     holes.forEach(function(hole){
-        //         if(toolDia != lastToolDia){
-        //             g += "M5 (spindle off)\n";
-        //             g += "T" + toolCount + " M6 (Drilling holes - diameter " + toolDia + "mm)\n";
-        //             g += "(T" + toolCount++ + " D=" + toolDia + "mm - PCB Drill Bit)\n";
-        //             g += "M3 S" + spindleRPM + " (spindle on)\n";
-        //             g += "F" + drillFeedrate + "\n";
-        //         }
-        //         g += "G0 Z" + clearanceHeight + "\n";
-        //         g += "G0 X" + hole.x + " Y" + hole.y   + "\n";
-        //         g += "G0 Z" + clearanceHeight/10 + "\n";
-        //         g += "G1 Z" + drillDepth  + "\n";
-        //         g += "G1 Z" + clearanceHeight/10 + "\n";
-        //         lastToolDia  = toolDia;
-        //     });
-        //     g += "G0 Z" + clearanceHeight + "\n";
-        //     g += "M5 (spindle stop)\n";
-        //     g += "M30 (prog stop)\n";
-            
-        //     $('.com-chilipeppr-widget-eagle-registration-gcode').val(g);
-        // },
         /**
          * This sets up the tab to generate solder mask Gcode.
          */
@@ -2348,7 +2200,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 chilipeppr.publish("/com-chilipeppr-elem-flashmsg/flashmsg", "Error Sending Gcode", "It looks like you don't have any Gcode to send to the workspace. Huh?", 5 * 1000);
                 return;
             }
-            console.log("Ameen code", gcodetxt);
+
             // send event off as if the file was drag/dropped
             chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondropped", gcodetxt, info);
             
@@ -2512,7 +2364,6 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         //threeDimensions: null,
         boardBoundaries: null, //V5.1D20161229
         blankBoundaries: null, //Boundaries of blank PCB as defined in layer 47
-        useRegistrationHoles: true,
         activeLayer: 'Top',
         clipperDimensions: [], // contains the dimensions of the board as clipper path
         //clipperDimensionsInfo: [], //V5.3D201701XX Added
@@ -2549,7 +2400,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.draw3dBlankBoard();
             this.draw3dRegHoles();
             this.buildDimensionClipper();
-            console.log("Ameen boundries",this.boundries());
+
             //Mirror board dimensions
             for(var c = 0; c < this.clipperDimension.length; c++){
                 this.clipperDimension[c].X = this.flipX(this.clipperDimension[c].X);
@@ -2983,6 +2834,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     }
                 }
             }
+            console.groupEnd();
             return g;
         },
         //This function will generate gcode for single sigment of dimension path(s)
@@ -6124,6 +5976,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 $('.eagle-holes-alert').addClass("hidden");
             else
                 $('.eagle-holes-alert').removeClass("hidden");
+            console.groupEnd();
         },
         draw3dVias: function (layersName) {
             if (!layersName) return;
@@ -8819,12 +8672,13 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
                                 <input class="form-control blank-pcb-y" style="width:48%;" type="number" placeholder="Y" value="0" step="1"/>
                             </div>
                             <!--  ----------------------- RENDER:BOARD:REGISTRATION HOLES ------------------------>
-                            <div class="checkbox">
+                            <div class="checkbox" style="margin-bottom:0px;">
                                 <label>
                                     <input type="checkbox" class="form-group use-reg-holes" checked>
-                                    <h2 style="margin-top:10px;">Registration Holes</h2> 
+                                    <h2 style="margin-top:10px; margin-bottom:0px;">Registration Holes</h2> 
                                 </label>
                             </div>
+                            <p class="descriptive-text reg-holes-note" style="margin:0px; padding:0px; color:red">Check Blank FR4 Board to enable this feature.</p>
                             <p class="descriptive-text">Following settings will generate Gcode to drill registration hole, this will be a seperate Gcode file, the registration holes are useful when milling a board with multiple layers or whenever there is a need to remove the board and put it back in exactly the same location.</p>
                             Holes Pattern
                             <div class="form-group">
@@ -9280,7 +9134,7 @@ EagleCanvas.prototype.mirrorLayer = function (layerIdx) {
                             </div>
                             <div class="input-group">
                                 Cutting Dimensions &amp; Milling Holes
-                                <select class="selectMillTraces form-control" id="DirectionCutting">
+                                <select class="selectMillTraces form-control" id="DirectionCutting" disabled>
                                     <option value='0'>Don't Care</option>
                                     <option value='1'>Conventional Milling</option>
                                     <option value='2'>Climb milling</option>

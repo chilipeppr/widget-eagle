@@ -149,12 +149,13 @@
                                 <input class="form-control blank-pcb-y" style="width:48%;" type="number" placeholder="Y" value="0" step="1"/>
                             </div>
                             <!--  ----------------------- RENDER:BOARD:REGISTRATION HOLES ------------------------>
-                            <div class="checkbox">
+                            <div class="checkbox" style="margin-bottom:0px;">
                                 <label>
                                     <input type="checkbox" class="form-group use-reg-holes" checked>
-                                    <h2 style="margin-top:10px;">Registration Holes</h2> 
+                                    <h2 style="margin-top:10px; margin-bottom:0px;">Registration Holes</h2> 
                                 </label>
                             </div>
+                            <p class="descriptive-text reg-holes-note" style="margin:0px; padding:0px; color:red">Check Blank FR4 Board to enable this feature.</p>
                             <p class="descriptive-text">Following settings will generate Gcode to drill registration hole, this will be a seperate Gcode file, the registration holes are useful when milling a board with multiple layers or whenever there is a need to remove the board and put it back in exactly the same location.</p>
                             Holes Pattern
                             <div class="form-group">
@@ -610,7 +611,7 @@
                             </div>
                             <div class="input-group">
                                 Cutting Dimensions &amp; Milling Holes
-                                <select class="selectMillTraces form-control" id="DirectionCutting">
+                                <select class="selectMillTraces form-control" id="DirectionCutting" disabled>
                                     <option value='0'>Don't Care</option>
                                     <option value='1'>Conventional Milling</option>
                                     <option value='2'>Climb milling</option>

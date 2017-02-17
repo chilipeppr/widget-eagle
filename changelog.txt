@@ -1,7 +1,7 @@
 Version 5.4
 **************************************************
 Auther: Ameen Nihad
-Release date: 09 FEB 2017
+Release date: 17 FEB 2017
 
 - Bug: Board renders incorrectly if mirror option is checked before drag/drop new board file.
   fixed by rendering board dimensions first becasue mirror feature currently rely on dimension boundries.
@@ -18,11 +18,10 @@ Release date: 09 FEB 2017
 - Tabs functionality is fully impelmented.
 - Gcode tab is seperated to multiple tabs (Taces, Drilling, Milling, Tabs & Gocde).
 - Circles as board dimensions are now supported.
-TODO: Mill empty areas.
-TODO: Keep 3dview angle after Render button is pressed.
-TODO: Registration holes feature.
-TODO: Smash (give z hight to board parts)
-TODO: SMD Roundness
+- Bug: Pads not connected to signals were considered as same signal, therefore adjacent pads will be merged if inflate value is high enough.
+  Fixed by assigning pad name to pad signal name.
+- Top/Bottom layers are always listed in Board Layer dropdown list.
+- Blank FR4 diemension and Registration Holes features are fully implemented, useful for milling boards with multiple layers.
 
 Version 5.3
 **************************************************
