@@ -71,13 +71,13 @@
 #com-chilipeppr-widget-eagle .tab-pane {
     padding: 10px 16px 20px 16px;
     overflow: auto;
-    max-height: 240px;
+    max-height: 260px;
 }
 
 #com-chilipeppr-widget-eagle .tab-pane-container {
     padding: 0px 0px 0px 0px;
     overflow: visible;
-    max-height: 240px;
+    max-height: 280px;
 }
 
 #com-chilipeppr-widget-eagle .panel-body {
