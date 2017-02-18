@@ -89,8 +89,8 @@
                         <button type="button" class="btn btn-xs btn-default btn-eagle-sendgcodetows" 
                         style="margin: 4px 0;" disabled><span class="glyphicon glyphicon-send"></span> Send Gcode to Workspace</button>
                     </div>
-                    <div style="margin: 10px 0;"></div>
-                    <ul class="nav nav-tabs" role="tablist">
+                    <div style="margin: 4px 0;"></div>
+                    <ul class="nav nav-tabs nav-tabs-2ndpos" role="tablist" style="">
                         <li class="active"><a href="#main-board" role="tab" data-toggle="tab">Board</a>
                         </li>
                         <li><a href="#main-signals" role="tab" data-toggle="tab">Signals</a>
@@ -103,7 +103,7 @@
                     <!--  ----------------------- RENDER:BOARD ------------------------>
                     <div class="tab-content">
                         <div class="tab-pane active" id="main-board">
-                            <h2 style="margin-top:10px;">Board Layer</h2>
+                            <h2 style="margin-top:0px;">Board Layer</h2>
                             <div class="form-group">
                                 <select class="selectLayer form-control" id="selectLayer">
                                     <!-- <option>Select Layer</option> -->
@@ -124,14 +124,25 @@
                                 </div> 
                                 
                             </div>
+                            
                             <!--  ----------------------- RENDER:BOARD:BLANK FR4 BOARD ------------------------>
+                            <div style="border:1px dashed black; padding:0 10px;border-radius:6px;">
+                                
                             <div class="checkbox">
                                 <label>
                                     <input type="checkbox" class="use-blank-pcb" checked>
-                                    <h2 style="margin-top:10px;">Blank FR4 Board</h2> 
+                                    <h2 style="margin-top:0px;">Blank FR4 Board</h2> 
                                 </label>
                             </div>
-                            <p class="descriptive-text">Following settings will affect how selected board layer is mirrored, if this option is unchecked widget will use board dimensions instead.</p>
+                            <p class="descriptive-text" style="margin-top:0;padding-top:0;">
+                                Use this section to create a set size FR4 board that you can 
+                                mill registration holes in for flipping your board over. 
+                            </p>
+                                
+                            <p class="descriptive-text" style="margin-top:0;padding-top:0;">
+                                The following settings will affect how the selected board layer is
+                                mirrored. If this option is unchecked, the widget will use 
+                                board dimensions instead.</p>
                             Width
                             <div class="input-group">
                                 <input class="form-control blank-pcb-width" type="number" placeholder="Width" value="150" min="20" step="10"/>
@@ -156,7 +167,12 @@
                                 </label>
                             </div>
                             <p class="descriptive-text reg-holes-note" style="margin:0px; padding:0px; color:red">Check Blank FR4 Board to enable this feature.</p>
-                            <p class="descriptive-text">Following settings will generate Gcode to drill registration hole, this will be a seperate Gcode file, the registration holes are useful when milling a board with multiple layers or whenever there is a need to remove the board and put it back in exactly the same location.</p>
+                            <p class="descriptive-text">
+                                The following settings will generate Gcode to drill registration holes.
+                                This will be a seperate Gcode file available in the textbox below.
+                                The registration holes are useful when milling a board with multiple 
+                                layers or whenever there is a need to remove the board and put it 
+                                back in exactly the same location.</p>
                             Holes Pattern
                             <div class="form-group">
                                 <select class="form-control" id="reg-holes-pattern">
@@ -210,7 +226,9 @@
                             <button style="margin-bottom:4px;" type="button" class="btn btn-default reg-holes-sendgcodetows">Send Gcode to Workspace</button>
                             <textarea class="reg-holes-gcode" rows="3" spellcheck="false"></textarea>
                         </div>
-
+                        </div>
+                        <!-- End Blank FR4 Board section -->
+                        
                         <!--  ----------------------- RENDER:SIGNALS ------------------------>
                         <div class="tab-pane xactive" id="main-signals">
                             <h2 style="margin-top:10px;">Inflate Traces</h2>
@@ -336,8 +354,8 @@
                 <div class="tab-pane tab-pane-container xactive" id="eagle-gcode">
                     <button type="button" class="btn btn-xs btn-default btn-eagle-sendgcodetows hidden" 
                     style="margin: 4px 0;" disabled><span class="glyphicon glyphicon-send"></span> Send Gcode to Workspace</button>
-                    <div style="margin: 10px 0;"></div>
-                    <ul class="nav nav-tabs" role="tablist">
+                    <div style="margin: 4px 0;"></div>
+                    <ul class="nav nav-tabs nav-tabs-2ndpos" role="tablist">
                         <li class="active"><a href="#gcode-traces" role="tab" data-toggle="tab">Traces</a>
                         </li>
                         <li><a href="#gcode-drilling" role="tab" data-toggle="tab">Drilling</a>
@@ -378,7 +396,7 @@
                                     <input type="checkbox" class="AvoidTraceBoardDimensions" checked /> Avoid Tracing Board Dimensions
                                     </label>
                                 </div>
-                                <p class="descriptive-text">Experimental - This feature will eliminate tracing any path(s) that matches board dimensions, hit Render button after changing this checkbox to see the results.</p>
+                                <p class="descriptive-text">Experimental - This feature will eliminate tracing any path(s) that match board dimensions. Hit Render button after changing this checkbox to see the results.</p>
                             </div>
                             
                             Feedrate for Milling Traces
@@ -422,13 +440,15 @@
                                 </label>
                             </div>
     
-                            <div class="checkbox">
+                            <div style="margin-left:10px;">
+                            <div class="checkbox" style="padding-top:4px;">
                                 <label>
                                     <input type="checkbox" class="drill-markholes" checked> Mark holes for drilling </input>
                                 </label>
                             </div>
-                            <p class="descriptive-text">This will mark holes for drill. The first endmill (V-Bit or other) will touch the middle of a hole to center the mill, to prevent "dancing drill" effect.</p>
-    
+                            <p class="descriptive-text" style="padding-top:0; margin-top:-8px;">This will mark holes for drill, which is a slight touch of the top surface to create an indent. The first endmill (V-Bit or other) will touch the middle of a hole to center the mill, to prevent "dancing drill" effect.</p>
+                            </div>
+                        
                             Depth for Drilling Holes
                             <div class="checkbox">
                                 <label>
@@ -474,7 +494,7 @@
                             <div class="panel eagle-advanced" style="margin-bottom:10px;">
                                 <div class="checkbox" style="margin-bottom:6px;">
                                     <label>
-                                        <input type="checkbox" class="dimension-layer-20" checked> 20 Dimension</input>
+                                        <input type="checkbox" class="dimension-layer-20" checked> 20 Dimension (Default)</input>
                                     </label>
                                 </div>
                                 <div class="checkbox">
@@ -482,7 +502,7 @@
                                         <input type="checkbox" class="dimension-layer-46" checked> 46 Milling</input>
                                     </label>
                                 </div>
-                                <p class="descriptive-text">Select which layer to use as board dimansions layer, both layers will be rendered in the 3D viewer, but gcode will be generated for selected layer(s) only.
+                                <p class="descriptive-text">Select which layer to use as board dimansions layer. Both layers will be rendered in the 3D viewer, but gcode will be generated for selected layer(s) only.
                                 </p>
                             </div>
                             
@@ -598,8 +618,8 @@
                         <div class="tab-pane xactive" id="gcode-gcode">
                             <!--  ----------------- Milling Direction--------------------->
                             
-                            <h2 style="margin-top:10px;">Tool Paths Direction</h2>
-                            <p class="descriptive-text">Following selections will adjust the orientation of tool paths, if left to default, orientation of paths is unpredictable and depends on how traces and wires were drawn in Eagle. Hit Render button after changing these values.
+                            <h2 style="margin-top:10px;margin-bottom:0;">Tool Paths Direction</h2>
+                            <p class="descriptive-text" style="padding-top:0;">Following selections will adjust the orientation of tool paths, if left to default, orientation of paths is unpredictable and depends on how traces and wires were drawn in Eagle. Hit Render button after changing these values.
                             </p>
                             <div class="form-group">
                                 Milling Traces
@@ -617,7 +637,8 @@
                                     <option value='2'>Climb milling</option>
                                 </select>
                             </div>
-                            Generated Gcode
+                            
+                            <p style="margin:10px 0 0 0;">Generated Gcode</p>
                             <textarea class="com-chilipeppr-widget-eagle-gcode" spellcheck="false"></textarea>
                         </div>
                     </div>

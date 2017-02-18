@@ -109,3 +109,16 @@
     position: absolute;
     margin-left: -1.3em;
 }
+
+.nav-tabs-2ndpos {
+    margin-left:10px;
+    margin-right:10px;
+}
+
+.nav-tabs-2ndpos li {
+    font-size:12px;
+}
+
+.nav-tabs.nav-tabs-2ndpos li.active a {
+    border-style: dashed;
+}
