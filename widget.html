@@ -34,20 +34,22 @@
 <body>
 
     <div id="com-chilipeppr-widget-eagle" class="panel panel-default">
-        <div class="panel-heading ">
+        <div class="panel-heading">
+            <span class="panel-title" data-toggle="popover">Eagle BRD</span>
+            <span style="font-size:9px;" class="fb-build">v5.4</span>
             <div class="btn-toolbar pull-right" role="toolbar">
                 <div class="btn-group"></div>
                 <div class="btn-group">
+                    <button type="button" class="btn btn-xs btn-default btn-refresh" data-delay="500" 
+                    data-animation="true" data-placement="auto" data-container="body" data-trigger="hover" 
+                    data-title="Refresh 3D Viewer" data-content="Hit Ctrl+Enter in any of the edit boxes below to trigger a refresh. Update the 3D Viewer with your new settings."><span 
+                    class="glyphicon glyphicon-refresh"></span>
+                    </button>
                     <button type="button" class="btn btn-xs btn-default btn-eagle-sendgcodetows" data-delay="500" 
                     data-animation="true" data-placement="auto" data-container="body" data-trigger="hover" 
                     data-title="Send Gcode to Workspace" disabled
                     data-content="Generate all of the Gcode and send it to the workspace so you can run it.">
-                        <span class="glyphicon glyphicon-send"></span> Gcode
-                    </button>
-                    <button type="button" class="btn btn-xs btn-default btn-refresh" data-delay="500" 
-                    data-animation="true" data-placement="auto" data-container="body" data-trigger="hover" 
-                    data-title="Refresh 3D Viewer" data-content="Hit Ctrl+Enter in any of the edit boxes below to trigger a refresh. Update the 3D Viewer with your new settings."><span 
-                    class="glyphicon glyphicon-refresh"></span> Render
+                        <span class="glyphicon glyphicon-send"></span>
                     </button>
                 </div>
                 <div class="btn-group">
@@ -61,389 +63,564 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
                     </div>
                 </div>
-            </div> <span class="panel-title" data-toggle="popover">Eagle BRD</span> <span 
-            style="font-size:9px;" class="fb-build">v5.3</span>
-
+            </div>
+            <div class="eagle-draghere" style="font-size:80%; margin-top:5px;">Drag your Eagle BRD file here...</div>
         </div>
-        <div class="alert alert-danger hidden eagle-holes-alert" style="margin-bottom:5px;">Gcode could not be generated for some of the holes (the ones highlighted in red), check tool size in the Gcode tab.</div>
-        <div class="alert alert-danger hidden eagle-slots-alert" style="margin-bottom:5px;">Gcode could not be generated for some of the slots (the ones highlighted in red), check tool size in the Gcode tab or correct any mistakes in your .brd file.</div>
+        
+        <div class="alert alert-danger hidden eagle-holes-alert" style="margin-bottom:5px;padding:5px;font-size:80%;">Gcode could not be generated for some of the holes (the ones highlighted in red), check tool size in the Gcode tab.</div>
+        <div class="alert alert-danger hidden eagle-slots-alert" style="margin-bottom:5px;padding:5px;font-size:80%;">Gcode could not be generated for some of the slots (the ones highlighted in red), check tool size in the Gcode tab or correct any mistakes in your .brd file.</div>
         <div class="panel-body">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
-                <li class="active"><a href="#eagle-main" role="tab" data-toggle="tab">Render</a>
+                <li class="active" id="com-chilipeppr-widget-eagle-navtab-main"><a href="#eagle-main" role="tab" data-toggle="tab">Render</a>
                 </li>
-                <li xclass="active"><a href="#eagle-gcode" role="tab" data-toggle="tab">Gcode</a></li>
+                <li id="com-chilipeppr-widget-eagle-navtab-gcode"><a href="#eagle-gcode" role="tab" data-toggle="tab">Gcode</a></li>
                 <li xclass="active"><a href="#eagle-soldermask" role="tab" data-toggle="tab">Solder Mask</a>
                 </li>
                 <li ><a href="#eagle-tutorial" role="tab" data-toggle="tab">Tutorial</a>
                 </li>
             </ul>
             
-            <!-- Tab panes -->
+            <!--  ----------------------- RENDER ------------------------>
             <div class="tab-content">
-                <div class="tab-pane active" id="eagle-main">
-                    <div class="eagle-draghere">Drag your Eagle BRD file here...</div>
+                <div class="tab-pane tab-pane-container active" id="eagle-main">
                     <!-- <p>Best Endmill Size to Use <code><span class="best-size highlight"><i>Undetermined</i></span></code></p> -->
-                    <div class="panel-eagle-sendgcodetows">
+                    <div class="panel-eagle-sendgcodetows hidden">
                         <button type="button" class="btn btn-xs btn-default btn-eagle-sendgcodetows" 
                         style="margin: 4px 0;" disabled><span class="glyphicon glyphicon-send"></span> Send Gcode to Workspace</button>
                     </div>
+                    <div style="margin: 10px 0;"></div>
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="active"><a href="#main-board" role="tab" data-toggle="tab">Board</a>
+                        </li>
+                        <li><a href="#main-signals" role="tab" data-toggle="tab">Signals</a>
+                        </li>
+                        <!--<li id="com-chilipeppr-widget-eagle-navtab-main-registration"><a href="#main-registation" role="tab" data-toggle="tab">Registration</a>-->
+                        <!--</li>-->
+                        <li><a href="#main-options" role="tab" data-toggle="tab">Options</a>
+                        </li>
+                    </ul>
+                    <!--  ----------------------- RENDER:BOARD ------------------------>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="main-board">
+                            <h2 style="margin-top:10px;">Board Layer</h2>
+                            <div class="form-group">
+                                <select class="selectLayer form-control" id="selectLayer">
+                                    <!-- <option>Select Layer</option> -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                Select Mirror Axis
+                                <p class="descriptive-text">To see mirrored results, either select different board layer or hit Render button.</p>
+                                <div class="checkbox">
+                                    <label>
+                                    <input type="checkbox" class="mirrorAxisY" checked /> Mirror horizontally - Y Axis
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                    <input type="checkbox" class="mirrorAxisX" checked /> Mirror vertically - X Axis
+                                    </label>
+                                </div> 
+                                
+                            </div>
+                            <!--  ----------------------- RENDER:BOARD:BLANK FR4 BOARD ------------------------>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="use-blank-pcb" checked>
+                                    <h2 style="margin-top:10px;">Blank FR4 Board</h2> 
+                                </label>
+                            </div>
+                            <p class="descriptive-text">Following settings will affect how selected board layer is mirrored, if this option is unchecked widget will use board dimensions instead.</p>
+                            Width
+                            <div class="input-group">
+                                <input class="form-control blank-pcb-width" type="number" placeholder="Width" value="150" min="20" step="10"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            Height
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <input class="form-control blank-pcb-height" type="number" placeholder="Height" value="100" min="20" step="10"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            Location (X, Y)
+                            <p class="descriptive-text" style="margin-bottom: 0px; padding-top: 0px;">Location of left bottom corner of blank FR4 board</p>
+                            <div class="input-group">
+                                <input class="form-control blank-pcb-x" style="width:48%; margin-right: 4%;" type="number" placeholder="X" value="0" step="1"/>
+                                <input class="form-control blank-pcb-y" style="width:48%;" type="number" placeholder="Y" value="0" step="1"/>
+                            </div>
+                            <!--  ----------------------- RENDER:BOARD:REGISTRATION HOLES ------------------------>
+                            <div class="checkbox" style="margin-bottom:0px;">
+                                <label>
+                                    <input type="checkbox" class="form-group use-reg-holes" checked>
+                                    <h2 style="margin-top:10px; margin-bottom:0px;">Registration Holes</h2> 
+                                </label>
+                            </div>
+                            <p class="descriptive-text reg-holes-note" style="margin:0px; padding:0px; color:red">Check Blank FR4 Board to enable this feature.</p>
+                            <p class="descriptive-text">Following settings will generate Gcode to drill registration hole, this will be a seperate Gcode file, the registration holes are useful when milling a board with multiple layers or whenever there is a need to remove the board and put it back in exactly the same location.</p>
+                            Holes Pattern
+                            <div class="form-group">
+                                <select class="form-control" id="reg-holes-pattern">
+                                    <option value='400'>4 Hole on corners</option>
+                                    <option value='410'>4 Hole on sides</option>
+                                    <option value='200'>2 Hole on corners BL/TR</option>
+                                    <option value='201'>2 Hole on corners TL/BR</option>
+                                    <option value='210'>2 Hole on sides T/B</option>
+                                    <option value='211'>2 Hole on sides L/R</option>
+                                </select>
+                                <p class="descriptive-text">T: Top, B: Bottom, L: Left, R: Right.</p>
+                            </div>
+                            
+                            Holes Diameter
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <input class="form-control reg-holes-diameter" type="number" placeholder="Diameter" value="3.175" min="1" max="4" step=".1"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            Distance from Edges
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <input class="form-control reg-holes-distance" type="number" placeholder="Distance" value="1" min="0.5" max="10" step=".5"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <!--  ----------------------- RENDER:BOARD:REGISTRATION HOLES:GCODE ------------------------>
+                            <h2 style="margin-top:10px;">Gcode Parameters</h2>
+                            <p class="descriptive-text" style="padding-top: 0px;">Following Gcode parementers are used for drilling registration holes only.</p>
+                            
+                            Depth for Drilling
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <input class="form-control reg-holes-depth" type="number" placeholder="Depth" value="-1.7" min="-20" max="-0.1" step="0.1"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            
+                            Clearance Height
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <input class="form-control reg-holes-clearance" type="number" placeholder="Clearance" value="2" min="0.5" step="0.5"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            
+                            Feedrate
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <input class="form-control reg-holes-feedrate" type="number" placeholder="Feed rate" value="200" min="20" step="100"/>
+                                <div class="input-group-addon">mm/min</div>
+                            </div>
+                            
+                            Spindle Speed
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <input class="form-control reg-holes-spindle-rpm" type="number" placeholder="Speed" value="12000" min="3000" step="1000"/>
+                                <div class="input-group-addon">rpm</div>
+                            </div>
+                            <button style="margin-bottom:4px;" type="button" class="btn btn-default reg-holes-sendgcodetows">Send Gcode to Workspace</button>
+                            <textarea class="reg-holes-gcode" rows="3" spellcheck="false"></textarea>
+                        </div>
 
-                    <div class="form-group">
-                        Select Board Layer
-                        <select class="selectLayer form-control" id="selectLayer">
-                            <!-- <option>Select Layer</option> -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        Select Mirror Axis
-                        <div class="checkbox">
-                            <label>
-                            <input type="checkbox" class="mirrorAxisY" checked /> Mirror horizontally - Y Axis
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                            <input type="checkbox" class="mirrorAxisX" checked /> Mirror vertically - X Axis
-                            </label>
-                        </div> 
-                        <p class="descriptive-text">Hit Render button after changing mirror option.</p>
-                    </div>
-    
-                    <div class="form-group">
-                        Inflate Milling Path By
-                        <div class="input-group">
-                            <input class="form-control inflate-by" type="number" placeholder="" value="0.35" />
-                            <div class="input-group-addon">mm</div>
-                        </div>
-                        <!-- <button type="button" class="btn btn-xs btn-eagle-advanced" >Advanced</button> -->
-                        <!-- <button type="button" class="btn btn-xs btnAnimate" >Animate</button> -->
-                        <!-- <p style="font-size:9px">This value is auto-set by determining the largest endmill you can use to isolate all signals, pads, and vias without milling into adjacent ones. You want to use the largest endmill you can, but you are limited by how closely spaced your elements are. It is best to leave this value alone, however you can attempt to expand your endmill at the cost of milling into other elements.</p> -->
-                        <!-- <p style="font-size:9px">In practice, you almost always will expand this size, so use the auto-set value as a baseline for what's safe and then go up from there. If you are going to manually set this value, best practice is to set this value to half of your endmill size. Then check the 3D viewer to see what effect it will have on taking away too much copper. You can use the "actual endmill" feature below to better visualize this offset combined with how much copper the endmill will take off.</p> -->
-                        <p class="descriptive-text">Inflate your milling path by half the diameter of your endmill. If you are using a 0.5mm endmill, then enter 0.25mm above. If you are using a V-bit then figure out the diameter based on how deep you'll mill. Copper on FR4 is usually
-                            1 oz = 0.035mm, 2 oz = 0.07mm, 3 oz = 0.105mm thick. If you use ChiliPeppr's Auto-Level, you could safely mill with depths of 1 oz = 0.07mm, 2 oz = 0.1mm (most popular), 3 oz = 0.15mm. That means a V-bit with a 45&deg; angle
-                            at 0.1mm depth will have a diameter of roughly 0.1mm. So, you could use 0.05mm above, however, in practice it would be best to inflate further than that to be safe.</p>
-                    </div>
+                        <!--  ----------------------- RENDER:SIGNALS ------------------------>
+                        <div class="tab-pane xactive" id="main-signals">
+                            <h2 style="margin-top:10px;">Inflate Traces</h2>
+                            <div class="form-group">
+                                Inflate Milling Path By
+                                <div class="input-group">
+                                    <input class="form-control inflate-by" type="number" placeholder="" value="0.35" />
+                                    <div class="input-group-addon">mm</div>
+                                </div>
+                                <!-- <button type="button" class="btn btn-xs btn-eagle-advanced" >Advanced</button> -->
+                                <!-- <button type="button" class="btn btn-xs btnAnimate" >Animate</button> -->
+                                <!-- <p style="font-size:9px">This value is auto-set by determining the largest endmill you can use to isolate all signals, pads, and vias without milling into adjacent ones. You want to use the largest endmill you can, but you are limited by how closely spaced your elements are. It is best to leave this value alone, however you can attempt to expand your endmill at the cost of milling into other elements.</p> -->
+                                <!-- <p style="font-size:9px">In practice, you almost always will expand this size, so use the auto-set value as a baseline for what's safe and then go up from there. If you are going to manually set this value, best practice is to set this value to half of your endmill size. Then check the 3D viewer to see what effect it will have on taking away too much copper. You can use the "actual endmill" feature below to better visualize this offset combined with how much copper the endmill will take off.</p> -->
+                                <p class="descriptive-text">Inflate your milling path by half the diameter of your endmill. If you are using a 0.5mm endmill, then enter 0.25mm above. If you are using a V-bit then figure out the diameter based on how deep you'll mill. Copper on FR4 is usually
+                                    1 oz = 0.035mm, 2 oz = 0.07mm, 3 oz = 0.105mm thick. If you use ChiliPeppr's Auto-Level, you could safely mill with depths of 1 oz = 0.07mm, 2 oz = 0.1mm (most popular), 3 oz = 0.15mm. That means a V-bit with a 45&deg; angle
+                                    at 0.1mm depth will have a diameter of roughly 0.1mm. So, you could use 0.05mm above, however, in practice it would be best to inflate further than that to be safe.</p>
+                            </div>
+                            
+                            Advanced Inflating
+                            <p class="descriptive-text">Instead of using the default inflate value, you can override
+                            inflate values for specific elements on the board.</p>
+                            
+                            <div class="panel eagle-advanced" style="margin-bottom:10px;">
+        
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="use-inflate-smds-by" xchecked /> Inflate SMDs By
+                                    </label>
+                                </div>
+                                <div class="input-group">
+                                    <input class="form-control inflate-smds-by" type="number" placeholder="" value="0.175" />
+                                    <div class="input-group-addon">mm</div>
+                                </div>
+                                <div class="checkbox" style="margin: 4px 0 6px 18px;">
+                                    <label>
+                                        <input type="checkbox" class="use-smd-clipwire" checked /> Clip wires
+                                    </label>
+                                </div>
+                                <div class="checkbox" style="margin: 2px 0 14px 18px;">
+                                    <label>
+                                        <input type="checkbox" class="use-smd-ignoreundefined" xchecked /> Remove Undefined SMDs
+                                    </label>
+                                </div>
+        
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="use-inflate-pads-by" xchecked /> Inflate Pads By
+                                    </label>
+                                </div>
+                                <div class="input-group">
+                                    <input class="form-control inflate-pads-by" type="number" placeholder="" value="0.175" />
+                                    <div class="input-group-addon">mm</div>
+                                </div>
+        
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="use-inflate-vias-by" xchecked /> Inflate Vias By
+                                    </label>
+                                </div>
+                                <div class="input-group">
+                                    <input class="form-control inflate-vias-by" type="number" placeholder="" value="0.175" />
+                                    <div class="input-group-addon">mm</div>
+                                </div>
+        
+        
+        
+                            </div>
                     
-                    Advanced Inflating
-                    <p class="descriptive-text">Instead of using the default inflate value, you can override
-                    inflate values for specific elements on the board.</p>
-                    
-                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
-
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="use-inflate-smds-by" xchecked /> Inflate SMDs By
-                            </label>
                         </div>
-                        <div class="input-group">
-                            <input class="form-control inflate-smds-by" type="number" placeholder="" value="0.175" />
-                            <div class="input-group-addon">mm</div>
+                        
+                        <!--  ----------------------- RENDER:OPTIONS ------------------------>
+                        <div class="tab-pane xactive" id="main-options">
+                            <h2 style="margin-top:10px;">Options</h2>
+                            <div class="form-group">
+                                Show Actual End Mill Path
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="show-actual" xchecked /> Show (Takes long to process)
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="show-actual-asmesh" checked> As Solid Line (Takes super long to process) </input>
+                                    </label>
+                                </div>
+                                <div class="input-group">
+        
+                                    <input class="form-control actual-endmill-size" type="number" placeholder="Size" value="0.35" />
+                                    <div class="input-group-addon">mm</div>
+                                </div>
+                                <p class="descriptive-text">This value does not affect how your Gcode is created, rather it just lets you visualize where your endmill will travel. The size you place here is simulated in the 3D viewer along the inflated milling path you specified above.
+                                    It is common to mill PCB's with an endmill larger than what should exactly be used at the cost of cutting off more copper from signals/vias/pads. To ensure you aren't causing any actual problems, look at where the cyan line
+                                    goes to understand.</p>
+                            </div>
+        
+                            <div class="form-group">
+                                Curve Resolution (Segment Length)
+                                <div class="input-group">
+                                    <input class="form-control curve-resolution" type="number" placeholder="" value="0.5" />
+                                    <div class="input-group-addon">mm</div>
+                                </div>
+                                <p class="descriptive-text">Curved board dimensions, curved polygond or curved wires will be converted to line segments and executed as G01 gcode commands, this value is the length of each line segment, smaller value means higher curve accuracy and larget gcode file, please input value between 0.1 - 1.00 mm</p>
+                            </div>
+                            
+                            <div class="form-group">
+        
+                                Toggle Signal/Pad/Via Popup Windows
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="popups-hide" xchecked /> Hide
+                                    </label>
+        
+                                </div>
+        
+                                <p class="descriptive-text">This allows you to hide the popup windows as you mouse around with the 3D viewer. They can sometimes get in the way when iterating the best endmill sizes and inflate by values.</p>
+                            </div>
                         </div>
-                        <div class="checkbox" style="margin: 4px 0 6px 18px;">
-                            <label>
-                                <input type="checkbox" class="use-smd-clipwire" checked /> Clip wires
-                            </label>
-                        </div>
-                        <div class="checkbox" style="margin: 2px 0 14px 18px;">
-                            <label>
-                                <input type="checkbox" class="use-smd-ignoreundefined" xchecked /> Remove Undefined SMDs
-                            </label>
-                        </div>
-
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="use-inflate-pads-by" xchecked /> Inflate Pads By
-                            </label>
-                        </div>
-                        <div class="input-group">
-                            <input class="form-control inflate-pads-by" type="number" placeholder="" value="0.175" />
-                            <div class="input-group-addon">mm</div>
-                        </div>
-
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="use-inflate-vias-by" xchecked /> Inflate Vias By
-                            </label>
-                        </div>
-                        <div class="input-group">
-                            <input class="form-control inflate-vias-by" type="number" placeholder="" value="0.175" />
-                            <div class="input-group-addon">mm</div>
-                        </div>
-
-
-
-                    </div>
-
-                    <div class="form-group">
-                        Show Actual End Mill Path
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="show-actual" xchecked /> Show (Takes long to process)
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="show-actual-asmesh" checked> As Solid Line (Takes super long to process) </input>
-                            </label>
-                        </div>
-                        <div class="input-group">
-
-                            <input class="form-control actual-endmill-size" type="number" placeholder="Size" value="0.35" />
-                            <div class="input-group-addon">mm</div>
-                        </div>
-                        <p class="descriptive-text">This value does not affect how your Gcode is created, rather it just lets you visualize where your endmill will travel. The size you place here is simulated in the 3D viewer along the inflated milling path you specified above.
-                            It is common to mill PCB's with an endmill larger than what should exactly be used at the cost of cutting off more copper from signals/vias/pads. To ensure you aren't causing any actual problems, look at where the cyan line
-                            goes to understand.</p>
-                    </div>
-
-                    <div class="form-group">
-                        Curve Resolution (Segment Length)
-                        <div class="input-group">
-                            <input class="form-control curve-resolution" type="number" placeholder="" value="0.5" />
-                            <div class="input-group-addon">mm</div>
-                        </div>
-                        <p class="descriptive-text">Curved board dimensions, curved polygond or curved wires will be converted to line segments and executed as G01 gcode commands, this value is the length of each line segment, smaller value means higher curve accuracy and larget gcode file, please input value between 0.1 - 1.00 mm</p>
-                    </div>
-                    
-                    <div class="form-group">
-
-                        Toggle Signal/Pad/Via Popup Windows
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="popups-hide" xchecked /> Hide
-                            </label>
-
-                        </div>
-
-                        <p class="descriptive-text">This allows you to hide the popup windows as you mouse around with the 3D viewer. They can sometimes get in the way when iterating the best endmill sizes and inflate by values.</p>
                     </div>
 
                     <canvas id="eagle-canvas" class="hidden" width="100%" height="130"></canvas>
                 </div>
 
-                <div class="tab-pane xactive" id="eagle-gcode">
-                    <button type="button" class="btn btn-xs btn-default btn-eagle-sendgcodetows" 
+                <div class="tab-pane tab-pane-container xactive" id="eagle-gcode">
+                    <button type="button" class="btn btn-xs btn-default btn-eagle-sendgcodetows hidden" 
                     style="margin: 4px 0;" disabled><span class="glyphicon glyphicon-send"></span> Send Gcode to Workspace</button>
-
-                    <h2 style="margin-top:10px;">Traces</h2> 
+                    <div style="margin: 10px 0;"></div>
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="active"><a href="#gcode-traces" role="tab" data-toggle="tab">Traces</a>
+                        </li>
+                        <li><a href="#gcode-drilling" role="tab" data-toggle="tab">Drilling</a>
+                        </li>
+                        <li><a href="#gcode-milling" role="tab" data-toggle="tab">Milling</a>
+                        </li>
+                        <li><a href="#gcode-tabs" role="tab" data-toggle="tab">Tabs</a>
+                        </li>
+                        <li><a href="#gcode-gcode" role="tab" data-toggle="tab">Gcode</a>
+                        </li>
+                    </ul>
                     
-                    Depth of Milling Traces
-                    <div class="input-group">
-                        <input class="form-control trace-depth" type="number" placeholder="Depth" value="-0.1" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <p class="descriptive-text">If you use ChiliPeppr's Auto-Level, you should be able to achieve copper removal with -0.1mm depth on 2oz copper. Or refer to the following depths:
-                        <ul class="descriptive-text" style="padding-left:20px;padding-top:0;">
-                            <li>1 oz copper : <b>-0.07</b>mm depth (0.035mm is typical thickness)</li>
-                            <li>2 oz copper : <b>-0.1</b>mm depth (Most popular. 0.07mm is typical thickness)</li>
-                            <li>3 oz copper : <b>-0.15</b>mm depth (0.105mm is typical thickness)</li>
-                        </ul>
-                    </p>
-                    
-                    Tracing Board Dimensions
-                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
-                        <div class="checkbox">
-                            <label>
-                            <input type="checkbox" class="AvoidTraceBoardDimensions" checked /> Avoid Tracing Board Dimensions
-                            </label>
-                        </div>
-                        <p class="descriptive-text">Experimental - This feature will eliminate tracing any path(s) that matches board dimensions, hit Render button after changing this checkbox to see the results.</p>
-                    </div>
-                    
-                    Feedrate for Milling Traces
-                    <div class="input-group">
-                        <input class="form-control trace-fr" type="number" placeholder="Feedrate" value="80" />
-                        <div class="input-group-addon">mm/min</div>
-                    </div>
-                    <p class="descriptive-text">The feedrate to use for milling your traces. Default is 80mm/min.
-                    </p>
-
-                    Feedrate for Plunge into Copper
-                    <div class="input-group">
-                        <input class="form-control trace-fr-plunge" type="number" placeholder="Feedrate" value="30" />
-                        <div class="input-group-addon">mm/min</div>
-                    </div>
-                    <p class="descriptive-text">The feedrate to use when the Z is descending into your copper. Default is 30mm/min.
-                    </p>
-                    
-                    Spindle Speed
-                    <div class="input-group">
-                        <input class="form-control spindle-rpm" type="number" placeholder="" value="12000" />
-                        <div class="input-group-addon">rpm</div>
-                    </div>
-                    <p class="descriptive-text">Spindle speed (rpm) value will be used for a whole job. If you need various speeds for different parts of the job e.g. milling traces, drilling, milling board outline, please edit the gcode file manually and replace S12000 with Sxxxx, where xxxx = your new spindle speed value.
-                    </p>
-                    <h2>Clearance Height</h2> Clearance for Z Axis Moves
-                    <div class="input-group">
-                        <input class="form-control clearance-height" type="number" placeholder="Clearance" value="1" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <p class="descriptive-text">The clearance height to move the Z axis to for moving from trace to trace without hitting anything. Default is 1mm, but if you are using the Auto-Level you could get away with 0.5mm.
-                    </p>
-
-
-                    <!--  ----------------------- DRILLING ------------------------>
-                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
-
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="use-drilling" checked>
-                                <h2>Drilling Holes</h2></input>
-                            </label>
-                        </div>
-
-                        Mark holes for drilling
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="drill-markholes" checked> Mark holes for drilling </input>
-                            </label>
-                        </div>
-                        <p class="descriptive-text">This will mark holes for drill. The first endmill (V-Bit or other) will touch the middle of a hole to center the mill, to prevent "dancing drill" effect.</p>
-
-                        Depth for Drilling Holes
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="drill-useboarddepth" checked> Use Board Depth </input>
-                            </label>
-                        </div>
-                        <div class="input-group">
-                            <input class="form-control drill-depth" type="number" placeholder="Depth" value="" disabled />
-                            <div class="input-group-addon">mm</div>
-                        </div>
-                        <p class="descriptive-text">The depth for drilling your holes will typically match your board depth.
-                        </p>
-
-                        Maximum hole diameter to drill
-                        <div class="input-group">
-                            <input class="form-control drill-max" type="number" placeholder="MaxDiameter" value="2.00" />
-                            <div class="input-group-addon">mm</div>
-                        </div>
-                        <p class="descriptive-text">The maximum diameter to drill. If you have bigger holes then they want to mill. I.e. You have a PCb with a lot of 1mm holes and on every corner a hole with 3.6mm. You want the small holes drill and the bigger ones to mill. Please
-                            remember, you need a endmill for dimension with a diameter smaller as this value!</p>
-
-                        <div class="drill-feedrate" style="">
-                            Feedrate for Drill
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="gcode-traces">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="use-traces" checked>
+                                    <h2 style="margin-top:10px;">Traces</h2> 
+                                </label>
+                            </div>
+                            Depth of Milling Traces
                             <div class="input-group">
-                                <input class="form-control drill-feedrate" type="number" placeholder="Drillfeedrate" value="200" />
+                                <input class="form-control trace-depth" type="number" placeholder="Depth" value="-0.1" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">If you use ChiliPeppr's Auto-Level, you should be able to achieve copper removal with -0.1mm depth on 2oz copper. Or refer to the following depths:
+                                <ul class="descriptive-text" style="padding-left:20px;padding-top:0;">
+                                    <li>1 oz copper : <b>-0.07</b>mm depth (0.035mm is typical thickness)</li>
+                                    <li>2 oz copper : <b>-0.1</b>mm depth (Most popular. 0.07mm is typical thickness)</li>
+                                    <li>3 oz copper : <b>-0.15</b>mm depth (0.105mm is typical thickness)</li>
+                                </ul>
+                            </p>
+                            
+                            Tracing Board Dimensions
+                            <div class="panel eagle-advanced" style="margin-bottom:10px;">
+                                <div class="checkbox">
+                                    <label>
+                                    <input type="checkbox" class="AvoidTraceBoardDimensions" checked /> Avoid Tracing Board Dimensions
+                                    </label>
+                                </div>
+                                <p class="descriptive-text">Experimental - This feature will eliminate tracing any path(s) that matches board dimensions, hit Render button after changing this checkbox to see the results.</p>
+                            </div>
+                            
+                            Feedrate for Milling Traces
+                            <div class="input-group">
+                                <input class="form-control trace-fr" type="number" placeholder="Feedrate" value="80" />
                                 <div class="input-group-addon">mm/min</div>
                             </div>
-                            <p class="descriptive-text">The Feedrate for Drilling.</p>
+                            <p class="descriptive-text">The feedrate to use for milling your traces. Default is 80mm/min.
+                            </p>
+        
+                            Feedrate for Plunge into Copper
+                            <div class="input-group">
+                                <input class="form-control trace-fr-plunge" type="number" placeholder="Feedrate" value="30" />
+                                <div class="input-group-addon">mm/min</div>
+                            </div>
+                            <p class="descriptive-text">The feedrate to use when the Z is descending into your copper. Default is 30mm/min.
+                            </p>
+                            
+                            Spindle Speed
+                            <div class="input-group">
+                                <input class="form-control spindle-rpm" type="number" placeholder="" value="12000" />
+                                <div class="input-group-addon">rpm</div>
+                            </div>
+                            <p class="descriptive-text">Spindle speed (rpm) value will be used for a whole job. If you need various speeds for different parts of the job e.g. milling traces, drilling, milling board outline, please edit the gcode file manually and replace S12000 with Sxxxx, where xxxx = your new spindle speed value.
+                            </p>
+                            <h2>Clearance Height</h2> Clearance for Z Axis Moves
+                            <div class="input-group">
+                                <input class="form-control clearance-height" type="number" placeholder="Clearance" value="1" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">The clearance height to move the Z axis to for moving from trace to trace without hitting anything. Default is 1mm, but if you are using the Auto-Level you could get away with 0.5mm.
+                            </p>
                         </div>
-                    </div>
-                    <!--  ----------------------- DRILLING END ------------------------>
-
-                    <h2>Board Dimensions</h2> Diameter of tool for cutting dimension
-                    <div class="input-group">
-                        <input class="form-control dimension-mill-diameter" type="number" placeholder="Size" value="2" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <p class="descriptive-text">Please input the diameter of your endmill for cutting the dimension. If you want to mill some holes, then the tool diameter has to be smaller than the smallest hole.
-                    </p>
-                    
-                    Depth of Cutting Out Dimensions (Board Depth)
-                    <div class="input-group">
-                        <input class="form-control dimension-depth" type="number" placeholder="Size" value="-1.7" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <p class="descriptive-text">Typical FR4 thickness is 1.7mm.
-                    </p>
-
-                    Step Down for Cutting Dimensions
-                    <div class="input-group">
-                        <input class="form-control dimension-stepdown" type="number" placeholder="Size" value="-0.5" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <p style="margin-bottom:0px;">Passes <code><span class="dimension-passes  highlight"><i>4</i></span></code> Last Pass <code><span class="dimension-lastpass highlight"><i>-0.2</i>mm</span></code></p>
-                    <p class="descriptive-text">The amount to step down in the Z axis for each pass of cutting out your board dimensions. Default value is -0.5mm. </p>
-
-                    <!--
-                    Create PCB Holders
-                    <div class="input-group">
-                        <input class="form-control pcbholder-length" type="number" placeholder="Pcbholder length in mm" value="1" />
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    <div class="input-group">
-                        <input class="form-control pcbholder-count" type="number" placeholder="Count of pcb holder on every side" value="1" />
-                        <div class="input-group-addon">pcs</div>
-                    </div>
-                    <p class="descriptive-text">Count of pcb holder on every side.</p>
-                    -->
-
-                    Feedrate for Cutting Dimensions
-                    <div class="input-group">
-                        <input class="form-control dimension-feedrate" type="number" placeholder="Feedrate" value="100" />
-                        <div class="input-group-addon">mm/min</div>
-                    </div>
-                    <p class="descriptive-text">The feedrate used for cutting out your dimensions. Default value is 100mm/min.
-                    </p>
-                    
-                    <!--  ----------------------- TABS --------------------------->
-                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="use-tabs" checked>
-                                <h2>Tabs (Board Holders)</h2></input>
-                            </label>
-                        </div>
-                        <p class="descriptive-text">Add tabs to board dimensions toolpaths to provide fixture of your PCB. <code>Work in progress, to be implemented in V5.4</code></p>
+    
+                        <div class="tab-pane xactive" id="gcode-drilling">
+                        <!--  ----------------------- DRILLING ------------------------>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="use-drilling" checked>
+                                    <h2 style="margin-top:10px;">Drilling Holes</h2>
+                                </label>
+                            </div>
+    
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="drill-markholes" checked> Mark holes for drilling </input>
+                                </label>
+                            </div>
+                            <p class="descriptive-text">This will mark holes for drill. The first endmill (V-Bit or other) will touch the middle of a hole to center the mill, to prevent "dancing drill" effect.</p>
+    
+                            Depth for Drilling Holes
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="drill-useboarddepth" checked> Use Board Depth </input>
+                                </label>
+                            </div>
+                            <div class="input-group">
+                                <input class="form-control drill-depth" type="number" placeholder="Depth" value="" disabled />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">The depth for drilling your holes will typically match your board depth.
+                            </p>
+    
+                            Maximum hole diameter to drill
+                            <div class="input-group">
+                                <input class="form-control drill-max" type="number" placeholder="MaxDiameter" value="1.00" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">The maximum diameter to drill. If you have bigger holes then they want to mill. I.e. You have a PCB with a lot of 1mm holes and on every corner a hole with 3.6mm. You want the small holes drill and the bigger ones to mill. Please
+                                remember, you need a endmill for dimension with a diameter smaller as this value!</p>
+    
+                            <div class="drill-feedrate" style="">
+                                Feedrate for Drill
+                                <div class="input-group">
+                                    <input class="form-control drill-feedrate" type="number" placeholder="Drillfeedrate" value="200" />
+                                    <div class="input-group-addon">mm/min</div>
+                                </div>
+                                <p class="descriptive-text">The Feedrate for Drilling.</p>
+                            </div>
                         
-                        Tab Count
-                        <div class="input-group">
-                            <input class="form-control tab-count" type="number" placeholder="Feedrate" value="4" />
-                            <div class="input-group-addon">mm</div>
+                        <!--  ----------------------- DRILLING END ------------------------>
                         </div>
-                        <p class="descriptive-text">Number of tabs per each board dimension toolpath.</p>
                         
-                        Tab Width
-                        <div class="input-group">
-                            <input class="form-control tab-width" type="number" placeholder="Feedrate" value="1" />
-                            <div class="input-group-addon">mm</div>
+                        <div class="tab-pane xactive" id="gcode-milling">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="use-milling" checked>
+                                    <h2 style="margin-top:10px;">Milling Dimensions</h2>
+                                </label>
+                            </div>
+                            
+                            Select Dimension Layer(s)
+                            <div class="panel eagle-advanced" style="margin-bottom:10px;">
+                                <div class="checkbox" style="margin-bottom:6px;">
+                                    <label>
+                                        <input type="checkbox" class="dimension-layer-20" checked> 20 Dimension</input>
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="dimension-layer-46" checked> 46 Milling</input>
+                                    </label>
+                                </div>
+                                <p class="descriptive-text">Select which layer to use as board dimansions layer, both layers will be rendered in the 3D viewer, but gcode will be generated for selected layer(s) only.
+                                </p>
+                            </div>
+                            
+                            Tool Size Options
+                            <div class="panel eagle-advanced" style="margin-bottom:10px;padding-top:10px;">
+                                Diameter of tool for cutting dimension
+                                <div class="input-group">
+                                    <input class="form-control dimension-mill-diameter" type="number" placeholder="Size" value="1" />
+                                    <div class="input-group-addon">mm</div>
+                                </div>
+                                <p class="descriptive-text">Please input the diameter of your endmill for cutting the dimension. If you want to use multiple tools, then use wire width as tool diameter.<br />If you want to mill some holes, then the tool diameter has to be smaller than the smallest hole, if you are using multiple cutting tools, the tools with smallest diameter will be used to mill holes.
+                                </p>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="com-chilipeppr-widget-eagle-dimension-tso" class="com-chilipeppr-widget-eagle-dimension-tso-oneTool" xchecked /> 
+                                        Use same tool for all paths
+                                        <p style="margin-top:0px;margin-bottom:0px;font-size:11px;">
+                                        Mill all dimension paths (including large holes) with one tool, select tool size from above option.
+                                        </p>
+                                        </input>
+                                    </label>
+                                </div>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="com-chilipeppr-widget-eagle-dimension-tso" class="com-chilipeppr-widget-eagle-dimension-tso-wireWidth" checked /> 
+                                        Use wire width
+                                        <p style="margin-top:0px;margin-bottom:0px;font-size:11px;">
+                                        Use wire width as tool diameter, you can override width of small or zero width wires with the diameter set above by setting minimum wire width listed next.
+                                        </p>
+                                    </label>
+                                </div>
+                                Minimum wire width to use as tool diameter
+                                <div class="input-group">
+                                    <input class="form-control dimension-minimum-wire-width" type="number" placeholder="Size" value="1" />
+                                    <div class="input-group-addon">mm</div>
+                                </div>
+            
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" class="dimension-ignore-small-wires" xchecked> Ignore wires with smaller width</input>
+                                    </label>
+                                </div>
+                                <p class="descriptive-text">If this option is checked, smaller wires will be ignored, otherwise will be milled with cutting tool set above.
+                                </p>
+                            </div>
+                            
+                            Depth of Cutting Out Dimensions (Board Depth)
+                            <div class="input-group">
+                                <input class="form-control dimension-depth" type="number" placeholder="Size" value="-1.7" max="0" step="0.1" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">Typical FR4 thickness is 1.7mm.
+                            </p>
+        
+                            Step Down for Cutting Dimensions
+                            <div class="input-group">
+                                <input class="form-control dimension-stepdown" type="number" placeholder="Size" value="-0.5" max="0" step="0.1" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p style="margin-bottom:0px;">Passes <code><span class="dimension-passes  highlight"><i>4</i></span></code> Last Pass <code><span class="dimension-lastpass highlight"><i>-0.2</i>mm</span></code></p>
+                            <p class="descriptive-text">The amount to step down in the Z axis for each pass of cutting out your board dimensions. Default value is -0.5mm. </p>
+        
+                            Feedrate for Cutting Dimensions
+                            <div class="input-group">
+                                <input class="form-control dimension-feedrate" type="number" placeholder="Feedrate" value="100" />
+                                <div class="input-group-addon">mm/min</div>
+                            </div>
+                            <p class="descriptive-text">The feedrate used for cutting out your dimensions. Default value is 100mm/min.
+                            </p>
                         </div>
-                        <p class="descriptive-text">Tab width, value between 0.5mm to 3.0mm, take in consideration tool radius</p>
                         
-                        Tab Height
-                        <div class="input-group">
-                            <input class="form-control tab-height" type="number" placeholder="Feedrate" value="0.8" />
-                            <div class="input-group-addon">mm</div>
+                        <div class="tab-pane xactive" id="gcode-tabs">
+                            <!--  ----------------------- TABS --------------------------->
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="use-tabs" checked>
+                                    <h2 style="margin-top:10px;">Tabs (Board Holders)</h2>
+                                </label>
+                            </div>
+                            <p class="descriptive-text">Add tabs to board dimensions toolpaths to provide fixture of your PCB.</p>
+                            
+                            Tab Distance
+                            <div class="input-group">
+                                <input class="form-control tab-distance" type="number" placeholder="Distance between tabs" value="25" />
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">The distance between two tabs at one dimension segment.</p>
+                            
+                            Tab Width
+                            <div class="input-group">
+                                <input class="form-control tab-width" type="number" placeholder="Tab Width" value="1" min="0.5" max="3" step="0.1"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">Tab width, value between 0.5mm to 3.0mm, take in consideration tool radius</p>
+                            
+                            Tab Height
+                            <div class="input-group">
+                                <input class="form-control tab-height" type="number" placeholder="Tab Height" value="0.8" min="0.5" step="0.1"/>
+                                <div class="input-group-addon">mm</div>
+                            </div>
+                            <p class="descriptive-text">Tab height from bottom of board, value between 0.5mm to 1.7mm (board thinkness)</p>
+    
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="tabs-4-slots">
+                                    Tabs for slots and holes</input>
+                                </label>
+                            </div>
+                            <p class="descriptive-text">Add tabs to inner board dimensions like slots and large holes, no tabs will be added to small slots or holes.</p>
+                            <!--  ----------------------- TABS END ----------------------->
                         </div>
-                        <p class="descriptive-text">Tab height from bottom of board, value between 0.5mm to 1.7mm (board thinkness)</p>
-
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="tabs-4-slots">
-                                Tabs for slots and holes</input>
-                            </label>
-                        </div>
-                        <p class="descriptive-text">Add tabs to inner board dimensions like slots and large holes, no tabs will be added to small slots or holes (less the 6x of tool diameter)</p>
                         
+                        <div class="tab-pane xactive" id="gcode-gcode">
+                            <!--  ----------------- Milling Direction--------------------->
+                            
+                            <h2 style="margin-top:10px;">Tool Paths Direction</h2>
+                            <p class="descriptive-text">Following selections will adjust the orientation of tool paths, if left to default, orientation of paths is unpredictable and depends on how traces and wires were drawn in Eagle. Hit Render button after changing these values.
+                            </p>
+                            <div class="form-group">
+                                Milling Traces
+                                <select class="selectMillTraces form-control" id="DirectionMilling">
+                                    <option value='0'>Don't Care</option>
+                                    <option value='1'>Conventional Milling</option>
+                                    <option value='2'>Climb milling</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                Cutting Dimensions &amp; Milling Holes
+                                <select class="selectMillTraces form-control" id="DirectionCutting" disabled>
+                                    <option value='0'>Don't Care</option>
+                                    <option value='1'>Conventional Milling</option>
+                                    <option value='2'>Climb milling</option>
+                                </select>
+                            </div>
+                            Generated Gcode
+                            <textarea class="com-chilipeppr-widget-eagle-gcode" spellcheck="false"></textarea>
+                        </div>
                     </div>
-                    <!--  ----------------------- TABS END ----------------------->
-                    
-                    <!--  ----------------- Milling Direction--------------------->
-                    <div class="panel eagle-advanced" style="margin-bottom:10px;">
-                        <h2>Milling Direction</h2>
-                        <p class="descriptive-text">Following selections will adjust the orientation of tool paths, if left to default, orientation of paths is unpredectible and depends on how traces and wire are drawen in Eagle. Hit Render button after changing these values.
-                        </p>
-                        <div class="form-group">
-                            Milling Traces
-                            <select class="selectMillTraces form-control" id="DirectionMilling">
-                                <option value='0'>Don't Care</option>
-                                <option value='1'>Conventional Milling</option>
-                                <option value='2'>Climb milling</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            Cutting Dimensions/Milling Holes
-                            <select class="selectMillTraces form-control" id="DirectionCutting">
-                                <option value='0'>Don't Care</option>
-                                <option value='1'>Conventional Milling</option>
-                                <option value='2'>Climb milling</option>
-                            </select>
-                        </div>
-                    </div>
-                    Generated Gcode
-                    <textarea class="com-chilipeppr-widget-eagle-gcode"></textarea>
                 </div>
                 
                 <div class="tab-pane xactive" id="eagle-soldermask">

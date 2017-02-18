@@ -1,6 +1,32 @@
+Version 5.4
+**************************************************
+Auther: Ameen Nihad
+Release date: 17 FEB 2017
+
+- Bug: Board renders incorrectly if mirror option is checked before drag/drop new board file.
+  fixed by rendering board dimensions first becasue mirror feature currently rely on dimension boundries.
+- Bug: If a layer has no signals it will not be populated in (Board Layer) drop down list, even if layer has elements.
+  Example of that is Adafruit PCB Reference Ruler.brd which has no signals on top layer.
+  fixed by looping through elements and check if they are on Top or Bottom layer based on mirror value.
+- All via Shapes are now supported, previously all vias were assumed to be round.
+- Pad "Offset" shape is now supported, previously it was rendered as round pad.
+- Resting paramenters are now used to caclulate vias & pads diameters, previously vias were caclculates using default hadrcoded values, and pads were assumed to be twice the drill size.
+- Support layer 46-Milling.
+- Support for open paths in board dimensions.
+- Support for multiple tools to mill board dimansions, tool size is linked to wire width.
+- Curved board dimensions are rendered as G2/G3 commands.
+- Tabs functionality is fully impelmented.
+- Gcode tab is seperated to multiple tabs (Taces, Drilling, Milling, Tabs & Gocde).
+- Circles as board dimensions are now supported.
+- Bug: Pads not connected to signals were considered as same signal, therefore adjacent pads will be merged if inflate value is high enough.
+  Fixed by assigning pad name to pad signal name.
+- Top/Bottom layers are always listed in Board Layer dropdown list.
+- Blank FR4 diemension and Registration Holes features are fully implemented, useful for milling boards with multiple layers.
+
 Version 5.3
 **************************************************
 Auther: Ameen Nihad
+Release date: 19 JAN 2017
 
 New features:
 - Support for Curves in boarder dimension and signal wires is added, in V5.2 this feature was limited to board dimension only and to +/-90 degrees.
@@ -29,6 +55,7 @@ Bus fixed:
 Version 5.2 Quick Fix
 **************************************************
 Auther: Ameen Nihad
+Release date: 19 JAN 2017
 
 In exportGcodeMillHoles function, G0 is used by mistake to plunge the cutting tool, G0 changed to G1.
 Update stamp: V5.2QUICKFIX
@@ -36,6 +63,7 @@ Update stamp: V5.2QUICKFIX
 Versoin 5.2
 **************************************************
 Auther: Ameen Nihad
+Release date: 05 JAN 2017
 
 - Changed how holes are handled, now holes for Pads, Vias, packages and Plains are treated exactly the same.
 - Now holes are either drilled or milled, that depending on diameter of tools used, i.e. values of:
@@ -50,6 +78,7 @@ Update stamp: V5.2D20170105 (this can be used to locate the updated/added code)
 Versoin 5.1
 **************************************************
 Auther: Ameen Nihad
+Release date: 29 DEC 2016
 
 - Fix a bug in rendering Vias
 Bug: Previous code uses Via Drill Size to render the via, which causes vias to render smaller than actual size.
