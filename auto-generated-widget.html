@@ -2855,7 +2855,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         getDimensionGcode: function(v2, v1, z, isOpen, curve){
             var tabMaxZ = this.depthOfDimensions + this.tabs.height;
             if(curve === undefined){
-                var g = "G1 X" + v2.X + " Y" + v2.Y + "\n";
+                var g = "G1 X" + this.round(v2.X) + " Y" + this.round(v2.Y) + "\n";
                 if (!this.tabs.useTabs || isOpen || z > tabMaxZ) return g;
                 
                 var length = Math.sqrt((v2.X-v1.X)*(v2.X-v1.X) + (v2.Y-v1.Y)*(v2.Y-v1.Y));
@@ -2871,6 +2871,10 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var y1 = v1.Y + (d - dw) * Math.sin(angle);
                     var x2 = v1.X + (d + dw) * Math.cos(angle);
                     var y2 = v1.Y + (d + dw) * Math.sin(angle);
+                    x1 = this.round(x1);
+                    y1 = this.round(y1);
+                    x2 = this.round(x2);
+                    y2 = this.round(y2);
                     gt += "G1 X" + x1 + " Y" + y1 + "\n";
                     gt += "G1 Z" + tabMaxZ + "\n";
                     gt += "G1 X" + x2 + " Y" + y2 + "\n";
@@ -2882,7 +2886,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var gc = curve.clockWise?"G2":"G3";
                 var I = curve.X - v1.X;
                 var J = curve.Y - v1.Y;
-                var g = gc + " X" + v2.X + " Y" + v2.Y + " I" + I + " J" + J + "\n";
+                var g = gc + " X" + this.round(v2.X) + " Y" + this.round(v2.Y) + " I" + this.round(I) + " J" + this.round(J) + "\n";
                 if (!this.tabs.useTabs || isOpen || z > tabMaxZ) return g;
 
                 var angle = curve.curve * Math.PI / 180;
@@ -2898,16 +2902,23 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var y1 = curve.Y + curve.radius * Math.sin(a-sign*beta);
                     var x2 = curve.X + curve.radius * Math.cos(a+sign*beta);
                     var y2 = curve.Y + curve.radius * Math.sin(a+sign*beta);
+                    x1 = this.round(x1);
+                    y1 = this.round(y1);
+                    x2 = this.round(x2);
+                    y2 = this.round(y2);
                     gt += gc + " X" + x1 + " Y" + y1 + " I" + I + " J" + J + "\n";
                     gt += "G1 Z" + tabMaxZ + "\n";
                     I = curve.X - x1; J = curve.Y - y1;
-                    gt += gc + " X" + x2 + " Y" + y2 + " I" + I + " J" + J + "\n";
+                    gt += gc + " X" + x2 + " Y" + y2 + " I" + this.round(I) + " J" + this.round(J) + "\n";
                     I = curve.X - x2; J = curve.Y - y2;
                     gt += "G1 Z" + z + "\n";
                 }
-                var g = gc + " X" + v2.X + " Y" + v2.Y + " I" + I + " J" + J + "\n";
+                var g = gc + " X" + this.round(v2.X) + " Y" + this.round(v2.Y) + " I" + this.round(I) + " J" + this.round(J) + "\n";
                 return gt + g;
             }
+        },
+        round: function(n){
+            return(Math.round(n*1000)/1000); //Limit decimal places to avoid issues with Grbl
         },
         exportGcodeFooter:function(){
             
