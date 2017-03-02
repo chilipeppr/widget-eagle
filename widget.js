@@ -2734,7 +2734,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     gt += "G1 X" + x1 + " Y" + y1 + "\n";
                     gt += "G1 Z" + tabMaxZ + "\n";
                     gt += "G1 X" + x2 + " Y" + y2 + "\n";
-                    gt += "G1 Z" + z + "\n";
+                    gt += "G1 Z" + this.round(z) + "\n";
                 }
                 return gt + g;
             }
@@ -2767,14 +2767,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     I = curve.X - x1; J = curve.Y - y1;
                     gt += gc + " X" + x2 + " Y" + y2 + " I" + this.round(I) + " J" + this.round(J) + "\n";
                     I = curve.X - x2; J = curve.Y - y2;
-                    gt += "G1 Z" + z + "\n";
+                    gt += "G1 Z" + this.round(z) + "\n";
                 }
                 var g = gc + " X" + this.round(v2.X) + " Y" + this.round(v2.Y) + " I" + this.round(I) + " J" + this.round(J) + "\n";
                 return gt + g;
             }
         },
         round: function(n){
-            return(Math.round(n*1000)/1000); //Limit decimal places to avoid issues with Grbl
+            return(Math.round(n*10000)/10000); //Limit decimal places to avoid issues with Grbl
         },
         exportGcodeFooter:function(){
             
