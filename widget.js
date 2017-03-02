@@ -2446,7 +2446,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                g += "F" + this.drillFeedrate + "\n"; 
                this.holesToDrill[diameter].forEach(function(dvector){
                      g += "G0 Z" + that.clearanceHeight + "\n";
-                     g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+                     g += "G0 X" + that.round(dvector.X) + " Y" + that.round(dvector.Y)   + "\n";
                      g += "G0 Z" + that.clearanceHeight/10 + "\n";
                      g += "G1 Z" + that.drillDepth  + "\n";
                 });
@@ -2479,7 +2479,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 g += '(generate hole at x:' + hole.X + ' y:' + hole.Y + ' with dia:'+ hole.D +' in ' + stepDownPasses + ' passes)' + "\n";
                 g += "F" + that.feedRateDimensions + "\n";
                 g += "G0 Z" + that.clearanceHeight + "\n";
-                g += "G0 X" + (hole.X - gdiameter) + " Y" + hole.Y + "\n";
+                g += "G0 X" + that.round(hole.X - gdiameter) + " Y" + that.round(hole.Y) + "\n";
                 for(var i=0; i<stepDownPasses;i++){
                     var z = that.stepDownDimensions*(i+1);
                     if(z < that.depthOfDimensions)
@@ -2670,7 +2670,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var v1 = {X: dimensions[i].X, Y: dimensions[i].Y};
                 g += "G0 Z" + this.clearanceHeight + "\n";
                 g += "(dimensions)\n";
-                g += "G0 X" + v1.X + " Y" + v1.Y + "\n";
+                g += "G0 X" + this.round(v1.X) + " Y" + this.round(v1.Y) + "\n";
                 g += "G0 Z0\n";
                 while (!lastPass){
                     newZ += this.stepDownDimensions;
@@ -2709,7 +2709,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         //it handles line as well as curves
         //it will also generate tabs if applicable
         getDimensionGcode: function(v2, v1, z, isOpen, curve){
-            var tabMaxZ = this.depthOfDimensions + this.tabs.height;
+            var tabMaxZ = this.round(this.depthOfDimensions + this.tabs.height);
             if(curve === undefined){
                 var g = "G1 X" + this.round(v2.X) + " Y" + this.round(v2.Y) + "\n";
                 if (!this.tabs.useTabs || isOpen || z > tabMaxZ) return g;
