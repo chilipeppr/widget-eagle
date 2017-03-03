@@ -2590,7 +2590,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                g += "F" + this.drillFeedrate + "\n"; 
                this.holesToDrill[diameter].forEach(function(dvector){
                      g += "G0 Z" + that.clearanceHeight + "\n";
-                     g += "G0 X" + dvector.X + " Y" + dvector.Y   + "\n";
+                     g += "G0 X" + that.round(dvector.X) + " Y" + that.round(dvector.Y)   + "\n";
                      g += "G0 Z" + that.clearanceHeight/10 + "\n";
                      g += "G1 Z" + that.drillDepth  + "\n";
                 });
@@ -2623,7 +2623,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 g += '(generate hole at x:' + hole.X + ' y:' + hole.Y + ' with dia:'+ hole.D +' in ' + stepDownPasses + ' passes)' + "\n";
                 g += "F" + that.feedRateDimensions + "\n";
                 g += "G0 Z" + that.clearanceHeight + "\n";
-                g += "G0 X" + (hole.X - gdiameter) + " Y" + hole.Y + "\n";
+                g += "G0 X" + that.round(hole.X - gdiameter) + " Y" + that.round(hole.Y) + "\n";
                 for(var i=0; i<stepDownPasses;i++){
                     var z = that.stepDownDimensions*(i+1);
                     if(z < that.depthOfDimensions)
@@ -2814,7 +2814,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var v1 = {X: dimensions[i].X, Y: dimensions[i].Y};
                 g += "G0 Z" + this.clearanceHeight + "\n";
                 g += "(dimensions)\n";
-                g += "G0 X" + v1.X + " Y" + v1.Y + "\n";
+                g += "G0 X" + this.round(v1.X) + " Y" + this.round(v1.Y) + "\n";
                 g += "G0 Z0\n";
                 while (!lastPass){
                     newZ += this.stepDownDimensions;
@@ -2853,9 +2853,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         //it handles line as well as curves
         //it will also generate tabs if applicable
         getDimensionGcode: function(v2, v1, z, isOpen, curve){
-            var tabMaxZ = this.depthOfDimensions + this.tabs.height;
+            var tabMaxZ = this.round(this.depthOfDimensions + this.tabs.height);
             if(curve === undefined){
-                var g = "G1 X" + v2.X + " Y" + v2.Y + "\n";
+                var g = "G1 X" + this.round(v2.X) + " Y" + this.round(v2.Y) + "\n";
                 if (!this.tabs.useTabs || isOpen || z > tabMaxZ) return g;
                 
                 var length = Math.sqrt((v2.X-v1.X)*(v2.X-v1.X) + (v2.Y-v1.Y)*(v2.Y-v1.Y));
@@ -2871,10 +2871,14 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var y1 = v1.Y + (d - dw) * Math.sin(angle);
                     var x2 = v1.X + (d + dw) * Math.cos(angle);
                     var y2 = v1.Y + (d + dw) * Math.sin(angle);
+                    x1 = this.round(x1);
+                    y1 = this.round(y1);
+                    x2 = this.round(x2);
+                    y2 = this.round(y2);
                     gt += "G1 X" + x1 + " Y" + y1 + "\n";
                     gt += "G1 Z" + tabMaxZ + "\n";
                     gt += "G1 X" + x2 + " Y" + y2 + "\n";
-                    gt += "G1 Z" + z + "\n";
+                    gt += "G1 Z" + this.round(z) + "\n";
                 }
                 return gt + g;
             }
@@ -2882,7 +2886,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var gc = curve.clockWise?"G2":"G3";
                 var I = curve.X - v1.X;
                 var J = curve.Y - v1.Y;
-                var g = gc + " X" + v2.X + " Y" + v2.Y + " I" + I + " J" + J + "\n";
+                var g = gc + " X" + this.round(v2.X) + " Y" + this.round(v2.Y) + " I" + this.round(I) + " J" + this.round(J) + "\n";
                 if (!this.tabs.useTabs || isOpen || z > tabMaxZ) return g;
 
                 var angle = curve.curve * Math.PI / 180;
@@ -2898,16 +2902,23 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var y1 = curve.Y + curve.radius * Math.sin(a-sign*beta);
                     var x2 = curve.X + curve.radius * Math.cos(a+sign*beta);
                     var y2 = curve.Y + curve.radius * Math.sin(a+sign*beta);
+                    x1 = this.round(x1);
+                    y1 = this.round(y1);
+                    x2 = this.round(x2);
+                    y2 = this.round(y2);
                     gt += gc + " X" + x1 + " Y" + y1 + " I" + I + " J" + J + "\n";
                     gt += "G1 Z" + tabMaxZ + "\n";
                     I = curve.X - x1; J = curve.Y - y1;
-                    gt += gc + " X" + x2 + " Y" + y2 + " I" + I + " J" + J + "\n";
+                    gt += gc + " X" + x2 + " Y" + y2 + " I" + this.round(I) + " J" + this.round(J) + "\n";
                     I = curve.X - x2; J = curve.Y - y2;
-                    gt += "G1 Z" + z + "\n";
+                    gt += "G1 Z" + this.round(z) + "\n";
                 }
-                var g = gc + " X" + v2.X + " Y" + v2.Y + " I" + I + " J" + J + "\n";
+                var g = gc + " X" + this.round(v2.X) + " Y" + this.round(v2.Y) + " I" + this.round(I) + " J" + this.round(J) + "\n";
                 return gt + g;
             }
+        },
+        round: function(n){
+            return(Math.round(n*10000)/10000); //Limit decimal places to avoid issues with Grbl
         },
         exportGcodeFooter:function(){
             
