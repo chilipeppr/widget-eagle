@@ -2485,8 +2485,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     if(z < that.depthOfDimensions)
                         z = that.depthOfDimensions;
                     g += "G1 Z" + z.toFixed(4) + "\n"; //V5.2QUICKFIX
-                    g += (dir==2)?"G2 I":"G3 I";
-                    g += gdiameter.toFixed(4) + "\n";
+                    g += (dir==2)?"G2":"G3";
+                    g += " X" + that.round(hole.X - gdiameter) + " Y" + that.round(hole.Y);
+                    g += " I" + gdiameter.toFixed(4) + "\n";
                 }
                 g += "G0 Z" + that.clearanceHeight + "\n";
             });
