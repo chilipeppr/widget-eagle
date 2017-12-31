@@ -6447,12 +6447,42 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     var lineGeo = new THREE.Geometry();
                     var w2 = smd.dx / 2;
                     var h2 = smd.dy / 2;
-                    lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2 * -1, 0));
-                    lineGeo.vertices.push(new THREE.Vector3(w2, h2 * -1, 0));
-                    lineGeo.vertices.push(new THREE.Vector3(w2, h2, 0));
-                    lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2, 0));
-                    // close it by connecting last point to 1st point
-                    lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2 * -1, 0));
+                    if('roundness' in smd && smd.roundness != null){
+                        var c2 = Math.min(h2, w2) * smd.roundness / 100;
+
+                        var cPoints = that.createArcPoints(-(w2-c2), -(h2-c2), c2, 180, 270);
+                        cPoints.forEach(function(p){
+                            lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
+                        });
+                        
+                        cPoints = that.createArcPoints((w2-c2), -(h2-c2), c2, 270, 360);
+                        cPoints.forEach(function(p){
+                            lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
+                        });
+                        
+                        cPoints = that.createArcPoints((w2-c2), (h2-c2), c2, 0, 90);
+                        cPoints.forEach(function(p){
+                            lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
+                        });
+                        
+                        cPoints = that.createArcPoints(-(w2-c2), (h2-c2), c2, 90, 180);
+                        cPoints.forEach(function(p){
+                            lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
+                        });
+
+                    }
+                    else {
+                        lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2 * -1, 0));
+                        lineGeo.vertices.push(new THREE.Vector3(w2, h2 * -1, 0));
+                        lineGeo.vertices.push(new THREE.Vector3(w2, h2, 0));
+                        lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2, 0));
+                        // close it by connecting last point to 1st point
+                        lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2 * -1, 0));
+                    }
+                    console.log("AmeenX", "NEW SMD ------------------------" );
+                    lineGeo.vertices.forEach(function(v){
+                        console.log("AmeenX", v );
+                    });
 
                     var lineMat = new THREE.LineBasicMaterial({
                         color: that.colorSignal,
@@ -7425,6 +7455,22 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var arc = new THREE.Line( geometry, material );
             return arc;
         },
+        createArcPoints: function(aX, aY, radius, aStartAngle, aEndAngle){
+            var segmentLength = parseFloat($('#com-chilipeppr-widget-eagle .curve-resolution').val());
+            
+            segmentLength = Math.min(segmentLength, 1.0);
+            segmentLength = Math.max(segmentLength, 0.1);
+            var segments = Math.max(radius * Math.PI/(2 * segmentLength), 8), // Segment every [segmentLength] mm, minimum 8 segments
+                sa = aStartAngle * Math.PI / 180,
+                ea = aEndAngle * Math.PI / 180,
+                arcCurve = new THREE.EllipseCurve(
+                    aX, aY,
+                    radius, radius,
+                    sa, ea
+                ),
+                points = arcCurve.getSpacedPoints( segments );
+            return points;
+        },
         drawSphere: function (x, y, radius, color){
             console.log("Sqhere position and color: ", x, y, color);
             var segments = 16;
@@ -8132,6 +8178,7 @@ EagleCanvas.prototype.parseSmd = function (smd) {
         'y': smdY,
         'dx': smdDX,
         'dy': smdDY,
+        'roundness': smd.getAttribute('roundness'),
         'rot': smd.getAttribute('rot'),
         'name': smd.getAttribute('name'),
         'layer': smd.getAttribute('layer')
