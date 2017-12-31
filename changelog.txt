@@ -1,3 +1,11 @@
+Version 5.7
+**************************************************
+Auther: Ameen Nihad
+Release date: 31 DEC 2017
+
+- Issue 37: Roundness paramenter of SMD pads is now supported.
+- Fix G3 issue in Grbl by adding XY value to G3 lines.
+
 Version 5.4
 **************************************************
 Auther: Ameen Nihad
