@@ -1,3 +1,11 @@
+Version 5.8
+**************************************************
+Auther: Ameen Nihad
+Release date: 01 JAN 2018
+
+- Support packages wit polygons as pads, Lilypad_Arduino_USB_v12 is a good example.
+- Fix a bug in rendering packages wih pads in the bottom layer.
+
 Version 5.7
 **************************************************
 Auther: Ameen Nihad
