@@ -4747,6 +4747,53 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 that.sceneAdd(lineUnion);
             }
         },
+        getPadGeometryIntersectedWithPolygon: function(polygons, lineGeo, layerNumber){
+            polygons.forEach(function (polygon) {
+                if(layerNumber == polygon.layer){
+                    var polygonGeo = new THREE.Geometry();
+                    for(var vidx = 0; vidx < polygon.vertices.length; vidx++){
+                        var v0 = polygon.vertices[vidx];
+                        var v1 = (polygon.vertices.length == vidx+1)?polygon.vertices[0]:polygon.vertices[vidx+1];
+                        if("curve" in v0 && v0.curve != 0){
+                            var cPoints = this.createCurvePoints(v0.x, v0.y, v1.x, v1.y, v0.curve);
+                            cPoints.forEach(function(p){
+                                polygonGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
+                            });
+                        }
+                        else{
+                            polygonGeo.vertices.push(new THREE.Vector3(v0.x, v0.y, 0));
+                        }
+                    }
+                    lineGeo = this.unionLineGeometriesIfIntersected(lineGeo, polygonGeo);
+                }
+            }, this);
+            return lineGeo;
+        },
+        unionLineGeometriesIfIntersected: function(lineGeo1, lineGeo2){
+            console.log("AmeenG: lineGeo1", lineGeo1);
+            console.log("AmeenG: lineGeo2", lineGeo2);
+            var path1 = [];
+            lineGeo1.vertices.forEach(function(vertex){
+                path1.push({X: vertex.x, Y: vertex.y});
+            });
+            var path2 = [];
+            lineGeo2.vertices.forEach(function(vertex){
+                path2.push({X: vertex.x, Y: vertex.y});
+            });
+            var pathS = this.getIntersectionOfClipperPaths([path1], [path2]);
+            console.log("AmeenG: pathS", pathS);
+            if(pathS.length != 0){
+                pathS = this.getUnionOfClipperPaths([path1, path2]);
+                lineGeo = new THREE.Geometry();
+                pathS[0].forEach(function(vertex){
+                    lineGeo.vertices.push(new THREE.Vector3(vertex.X, vertex.Y, 0));
+                });
+                console.log("AmeenG: lineGeo", lineGeo);
+                return lineGeo;
+            }
+            
+            return lineGeo1;
+        },
         drawClipperPaths: function (paths, color, opacity, z, zstep, isClosed, isAddDirHelper) {
             console.log("drawClipperPaths");
             var lineUnionMat = new THREE.LineBasicMaterial({
@@ -6395,20 +6442,19 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 console.log("working on element:", elem);
                 console.log("ray: elemKey:  ", elemKey, "  elem.mirror:  ", elem.mirror);
                 console.log("activeLayer:  ", this.activeLayer)
-                var renderThisPad;
-                if ((elem.mirror == false && this.activeLayer == 'Top') || (elem.mirror == true && this.activeLayer == 'Bottom')  )
-                { //|| (pad.drill && pad.drill > 0)
-                	renderThisPad = true;
-                	console.log ("ray:  this part is on the active layer:", elemKey);
-                }
-                else
-                {
-                	renderThisPad = false;
-                }
-                console.log("pad.drill = ");  //, pad.drill
-                //renderThisPad = true;
-                
-								
+                // var renderThisPad;
+                // if ((elem.mirror == false && this.activeLayer == 'Top') || (elem.mirror == true && this.activeLayer == 'Bottom')  )
+                // { //|| (pad.drill && pad.drill > 0)
+                // 	renderThisPad = true;
+                // 	console.log ("ray:  this part is on the active layer:", elemKey);
+                // }
+                // else
+                // {
+                // 	renderThisPad = false;
+                // }
+                // console.log("pad.drill = ");  //, pad.drill
+                // //renderThisPad = true;
+				
                 // store clipper formatted points for this element
                 //this.clipperElements[elemKey] = [];
 								
@@ -6426,135 +6472,132 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 elem["threeObj"]["smds"] = {};
 
                 // CALCULATING SMDS
-                if (renderThisPad) {
+                // if (renderThisPad ) {
                 pkg.smds.forEach(function (smd) {
-
-                    console.log("drawing smd:", smd);
-                    var layerNum = smd.layer;
-
-                    /*
-                    if (elem.mirror) {
-                        console.log("mirror, since this elem is mirrored, we're getting the mirrorLayer from the eagle object. layerNum prior:", layerNum);
-                        layerNum = this.eagle.mirrorLayer(layerNum);
-                        console.log("mirror layerNum after:", layerNum);
-                    }
-                    */
-                    /*
-                    if (layer.number != layerNum) {
-                        return;
-                    }*/
-
-                    var lineGeo = new THREE.Geometry();
-                    var w2 = smd.dx / 2;
-                    var h2 = smd.dy / 2;
-                    if('roundness' in smd && smd.roundness != null){
-                        var c2 = Math.min(h2, w2) * smd.roundness / 100;
-
-                        var cPoints = that.createArcPoints(-(w2-c2), -(h2-c2), c2, 180, 270);
-                        cPoints.forEach(function(p){
-                            lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
-                        });
-                        
-                        cPoints = that.createArcPoints((w2-c2), -(h2-c2), c2, 270, 360);
-                        cPoints.forEach(function(p){
-                            lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
-                        });
-                        
-                        cPoints = that.createArcPoints((w2-c2), (h2-c2), c2, 0, 90);
-                        cPoints.forEach(function(p){
-                            lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
-                        });
-                        
-                        cPoints = that.createArcPoints(-(w2-c2), (h2-c2), c2, 90, 180);
-                        cPoints.forEach(function(p){
-                            lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
-                        });
-
-                    }
-                    else {
-                        lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2 * -1, 0));
-                        lineGeo.vertices.push(new THREE.Vector3(w2, h2 * -1, 0));
-                        lineGeo.vertices.push(new THREE.Vector3(w2, h2, 0));
-                        lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2, 0));
-                        // close it by connecting last point to 1st point
-                        lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2 * -1, 0));
-                    }
-                    console.log("AmeenX", "NEW SMD ------------------------" );
-                    lineGeo.vertices.forEach(function(v){
-                        console.log("AmeenX", v );
-                    });
-
-                    var lineMat = new THREE.LineBasicMaterial({
-                        color: that.colorSignal,
-                        transparent: true,
-                        opacity: 0.2
-                    });
-                    var line = new THREE.Line(lineGeo, lineMat);
-
-                    // do smd as mesh instead
-                    lineMat = new THREE.MeshBasicMaterial({
-                        color: that.colorSignal,
-                        transparent: true,
-                        opacity: 0.2,
-                        side: THREE.DoubleSide,
-                        //overdraw: false,
-                        //polygonOffset: true,
-                        depthWrite: false
-                    });
-                    //lineMat.side = THREE.DoubleSided;
-                    var holes = [];
-                    var triangles = THREE.ShapeUtils.triangulateShape(lineGeo.vertices, holes); //changed Shape.Utils to ShapeUtils per new Three revision
-
-                    for (var i = 0; i < triangles.length; i++) {
-
-                        lineGeo.faces.push(new THREE.Face3(triangles[i][0], triangles[i][1], triangles[i][2]));
-
-                    }
-                    //lineGeo.faces.push( new THREE.Face3( 0, 1, 2 ) );
-                    lineGeo.computeFaceNormals();
-                    line = new THREE.Mesh(lineGeo, lineMat);
-
-                    // add smd mesh to be found on mouse movements
-                    this.intersectObjects.push(line);
-
-                    // rotate
-                    // now that the smd is drawn, apply its individual
-                    // rotation
-                    if ('rot' in smd && smd.rot != null) {
-                        var rot = parseInt(smd.rot.replace(/R/i, ""));
-                        //console.log("will rotate individual smd by deg:", rot);
-                        if (rot > 0) {
-                            var r = (Math.PI / 180) * rot;
-                            //console.log("we are rotating individual smd by radians:", r);
-                            var axis = new THREE.Vector3(0, 0, 1);
-                            that.rotateAroundObjectAxis(line, axis, r);
+                    if(((!elem.mirror) && layer.number == smd.layer) || (elem.mirror && layer.number != smd.layer)){
+                        console.log("drawing smd:", smd);
+                        var layerNum = smd.layer;
+    
+                        /*
+                        if (elem.mirror) {
+                            console.log("mirror, since this elem is mirrored, we're getting the mirrorLayer from the eagle object. layerNum prior:", layerNum);
+                            layerNum = this.eagle.mirrorLayer(layerNum);
+                            console.log("mirror layerNum after:", layerNum);
                         }
+                        */
+                        /*
+                        if (layer.number != layerNum) {
+                            return;
+                        }*/
+    
+                        var lineGeo = new THREE.Geometry();
+                        var w2 = smd.dx / 2;
+                        var h2 = smd.dy / 2;
+                        if('roundness' in smd && smd.roundness != null){
+                            var c2 = Math.min(h2, w2) * smd.roundness / 100;
+    
+                            var cPoints = that.createArcPoints(-(w2-c2), -(h2-c2), c2, 180, 270);
+                            cPoints.forEach(function(p){
+                                lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
+                            });
+                            
+                            cPoints = that.createArcPoints((w2-c2), -(h2-c2), c2, 270, 360);
+                            cPoints.forEach(function(p){
+                                lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
+                            });
+                            
+                            cPoints = that.createArcPoints((w2-c2), (h2-c2), c2, 0, 90);
+                            cPoints.forEach(function(p){
+                                lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
+                            });
+                            
+                            cPoints = that.createArcPoints(-(w2-c2), (h2-c2), c2, 90, 180);
+                            cPoints.forEach(function(p){
+                                lineGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
+                            });
+                        console.log("AmeenX", "round SMD ------------------------" );
+                        }
+                        else {
+                            lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2 * -1, 0));
+                            lineGeo.vertices.push(new THREE.Vector3(w2, h2 * -1, 0));
+                            lineGeo.vertices.push(new THREE.Vector3(w2, h2, 0));
+                            lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2, 0));
+                            // close it by connecting last point to 1st point
+                            lineGeo.vertices.push(new THREE.Vector3(w2 * -1, h2 * -1, 0));
+                        }
+    
+                        lineGeo = that.getPadGeometryIntersectedWithPolygon(pkg.polygons, lineGeo, layer.number);
+                        
+                        var lineMat = new THREE.LineBasicMaterial({
+                            color: that.colorSignal,
+                            transparent: true,
+                            opacity: 0.2
+                        });
+                        var line = new THREE.Line(lineGeo, lineMat);
+    
+                        // do smd as mesh instead
+                        lineMat = new THREE.MeshBasicMaterial({
+                            color: that.colorSignal,
+                            transparent: true,
+                            opacity: 0.2,
+                            side: THREE.DoubleSide,
+                            //overdraw: false,
+                            //polygonOffset: true,
+                            depthWrite: false
+                        });
+                        //lineMat.side = THREE.DoubleSided;
+                        var holes = [];
+                        var triangles = THREE.ShapeUtils.triangulateShape(lineGeo.vertices, holes); //changed Shape.Utils to ShapeUtils per new Three revision
+    
+                        for (var i = 0; i < triangles.length; i++) {
+    
+                            lineGeo.faces.push(new THREE.Face3(triangles[i][0], triangles[i][1], triangles[i][2]));
+    
+                        }
+                        //lineGeo.faces.push( new THREE.Face3( 0, 1, 2 ) );
+                        lineGeo.computeFaceNormals();
+                        line = new THREE.Mesh(lineGeo, lineMat);
+    
+                        // add smd mesh to be found on mouse movements
+                        this.intersectObjects.push(line);
+    
+                        // rotate
+                        // now that the smd is drawn, apply its individual
+                        // rotation
+                        if ('rot' in smd && smd.rot != null) {
+                            var rot = parseInt(smd.rot.replace(/R/i, ""));
+                            //console.log("will rotate individual smd by deg:", rot);
+                            if (rot > 0) {
+                                var r = (Math.PI / 180) * rot;
+                                //console.log("we are rotating individual smd by radians:", r);
+                                var axis = new THREE.Vector3(0, 0, 1);
+                                that.rotateAroundObjectAxis(line, axis, r);
+                            }
+                        }
+    
+                        // set smd's x/y
+                        line.position.set(smd.x, smd.y, 0);
+                        line.userData["smdName"] = smd.name;
+                        line.userData["smd"] = smd;
+                        //line.userData["elemKey"] = elemKey;
+                        line.userData["elem"] = elem;
+                        //line.userData['pkgKey'] = elem.pkg;
+                        line.userData['pkg'] = pkg;
+                        line.userData["type"] = "smd";
+                        //console.log("adding smd line with userData:", line);
+    
+                        // add this three.js obj to smd
+                        //smd["threeObj"] = line;
+                        elem["threeObj"]["smds"][smd.name] = line;
+    
+                        smdgroup.add(line);
+                        //that.sceneAdd(line);
+                        //group.add(line);
+    
+                        padCtr++;
+
                     }
-
-                    // set smd's x/y
-                    line.position.set(smd.x, smd.y, 0);
-                    line.userData["smdName"] = smd.name;
-                    line.userData["smd"] = smd;
-                    //line.userData["elemKey"] = elemKey;
-                    line.userData["elem"] = elem;
-                    //line.userData['pkgKey'] = elem.pkg;
-                    line.userData['pkg'] = pkg;
-                    line.userData["type"] = "smd";
-                    //console.log("adding smd line with userData:", line);
-
-                    // add this three.js obj to smd
-                    //smd["threeObj"] = line;
-                    elem["threeObj"]["smds"][smd.name] = line;
-
-                    smdgroup.add(line);
-                    //that.sceneAdd(line);
-                    //group.add(line);
-
-                    padCtr++;
-
                 }, this);
-                
-
                 /*
                 if (elem.rot.match(/M/i)) {
                   var axis = new THREE.Vector3(0, 1, 0);
@@ -6608,7 +6651,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                     //object.applyMatrix(mS);
                 }
                 
-                } // (if renderThisPad) ends here
+                // } // (if renderThisPad) ends here
                 
                 that.flipObject3D(smdgroup); //V5.1D20161229 - Added
                 
@@ -6715,22 +6758,15 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         diameter = pad.diameterBottom;
                     else
                         diameter = pad.diameterInner;
-   
-                    if (pad.shape == "square") {
-                    
-                        // // check if diameter is there. if not create assumption
-                        // if (pad.diameter == null || isNaN(pad.diameter)) {
-                        //     //console.warn("found pad without diameter. pad:", pad);
-                        //     // base assumption on drill width
-                        //     if (pad.drill && pad.drill > 0) {
-                        //         // we have something to base our size on
-                        //         pad.diameter = pad.drill * 2;
-                        //     } else {
-                        //         console.error("no way to determine pad size for pad:", pad);
-                        //     }
-                        // }
                         
-                        var lineGeo = new THREE.Geometry();
+                    var lineGeo;
+                    var lineMat = new THREE.LineBasicMaterial({
+                        color: that.colorPad,
+                        transparent: true,
+                        opacity: 0.2
+                    });
+                    if (pad.shape == "square") {
+                         lineGeo = new THREE.Geometry();
                         // var w = pad.diameter / 2;
                         var w = diameter / 2;
 
@@ -6740,72 +6776,28 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         lineGeo.vertices.push(new THREE.Vector3(0 - w, 0 + w, 0));
                         // close it by connecting last point to 1st point
                         lineGeo.vertices.push(new THREE.Vector3(0 - w, 0 - w, 0));
-
-                        var lineMat = new THREE.LineBasicMaterial({
-                            color: that.colorPad,
-                            transparent: true,
-                            opacity: 0.2
-                        });
-                        var line = new THREE.Line(lineGeo, lineMat);
-                        group.add(line);
-
+                        
+                        // var line = new THREE.Line(lineGeo, lineMat);
+                        // group.add(line);
 
                     } else if (pad.shape == "octagon") {
 
-                        // use circle geometry shortcut, but create only 8 segments
-                        //console.log("generating octagon via circle. pad:", pad);
-
-                        // check if diameter is there. if not create assumption
-                        // if (pad.diameter == null || isNaN(pad.diameter)) {
-                        //     //console.warn("found pad without diameter. pad:", pad);
-                        //     // base assumption on drill width
-                        //     if (pad.drill && pad.drill > 0) {
-                        //         // we have something to base our size on
-                        //         pad.diameter = pad.drill * 2;
-                        //     } else {
-                        //         console.error("no way to determine pad size for pad:", pad);
-                        //     }
-                        // }
-                        
                         // var radius = pad.diameter / 2;
                         var radius = diameter / 2;
                         var segments = 8; // not 1 extra for center vertex
-                        var material = new THREE.LineBasicMaterial({
-                            color: that.colorPad,
-                            transparent: true,
-                            opacity: 0.2
-                        });
-                        var geometry = new THREE.CircleGeometry(radius, segments, Math.PI / 8, Math.PI * 2);
+
+                        lineGeo = new THREE.CircleGeometry(radius, segments, Math.PI / 8, Math.PI * 2);
 
                         // Remove center vertex
-                        geometry.vertices.shift();
+                        lineGeo.vertices.shift();
 
-                        var lineCircle = new THREE.Line(geometry, material);
+                        //var lineCircle = new THREE.Line(geometry, material);
 
-                        group.add(lineCircle);
+                        //group.add(lineCircle);
 
 
                     } else if (pad.shape == "long" || pad.shape == "offset") {
 
-                        //debugger;
-                        // the long pad height is 3x diameter of drill
-                        // the width is 2x diam of drill
-                        // unless the user specified the diameter (then use that)
-                        //var group = new THREE.Object3D();
-
-                        var lineMat = new THREE.LineBasicMaterial({
-                            color: that.colorPad,
-                            transparent: true,
-                            opacity: 0.2
-                        });
-
-                        // var dia = pad.diameter;
-                        // if (!dia > 0) {
-                        //     // no diam. using auto
-                        //     dia = pad.drill * 1.5;
-                        // }
-                        // var w = dia; // width of square and circles
-                        
                         // could draw circle top, circle bottom, then square, then do union
                         // var radius = dia / 2;
                         var psLong = pad.shape == "long";
@@ -6835,7 +6827,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         group.add(circle2);
 
                         // add a square to middle
-                        var lineGeo = new THREE.Geometry();
+                        lineGeo = new THREE.Geometry();
                         // w = w / 2;
                         var w = diameter / 2;
                         var a = psLong? w: 0;
@@ -6846,41 +6838,33 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         lineGeo.vertices.push(new THREE.Vector3(0 - a, 0 + w, 0));
                         // close it by connecting last point to 1st point
                         lineGeo.vertices.push(new THREE.Vector3(0 - a, 0 - w, 0));
-                        var line = new THREE.Line(lineGeo, lineMat);
+                        //var line = new THREE.Line(lineGeo, lineMat);
                         //group.position.set(pad.x, pad.y, 0);
-                        group.add(line);
+                        //group.add(line);
 
                     } else {
-                        //console.log("generating circle. pad:", pad);
-
-                        // if (isNaN(pad.diameter)) {
-                        //     //console.log("no diam specified. use auto formula");
-                        //     pad.diameter = pad.drill * 2;
-                        // }
                         // var radius = pad.diameter / 2,
                         var radius = diameter / 2;
-                            segments = 32,
-                            material = new THREE.LineBasicMaterial({
-                                color: that.colorPad,
-                                transparent: true,
-                                opacity: 0.2
-                            }),
-                            geometry = new THREE.CircleGeometry(radius, segments);
+                            segments = 32;
+                        lineGeo = new THREE.CircleGeometry(radius, segments);
 
                         // Remove center vertex
-                        geometry.vertices.shift();
+                        lineGeo.vertices.shift();
 
                         // shift to xy pos
-                        var lineCircle = new THREE.Line(geometry, material);
+                        //var lineCircle = new THREE.Line(geometry, material);
                         //lineCircle.position.set(pad.x, pad.y, 0);
 
                         //lineCircle.rotateX(90);
 
                         //that.sceneAdd( lineCircle );
-                        group.add(lineCircle);
+                        //group.add(lineCircle);
                     }
-
-
+                    lineGeo = that.getPadGeometryIntersectedWithPolygon(pkg.polygons, lineGeo, layer.number);
+                    
+                    var line = new THREE.Line(lineGeo, lineMat);
+                    group.add(line);
+                    
                     // now draw the drill as dimension (not as standalone)
                     /*
                     var radius = pad.drill / 2;
@@ -7454,6 +7438,32 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             
             var arc = new THREE.Line( geometry, material );
             return arc;
+        },
+        createCurvePoints: function (x1, y1, x2, y2, curve){
+            var segmentLength = parseFloat($('#com-chilipeppr-widget-eagle .curve-resolution').val());
+            segmentLength = Math.min(segmentLength, 1.0);
+            segmentLength = Math.max(segmentLength, 0.1);
+            var radian = curve * Math.PI / 180,
+                sn = (curve > 0 && curve < 180) || (curve <-180 && curve > -360)?1:-1,
+                ql = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)), //distance between points 1 and 2
+                rd = Math.abs((ql/2)/Math.sin(radian/2)),
+                x3 = (x1+x2)/2, y3 = (y1+y2)/2, //the point halfway between points 1 and 2
+                dx = (y1-y2)/ql, dy = (x2-x1)/ql, //direction of mirror line (normalized) that passing through (x, y) an between points 1 and 2
+                ax = x3 + sn * Math.sqrt(rd*rd - (ql/2)*(ql/2))*dx, //X coordinate of arc center
+                ay = y3 + sn * Math.sqrt(rd*rd - (ql/2)*(ql/2))*dy, //Y coordinate of arc center
+                aStartAngle = Math.atan2(y1-ay, x1-ax),
+                aEndAngle = Math.atan2(y2-ay, x2-ax),
+                cw = curve < 0;
+            var segments = Math.max(rd * Math.abs(radian)/segmentLength, 8); // Segment every [segmentLength] mm, minimum 8 segments
+            var arcCurve = new THREE.EllipseCurve(
+                ax, ay,
+                rd, rd,
+                aStartAngle, aEndAngle,
+                cw
+                );
+            var points = arcCurve.getSpacedPoints( segments );
+
+            return points;
         },
         createArcPoints: function(aX, aY, radius, aStartAngle, aEndAngle){
             var segmentLength = parseFloat($('#com-chilipeppr-widget-eagle .curve-resolution').val());
@@ -8059,7 +8069,13 @@ EagleCanvas.prototype.parse = function () {
             var pad = pads[padIdx];
             packagePads.push(this.parsePad(pad));
         }
-
+        
+        var packagePolygons = [];
+        var pPolygons = pkg.getElementsByTagName('polygon');
+        for (var polygonIdx = 0; polygonIdx < pPolygons.length; polygonIdx++){
+            var pPolygon = pPolygons[polygonIdx];
+            packagePolygons.push(this.parsePoly(pPolygon));
+        }
         // need to add rectangles as well
 
         var packageWires = [];
@@ -8113,6 +8129,7 @@ EagleCanvas.prototype.parse = function () {
         var packageDict = {
             'pads': packagePads,
             'smds': packageSmds,
+            'polygons': packagePolygons,
             'wires': packageWires,
             'holes': packageHoles, //V5.2D20170105 Added
             'texts': packageTexts,
