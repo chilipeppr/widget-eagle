@@ -1770,7 +1770,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
             var selectedLayerInDropdown = $("#com-chilipeppr-widget-eagle .selectLayer :selected").text();
             //var activeLayer = this.layer.name;
-            //console.log("r4.9:  ", this.layer.name);
+            console.log("r4.9:  ", this.layer.name);
             console.log("selected layer in dropdown:  ", selectedLayerInDropdown);
             /*console.log("r6:  ", activeLayer);
             if (selectedLayerInDropdown != activeLayer) {
@@ -4895,19 +4895,26 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             polygons.forEach(function (polygon) {
                 if(layerNumber == polygon.layer){
                     var polygonGeo = new THREE.Geometry();
-                    for(var vidx = 0; vidx < polygon.vertices.length; vidx++){
-                        var v0 = polygon.vertices[vidx];
-                        var v1 = (polygon.vertices.length == vidx+1)?polygon.vertices[0]:polygon.vertices[vidx+1];
-                        if("curve" in v0 && v0.curve != 0){
-                            var cPoints = this.createCurvePoints(v0.x, v0.y, v1.x, v1.y, v0.curve);
-                            cPoints.forEach(function(p){
-                                polygonGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
-                            });
-                        }
-                        else{
-                            polygonGeo.vertices.push(new THREE.Vector3(v0.x, v0.y, 0));
-                        }
+                    if('polyGeo' in polygon && polygon.polyGeo != null){
+                        polygonGeo = polygon.polyGeo;
                     }
+                    else{
+                        for(var vidx = 0; vidx < polygon.vertices.length; vidx++){
+                            var v0 = polygon.vertices[vidx];
+                            var v1 = (polygon.vertices.length == vidx+1)?polygon.vertices[0]:polygon.vertices[vidx+1];
+                            if("curve" in v0 && v0.curve != 0){
+                                var cPoints = this.createCurvePoints(v0.x, v0.y, v1.x, v1.y, v0.curve);
+                                cPoints.forEach(function(p){
+                                    polygonGeo.vertices.push(new THREE.Vector3(p.x, p.y, 0));
+                                });
+                            }
+                            else{
+                                polygonGeo.vertices.push(new THREE.Vector3(v0.x, v0.y, 0));
+                            }
+                        }
+                        polygon.polyGeo = polygonGeo;
+                    }
+
                     lineGeo = this.unionLineGeometriesIfIntersected(lineGeo, polygonGeo);
                 }
             }, this);
