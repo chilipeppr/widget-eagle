@@ -391,7 +391,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.draw3dRegHoles();
             this.exportGcodeRegistrationHoles();
             
- //           chilipeppr.publish('/com-chilipeppr-widget-3dviewer/drawextents' );
+            chilipeppr.publish('/com-chilipeppr-widget-3dviewer/drawextents' );
         },
         draw3dBlankBoard: function(){
             if(!this.blankBoard.use) return;
@@ -1626,7 +1626,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             var selectedLayerInDropdown = $("#com-chilipeppr-widget-eagle .selectLayer :selected").text();
             //var activeLayer = this.layer.name;
             //console.log("r4.9:  ", this.layer.name);
-            console.log("AmeenLayer selected layer in dropdown:  ", selectedLayerInDropdown);
+            console.log("selected layer in dropdown:  ", selectedLayerInDropdown);
             /*console.log("r6:  ", activeLayer);
             if (selectedLayerInDropdown != activeLayer) {
             	console.log("r7:  Different");
