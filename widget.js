@@ -5289,8 +5289,12 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var pkg = this.eagle.packagesByName[elem.pkg];
                 pkg.wires.forEach(function(wire){
                     if (wire.layer == dimansionLayerNumber || wire.layer == millingLayerNumber) {
+                        var rot = 0;
+                        if ('rot' in elem && elem.rot != null) {
+                            rot = parseInt(elem.rot.replace(/R/i, "")) * Math.PI/180;
+                        }
                         var wp = [{X:wire.x1, Y:wire.y1}, {X:wire.x2, Y:wire.y2}];
-                        this.adjustPath(wp, elem.rotation, elem.x, elem.y);
+                        this.adjustPath(wp, rot, elem.x, elem.y);
                         wires.push({
                             "curve": wire.curve,
                             "layer": wire.layer,
