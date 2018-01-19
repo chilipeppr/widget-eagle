@@ -199,7 +199,6 @@ cprequire_test(["inline:com-chilipeppr-widget-eagle"], function (ew) {
     $('#com-chilipeppr-widget-eagle').css('width', '320px');
     $('body').prepend('<div id="3dviewer"></div>');
 
-    //chilipeppr.load("#3dviewer", "http://fiddle.jshell.net/chilipeppr/y3HRF/195/show/light/", function () {
     chilipeppr.load(
       "#3dviewer",
       "http://raw.githubusercontent.com/chilipeppr/widget-3dviewer/master/auto-generated-widget.html",
@@ -220,7 +219,7 @@ cprequire_test(["inline:com-chilipeppr-widget-eagle"], function (ew) {
     });
 
     $('body').prepend('<div id="test-drag-drop"></div>');
-    chilipeppr.load("#test-drag-drop", "http://fiddle.jshell.net/chilipeppr/Z9F6G/show/light/",
+    chilipeppr.load("#test-drag-drop", "http://raw.githubusercontent.com/chilipeppr/elem-dragdrop/master/auto-generated-widget.html",
 
     function () {
         cprequire(
@@ -234,7 +233,7 @@ cprequire_test(["inline:com-chilipeppr-widget-eagle"], function (ew) {
     
     $('body').prepend('<div id="com-chilipeppr-flash"></div>');
     chilipeppr.load("#com-chilipeppr-flash",
-        "http://fiddle.jshell.net/chilipeppr/90698kax/show/light/",
+        "http://raw.githubusercontent.com/chilipeppr/element-flash/master/auto-generated-widget.html",
 
     function () {
         console.log("mycallback got called after loading flash msg module");
@@ -536,7 +535,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             this.draw3dRegHoles();
             this.exportGcodeRegistrationHoles();
             
-            chilipeppr.publish('/com-chilipeppr-widget-3dviewer/drawextents' );
+ //           chilipeppr.publish('/com-chilipeppr-widget-3dviewer/drawextents' );
         },
         draw3dBlankBoard: function(){
             if(!this.blankBoard.use) return;
@@ -1770,8 +1769,8 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
 
             var selectedLayerInDropdown = $("#com-chilipeppr-widget-eagle .selectLayer :selected").text();
             //var activeLayer = this.layer.name;
-            console.log("r4.9:  ", this.layer.name);
-            console.log("selected layer in dropdown:  ", selectedLayerInDropdown);
+            //console.log("r4.9:  ", this.layer.name);
+            console.log("AmeenLayer selected layer in dropdown:  ", selectedLayerInDropdown);
             /*console.log("r6:  ", activeLayer);
             if (selectedLayerInDropdown != activeLayer) {
             	console.log("r7:  Different");
@@ -5380,6 +5379,22 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         },
 
         // THIS SECTION IS FOR WORKING ON THE DIMENSION OF THE BOARD
+        adjustPath: function(path, rotation, positionX, positionY){
+            if(rotation == 0){
+                path.forEach(function(vertex){
+                    vertex.X += positionX;
+                    vertex.Y += positionY;
+                });
+            }
+            else{
+                path.forEach(function(vertex){
+                    var angle = rotation + Math.atan2(vertex.Y, vertex.X);
+                    var r = Math.sqrt(vertex.X * vertex.X + vertex.Y * vertex.Y);
+                    vertex.X = positionX + r * Math.cos(angle);
+                    vertex.Y = positionY + r * Math.sin(angle);
+                });
+            }
+        },
         wiresConnected: function(w1, w2){
             return((w1.x2 == w2.x1) && (w1.y2 == w2.y1));
         },
@@ -5418,17 +5433,19 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 var pkg = this.eagle.packagesByName[elem.pkg];
                 pkg.wires.forEach(function(wire){
                     if (wire.layer == dimansionLayerNumber || wire.layer == millingLayerNumber) {
+                        var wp = [{X:wire.x1, Y:wire.y1}, {X:wire.x2, Y:wire.y2}];
+                        this.adjustPath(wp, elem.rotation, elem.x, elem.y);
                         wires.push({
                             "curve": wire.curve,
                             "layer": wire.layer,
                             "width": wire.width,
-                            "x1": wire.x1 + elem.x,
-                            "x2": wire.x2 + elem.x,
-                            "y1": wire.y1 + elem.y,
-                            "y2": wire.y2 + elem.y
+                            "x1": wp[0].X,
+                            "x2": wp[1].X,
+                            "y1": wp[0].Y,
+                            "y2": wp[1].Y
                         });
                     }
-                });
+                }, this);
             }
             for (var plainWireKey in this.eagle.plainWires) {
                 if (this.eagle.plainWires[plainWireKey].length > 0) {
@@ -6625,7 +6642,9 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                 // CALCULATING SMDS
                 // if (renderThisPad ) {
                 pkg.smds.forEach(function (smd) {
-                    if(((!elem.mirror) && layer.number == smd.layer) || (elem.mirror && layer.number != smd.layer)){
+                    var smdLayer = elem.mirror? 17 - parseInt(smd.layer, 10): smd.layer;
+                    // if(((!elem.mirror) && layer.number == smd.layer) || (elem.mirror && layer.number != smd.layer)){
+                    if(layer.number == smdLayer){
                         console.log("drawing smd:", smd);
                         var layerNum = smd.layer;
     
@@ -7888,7 +7907,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
             });
 
             var that = this;
-            chilipeppr.load("http://fiddle.jshell.net/chilipeppr/zMbL9/show/light/", function () {
+            chilipeppr.load("http://raw.githubusercontent.com/chilipeppr/widget-pubsubviewer/master/auto-generated-widget.html", function () {
                 require(['inline:com-chilipeppr-elem-pubsubviewer'], function (pubsubviewer) {
                     pubsubviewer.attachTo($('#com-chilipeppr-widget-eagle .panel-heading .dropdown-menu'), that);
                 });

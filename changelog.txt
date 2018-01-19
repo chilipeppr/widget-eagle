@@ -1,10 +1,12 @@
 Version 5.8
 **************************************************
 Auther: Ameen Nihad
-Release date: 01 JAN 2018
+Release date: 19 JAN 2018
 
-- Support packages wit polygons as pads, Lilypad_Arduino_USB_v12 is a good example.
+- Fix a bug with rendering package dimension wires when element is rotated.
+- Support packages with polygons as pads, Lilypad_Arduino_USB_v12 is a good example.
 - Fix a bug in rendering packages wih pads in the bottom layer.
+- Changed 3 old links to jshell.
 
 Version 5.7
 **************************************************
