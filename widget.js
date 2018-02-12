@@ -2456,6 +2456,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
         //V5.2D20170105 Added
         exportGcodeMillHoles:function(){
             var g = '';
+            var isGrblGws = window.location.pathname.includes("jpadie") || window.location.pathname.includes("grbl");
             if(! $('#com-chilipeppr-widget-eagle .use-milling').is(':checked')) return g;
             var that = this;
             var dir = $('#DirectionCutting').val();
@@ -2485,7 +2486,7 @@ onAddGcode : function(addGcodeCallback, gcodeParts, eagleWidget, helpDesc){
                         z = that.depthOfDimensions;
                     g += "G1 Z" + z.toFixed(4) + "\n"; //V5.2QUICKFIX
                     g += (dir==2)?"G2":"G3";
-                    g += " X" + that.round(hole.X - gdiameter) + " Y" + that.round(hole.Y);
+                    if(isGrblGws) g += " X" + that.round(hole.X - gdiameter) + " Y" + that.round(hole.Y); // Temporary fix, should change the code to be compatible with all controllers
                     g += " I" + gdiameter.toFixed(4) + "\n";
                 }
                 g += "G0 Z" + that.clearanceHeight + "\n";

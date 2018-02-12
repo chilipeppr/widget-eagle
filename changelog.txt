@@ -1,3 +1,8 @@
+Version 5.9 TODO:
+**************************************************
+- LilyPixel_v11.brd Pads rotation is in correct
+- tRestrict bRestrict layers
+
 Version 5.8
 **************************************************
 Auther: Ameen Nihad
